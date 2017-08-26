@@ -31,22 +31,22 @@ abstract class Vtiger_Controller
 
 	public function validateRequest(\App\Request $request)
 	{
-
+		
 	}
 
 	public function preProcessAjax(\App\Request $request)
 	{
-
+		
 	}
 
 	public function preProcess(\App\Request $request)
 	{
-
+		
 	}
 
 	public function postProcess(\App\Request $request)
 	{
-
+		
 	}
 
 	// Control the exposure of methods to be invoked from client (kind-of RPC)
@@ -89,7 +89,7 @@ abstract class Vtiger_Controller
 		if (!empty($name) && $this->isMethodExposed($name)) {
 			return call_user_func_array(array($this, $name), $parameters);
 		}
-		throw new \App\Exceptions\AppException('LBL_NOT_ACCESSIBLE');
+		throw new \Exception\AppException('LBL_NOT_ACCESSIBLE');
 	}
 
 	/**
@@ -121,7 +121,7 @@ abstract class Vtiger_Controller
 		header('X-Permitted-Cross-Domain-Policies: none');
 		if (AppConfig::security('CSP_ACTIVE')) {
 			// 'nonce-" . App\Session::get('CSP_TOKEN') . "'
-			header("Content-Security-Policy: default-src 'self' blob:; img-src 'self' data: a.tile.openstreetmap.org b.tile.openstreetmap.org c.tile.openstreetmap.org; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' blob:; form-action 'self' ;");
+			header("Content-Security-Policy: default-src 'self' blob:; img-src 'self' data: a.tile.openstreetmap.org b.tile.openstreetmap.org c.tile.openstreetmap.org; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' ; form-action 'self' ;");
 		}
 		if ($keys = AppConfig::security('HPKP_KEYS')) {
 			header('Public-Key-Pins: pin-sha256="' . implode('"; pin-sha256="', $keys) . '"; max-age=10000;');
@@ -146,7 +146,7 @@ abstract class Vtiger_Action_Controller extends Vtiger_Controller
 
 	public function getViewer(\App\Request $request)
 	{
-		throw new \App\Exceptions\AppException('Action - implement getViewer - JSONViewer');
+		throw new \Exception\AppException('Action - implement getViewer - JSONViewer');
 	}
 
 	public function validateRequest(\App\Request $request)
@@ -161,7 +161,7 @@ abstract class Vtiger_Action_Controller extends Vtiger_Controller
 
 	protected function preProcessDisplay(\App\Request $request)
 	{
-
+		
 	}
 
 	protected function preProcessTplName(\App\Request $request)
@@ -347,8 +347,6 @@ abstract class Vtiger_View_Controller extends Vtiger_Action_Controller
 			'~libraries/footable/css/footable.core.css',
 			'~libraries/jquery/timepicker/jquery.timepicker.css',
 			'~libraries/jquery/clockpicker/bootstrap-clockpicker.css',
-			'~layouts/resources/colors/calendar.css',
-			'~layouts/resources/colors/users.css',
 		];
 		$headerCssInstances = $this->checkAndConvertCssStyles($cssFileNames);
 		return $headerCssInstances;

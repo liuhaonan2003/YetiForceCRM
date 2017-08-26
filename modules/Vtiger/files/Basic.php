@@ -23,7 +23,6 @@ abstract class Vtiger_Basic_File
 	 * Checking permission in get method
 	 * @param \App\Request $request
 	 * @return boolean
-	 * @throws \App\Exceptions\NoPermitted
 	 */
 	public function getCheckPermission(\App\Request $request)
 	{
@@ -32,10 +31,10 @@ abstract class Vtiger_Basic_File
 		$field = $request->get('field');
 		if ($record) {
 			if (!\App\Privilege::isPermitted($moduleName, 'DetailView', $record) || !\App\Field::getFieldPermission($moduleName, $field)) {
-				throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		} else {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 		return true;
 	}
@@ -44,7 +43,6 @@ abstract class Vtiger_Basic_File
 	 * Checking permission in post method
 	 * @param \App\Request $request
 	 * @return boolean
-	 * @throws \App\Exceptions\NoPermitted
 	 */
 	public function postCheckPermission(\App\Request $request)
 	{
@@ -54,11 +52,11 @@ abstract class Vtiger_Basic_File
 		if (!empty($record)) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($record, $moduleName);
 			if (!$recordModel->isEditable() || !\App\Field::getFieldPermission($moduleName, $field, false)) {
-				throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		} else {
 			if (!\App\Field::getFieldPermission($moduleName, $field, false) || !\App\Privilege::isPermitted($moduleName, 'CreateView')) {
-				throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		}
 		return true;

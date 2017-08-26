@@ -29,11 +29,13 @@ class Calendar_DragDropAjax_Action extends Calendar_SaveAjax_Action
 	public function updateDeltaOnResize(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('id');
+		$recordId = $request->get('id');
 		$dayDelta = $request->get('dayDelta');
 		$minuteDelta = $request->get('minuteDelta');
+		$actionname = 'EditView';
+
 		$response = new Vtiger_Response();
-		if (!\App\Privilege::isPermitted($moduleName, 'EditView', $recordId)) {
+		if (isPermitted($moduleName, $actionname, $recordId) === 'no') {
 			$result = array('ispermitted' => false, 'error' => false);
 			$response->setResult($result);
 			$response->emit();
@@ -73,11 +75,13 @@ class Calendar_DragDropAjax_Action extends Calendar_SaveAjax_Action
 	public function updateDeltaOnDrop(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('id');
+		$recordId = $request->get('id');
 		$dayDelta = $request->get('dayDelta');
 		$minuteDelta = $request->get('minuteDelta');
+		$actionname = 'EditView';
+
 		$response = new Vtiger_Response();
-		if (!\App\Privilege::isPermitted($moduleName, 'EditView', $recordId)) {
+		if (isPermitted($moduleName, $actionname, $recordId) === 'no') {
 			$result = ['ispermitted' => false];
 			$response->setResult($result);
 			$response->emit();

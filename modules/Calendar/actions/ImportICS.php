@@ -18,20 +18,14 @@ Vtiger_Loader::includeOnce('~modules/Calendar/iCalLastImport.php');
 class Calendar_ImportICS_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$userPrivilegesModel->hasModulePermission($moduleName)) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
-		if (!\App\Privilege::isPermitted($moduleName, 'EditView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+		$permission = $userPrivilegesModel->hasModulePermission($moduleName);
+
+		if (!$permission) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 

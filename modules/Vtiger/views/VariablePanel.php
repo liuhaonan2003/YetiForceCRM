@@ -13,20 +13,21 @@ class Vtiger_VariablePanel_View extends Vtiger_View_Controller
 	/**
 	 * Checking permissions
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 * @throws \App\Exceptions\NoPermittedToRecord
+	 * @throws \Exception\AppException
+	 * @throws \Exception\NoPermittedToRecord
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$currentUserPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPrivilegesModel->hasModulePermission($moduleName) || !\App\Privilege::isPermitted($moduleName, 'CreateView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 		if ($recordId && !\App\Privilege::isPermitted($moduleName, 'EditView', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
+		return true;
 	}
 
 	/**

@@ -85,29 +85,31 @@ class Portal_Module_Model extends Vtiger_Module_Model
 		return $record;
 	}
 
-	/**
-	 * Delete records
-	 * @param \App\Request $request
-	 */
 	public function deleteRecords(\App\Request $request)
 	{
-		$searchValue = $request->getForSql('search_value');
+		$searchValue = $request->get('search_value');
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
+
+		$db = PearDatabase::getInstance();
+
+		$query = 'DELETE FROM vtiger_portal';
 		$params = [];
+
 		if (!empty($selectedIds) && $selectedIds != 'all' && count($selectedIds) > 0) {
-			$params = ['portalid' => $selectedIds];
+			$query .= sprintf(' WHERE portalid IN (%s)', generateQuestionMarks($selectedIds));
+			$params = $selectedIds;
 		} else if ($selectedIds == 'all') {
 			if (empty($searchValue) && count($excludedIds) > 0) {
-				$params = ['not in', 'portalid', $excludedIds];
+				$query .= sprintf(' WHERE portalid NOT IN ()', generateQuestionMarks($excludedIds));
+				$params = $excludedIds;
 			} else if (!empty($searchValue) && count($excludedIds) < 1) {
-				$params = ['like', 'portalname', $searchValue];
+				$query .= sprintf(" WHERE portalname LIKE '%s'", "%$searchValue%");
 			} else if (!empty($searchValue) && count($excludedIds) > 0) {
-				$params = ['and'];
-				$params [] = ['like', 'portalname', $searchValue];
-				$params [] = ['not in', 'portalid', $excludedIds];
+				$query .= sprintf(" WHERE portalname LIKE '%s' && portalid NOT IN (%s)", "%$searchValue%", generateQuestionMarks($excludedIds));
+				$params = $excludedIds;
 			}
 		}
-		App\Db::getInstance()->createCommand()->delete('vtiger_portal', $params)->execute();
+		$db->pquery($query, $params);
 	}
 }

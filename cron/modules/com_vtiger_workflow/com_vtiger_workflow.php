@@ -21,9 +21,10 @@ require_once('modules/com_vtiger_workflow/VTWorkflowUtils.php');
 require_once 'modules/com_vtiger_workflow/include.php';
 require_once 'modules/com_vtiger_workflow/WorkFlowScheduler.php';
 
-$workflowScheduler = new WorkFlowScheduler();
+$adb = PearDatabase::getInstance();
+$workflowScheduler = new WorkFlowScheduler($adb);
 $workflowScheduler->queueScheduledWorkflowTasks();
-$readyTasks = (new VTTaskQueue())->getReadyTasks();
+$readyTasks = (new VTTaskQueue($adb))->getReadyTasks();
 $tm = new VTTaskManager();
 foreach ($readyTasks as $tasdkDetails) {
 	list($taskId, $entityId, $taskContents) = $taskDetails;

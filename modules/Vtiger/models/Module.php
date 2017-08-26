@@ -282,10 +282,9 @@ class Vtiger_Module_Model extends \vtlib\Module
 				}
 			}
 		}
-		$dbCommand = \App\Db::getInstance()->createCommand();
-		$dbCommand->delete('u_#__crmentity_label', ['crmid' => $recordModel->getId()])->execute();
-		$dbCommand->delete('u_#__crmentity_search_label', ['crmid' => $recordModel->getId()])->execute();
-		\App\Db::getInstance('admin')->createCommand()->delete('s_#__privileges_updater', ['crmid' => $recordModel->getId()])->execute();
+		$db = \App\Db::getInstance();
+		$db->createCommand()->delete('u_yf_crmentity_label', ['crmid' => $recordModel->getId()])->execute();
+		$db->createCommand()->delete('u_yf_crmentity_search_label', ['crmid' => $recordModel->getId()])->execute();
 	}
 
 	/**
@@ -579,7 +578,7 @@ class Vtiger_Module_Model extends \vtlib\Module
 	 * Get field by field name
 	 * @param string $fieldName
 	 * @return Vtiger_Field_Model
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public function getFieldByName($fieldName)
 	{
@@ -1040,7 +1039,7 @@ class Vtiger_Module_Model extends \vtlib\Module
 	 */
 	public function getExportQuery($focus, $where)
 	{
-		return $this->getEntityInstance()->createExportQuery($where);
+		return $this->getEntityInstance()->create_export_query($where);
 	}
 
 	/**
@@ -1179,7 +1178,7 @@ class Vtiger_Module_Model extends \vtlib\Module
 				if (in_array($this->getName(), $referenceSubProcessInstance->getReferenceList())) {
 					$relationField = 'subprocess';
 				} else {
-					throw new \App\Exceptions\AppException('LBL_HANDLER_NOT_FOUND');
+					throw new \Exception\AppException('LBL_HANDLER_NOT_FOUND');
 				}
 			}
 		}

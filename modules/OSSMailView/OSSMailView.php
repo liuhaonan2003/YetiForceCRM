@@ -191,7 +191,7 @@ class OSSMailView extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 
@@ -234,11 +234,11 @@ class OSSMailView extends CRMEntity
 	/**
 	 * Transform the value while exporting
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
 		if ($key == 'owner')
 			return \App\Fields\Owner::getLabel($value);
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -291,37 +291,38 @@ class OSSMailView extends CRMEntity
 
 	/**
 	 * Invoked when special actions are performed on the module.
-	 * @param string $moduleName Module name
-	 * @param string $eventType Event Type
+	 * @param String Module name
+	 * @param String Event Type
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 		require_once('include/utils/utils.php');
-		$dbCommand = App\Db::getInstance()->createCommand();
-		if ($eventType === 'module.postinstall') {
+		$adb = PearDatabase::getInstance();
+		if ($eventType == 'module.postinstall') {
 			\App\Fields\RecordNumber::setNumber($moduleName, 'M_', 1);
 			$displayLabel = 'OSSMailView';
-			$dbCommand->update('vtiger_tab', ['customized' => 0], ['name' => $displayLabel])->execute();
-			$dbCommand->insert('vtiger_ossmailscanner_config', ['conf_type' => 'email_list', 'parameter' => 'widget_limit', 'value' => '10'])->execute();
-			$dbCommand->insert('vtiger_ossmailscanner_config', ['conf_type' => 'email_list', 'parameter' => 'target', 'value' => '_blank'])->execute();
-			$dbCommand->insert('vtiger_ossmailscanner_config', ['conf_type' => 'email_list', 'parameter' => 'permissions', 'value' => 'vtiger'])->execute();
-			CRMEntity::getInstance('ModTracker')->enableTrackingForModule(\App\Module::getModuleId($moduleName));
+			$adb->query("UPDATE vtiger_tab SET customized=0 WHERE name='$displayLabel'");
+
+			$adb->pquery("INSERT INTO vtiger_ossmailscanner_config (conf_type,parameter,value) VALUES (?,?,?)", array('email_list', 'widget_limit', '10'));
+			$adb->pquery("INSERT INTO vtiger_ossmailscanner_config (conf_type,parameter,value) VALUES (?,?,?)", array('email_list', 'target', '_blank'));
+			$adb->pquery("INSERT INTO vtiger_ossmailscanner_config (conf_type,parameter,value) VALUES (?,?,?)", array('email_list', 'permissions', 'vtiger'));
+			CRMEntity::getInstance('ModTracker')->enableTrackingForModule(vtlib\Functions::getModuleId($moduleName));
 			$registerLink = true;
-			$module = vtlib\Module::getInstance($moduleName);
-			$userName = \App\User::getCurrentUserModel()->getDetail('user_name');
-			$dbCommand->insert('vtiger_ossmails_logs', ['action' => 'Action_InstallModule', 'info' => $moduleName . ' ' . $module->version, 'user' => $userName])->execute();
-		} else if ($eventType === 'module.disabled') {
+			$Module = vtlib\Module::getInstance($moduleName);
+			$user_id = Users_Record_Model::getCurrentUserModel()->get('user_name');
+			$adb->pquery("INSERT INTO vtiger_ossmails_logs (`action`, `info`, `user`) VALUES (?, ?, ?);", array('Action_InstallModule', $moduleName . ' ' . $Module->version, $user_id), false);
+		} else if ($eventType == 'module.disabled') {
 			$registerLink = false;
-		} else if ($eventType === 'module.enabled') {
+		} else if ($eventType == 'module.enabled') {
 			$registerLink = true;
-		} else if ($eventType === 'module.preuninstall') {
-
-		} else if ($eventType === 'module.preupdate') {
-
-		} else if ($eventType === 'module.postupdate') {
-			$module = vtlib\Module::getInstance($moduleName);
-			$userName = \App\User::getCurrentUserModel()->getDetail('user_name');
-			$dbCommand->insert('vtiger_ossmails_logs', ['action' => 'Action_UpdateModule', 'info' => $moduleName . ' ' . $module->version, 'user' => $userName, 'start_time' => date('Y-m-d H:i:s')])->execute();
+		} else if ($eventType == 'module.preuninstall') {
+			
+		} else if ($eventType == 'module.preupdate') {
+			
+		} else if ($eventType == 'module.postupdate') {
+			$Module = vtlib\Module::getInstance($moduleName);
+			$user_id = Users_Record_Model::getCurrentUserModel()->get('user_name');
+			App\Db::getInstance()->createCommand()->insert('vtiger_ossmails_logs', ['action' => 'Action_UpdateModule', 'info' => $moduleName . ' ' . $Module->version, 'user' => $user_id, 'start_time' => date('Y-m-d H:i:s')])->execute();
 		}
 		$displayLabel = 'Mail View';
 		if ($registerLink) {
@@ -332,7 +333,7 @@ class OSSMailView extends CRMEntity
 				'linkto' => 'index.php?module=OSSMailView&parent=Settings&view=index'
 			]);
 		} else {
-			$dbCommand->delete('vtiger_settings_field', ['name' => $displayLabel])->execute();
+			$adb->pquery("DELETE FROM vtiger_settings_field WHERE name=?", array($displayLabel));
 		}
 	}
 }

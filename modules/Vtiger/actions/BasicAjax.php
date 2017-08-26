@@ -11,23 +11,16 @@
 class Vtiger_BasicAjax_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModulePermission($request->get('search_module'))) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
+		return;
 	}
 
 	public function process(\App\Request $request)
 	{
 		$searchValue = $request->get('search_value');
 		$searchModule = $request->get('search_module');
+
 		$parentRecordId = $request->get('parent_id');
 		$parentModuleName = $request->get('parent_module');
 		$relatedModule = $request->get('module');
@@ -39,10 +32,11 @@ class Vtiger_BasicAjax_Action extends Vtiger_Action_Controller
 		if (is_array($records)) {
 			foreach ($records as $moduleName => $recordModels) {
 				foreach ($recordModels as $recordModel) {
-					$result[] = array('label' => App\Purifier::decodeHtml($recordModel->getSearchName()), 'value' => App\Purifier::decodeHtml($recordModel->getName()), 'id' => $recordModel->getId());
+					$result[] = array('label' => decode_html($recordModel->getSearchName()), 'value' => decode_html($recordModel->getName()), 'id' => $recordModel->getId());
 				}
 			}
 		}
+
 		$response = new Vtiger_Response();
 		$response->setResult($result);
 		$response->emit();

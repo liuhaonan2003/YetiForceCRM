@@ -10,7 +10,7 @@
 class Vtiger_TreeCategoryModal_Model extends \App\Base
 {
 
-	public static $_cached_instance;
+	static $_cached_instance;
 
 	/**
 	 * Function to get the Module Name

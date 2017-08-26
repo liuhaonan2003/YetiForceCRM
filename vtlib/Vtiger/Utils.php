@@ -22,7 +22,7 @@ class Utils
 	 * Check if given value is a number or not
 	 * @param mixed String or Integer
 	 */
-	public static function isNumber($value)
+	static function isNumber($value)
 	{
 		return is_numeric($value) ? intval($value) == $value : false;
 	}
@@ -33,7 +33,7 @@ class Utils
 	 * @param Integer Number of times 
 	 * @param String suffix to use (optional)
 	 */
-	public static function implodestr($prefix, $count, $suffix = false)
+	static function implodestr($prefix, $count, $suffix = false)
 	{
 		$strvalue = '';
 		for ($index = 0; $index < $count; ++$index) {
@@ -50,7 +50,7 @@ class Utils
 	 * @param String File path to check
 	 * @param Boolean False to avoid die() if check fails
 	 */
-	public static function checkFileAccessForInclusion($filepath, $dieOnFail = true)
+	static function checkFileAccessForInclusion($filepath, $dieOnFail = true)
 	{
 		$unsafeDirectories = array('storage', 'cache', 'test');
 		$realfilepath = realpath($filepath);
@@ -69,7 +69,7 @@ class Utils
 		if (stripos($realfilepath, $rootdirpath) !== 0 || in_array($filePathParts[0], $unsafeDirectories)) {
 			if ($dieOnFail) {
 				\App\Log::error(__METHOD__ . '(' . $filepath . ') - Sorry! Attempt to access restricted file. realfilepath: ' . print_r($realfilepath, true));
-				throw new \App\Exceptions\AppException('Sorry! Attempt to access restricted file.');
+				throw new \Exception\AppException('Sorry! Attempt to access restricted file.');
 			}
 			return false;
 		}
@@ -81,7 +81,7 @@ class Utils
 	 * @param String File path to check
 	 * @param Boolean False to avoid die() if check fails
 	 */
-	public static function checkFileAccess($filepath, $dieOnFail = true)
+	static function checkFileAccess($filepath, $dieOnFail = true)
 	{
 		// Set the base directory to compare with
 		$use_root_directory = \AppConfig::main('root_directory');
@@ -102,7 +102,7 @@ class Utils
 		if (stripos($realfilepath, $rootdirpath) !== 0) {
 			if ($dieOnFail) {
 				\App\Log::error(__METHOD__ . '(' . $filepath . ') - Sorry! Attempt to access restricted file. realfilepath: ' . print_r($realfilepath, true));
-				throw new \App\Exceptions\AppException('Sorry! Attempt to access restricted file.');
+				throw new \Exception\AppException('Sorry! Attempt to access restricted file.');
 			}
 			return false;
 		}
@@ -114,7 +114,7 @@ class Utils
 	 * @param String Log message
 	 * @param Boolean true to append end-of-line, false otherwise
 	 */
-	public static function log($message, $delimit = true)
+	static function Log($message, $delimit = true)
 	{
 		$utilsLog = vglobal('tiger_Utils_Log');
 
@@ -132,10 +132,22 @@ class Utils
 	}
 
 	/**
+	 * Escape the string to avoid SQL Injection attacks.
+	 * @param String Sql statement string
+	 */
+	static function SQLEscape($value)
+	{
+		if ($value === null)
+			return $value;
+		$adb = \PearDatabase::getInstance();
+		return $adb->sql_escape_string($value);
+	}
+
+	/**
 	 * Check if table is present in database
 	 * @param String tablename to check
 	 */
-	public static function checkTable($tableName)
+	static function CheckTable($tableName)
 	{
 		return \App\Db::getInstance()->isTableExists($tableName);
 	}
@@ -148,7 +160,7 @@ class Utils
 	 * <br />
 	 * will be appended to CREATE TABLE $tablename SQL
 	 */
-	public static function createTable($tablename, $criteria, $suffixTableMeta = false)
+	static function CreateTable($tablename, $criteria, $suffixTableMeta = false)
 	{
 		$adb = \PearDatabase::getInstance();
 
@@ -175,7 +187,7 @@ class Utils
 	 * @param string $columnName to add
 	 * @param array|string $criteria ([\yii\db\Schema::TYPE_STRING, 1024] | string(1024)) 
 	 */
-	public static function addColumn($tableName, $columnName, $criteria)
+	public static function AddColumn($tableName, $columnName, $criteria)
 	{
 		$db = \App\Db::getInstance();
 		$tableSchema = $db->getSchema()->getTableSchema($tableName, true);
@@ -191,7 +203,7 @@ class Utils
 	 * Get SQL query
 	 * @param String SQL query statement
 	 */
-	public static function executeQuery($sqlquery, $supressdie = false)
+	static function ExecuteQuery($sqlquery, $supressdie = false)
 	{
 		$adb = \PearDatabase::getInstance();
 		$old_dieOnError = $adb->dieOnError;
@@ -208,13 +220,13 @@ class Utils
 	 * Get CREATE SQL for given table
 	 * @param String tablename for which CREATE SQL is requried
 	 */
-	public static function createTableSql($tablename)
+	static function CreateTableSql($tablename)
 	{
 		$adb = \PearDatabase::getInstance();
 
 		$result = $adb->query("SHOW CREATE TABLE $tablename");
 		$createTable = $adb->fetch_array($result);
-		$sql = \App\Purifier::decodeHtml($createTable['Create Table']);
+		$sql = decode_html($createTable['Create Table']);
 		return $sql;
 	}
 
@@ -222,7 +234,7 @@ class Utils
 	 * Check if the given SQL is a CREATE statement
 	 * @param String SQL String
 	 */
-	public static function isCreateSql($sql)
+	static function IsCreateSql($sql)
 	{
 		if (preg_match('/(CREATE TABLE)/', strtoupper($sql))) {
 			return true;
@@ -234,7 +246,7 @@ class Utils
 	 * Check if the given SQL is destructive (DELETE's DATA)
 	 * @param String SQL String
 	 */
-	public static function isDestructiveSql($sql)
+	static function IsDestructiveSql($sql)
 	{
 		if (preg_match('/(DROP TABLE)|(DROP COLUMN)|(DELETE FROM)/', strtoupper($sql))) {
 			return true;
@@ -251,7 +263,7 @@ class Utils
 	 * @param <boolean> $backtrace flag to enable or disable backtrace in log  
 	 * @param <boolean> $request flag to enable or disable request in log
 	 */
-	public static function moduleLog($module, $mixed, $extra = [])
+	static function ModuleLog($module, $mixed, $extra = [])
 	{
 		if (ALLOW_MODULE_LOGGING) {
 			$date = date('Y-m-d H:i:s');

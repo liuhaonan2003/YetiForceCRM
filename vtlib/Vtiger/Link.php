@@ -43,7 +43,7 @@ class Link
 	{
 		foreach ($valuemap as $key => $value) {
 			if ($key == 'linkurl' || $key == 'linkicon') {
-				$this->$key = \App\Purifier::decodeHtml($value);
+				$this->$key = decode_html($value);
 			} else {
 				$this->$key = $value;
 			}
@@ -62,7 +62,7 @@ class Link
 	}
 
 	/** Cache (Record) the schema changes to improve performance */
-	public static $__cacheSchemaChanges = [];
+	static $__cacheSchemaChanges = [];
 
 	/**
 	 * Add link given module
@@ -73,7 +73,7 @@ class Link
 	 * @param String ICON to use on the display
 	 * @param Integer Order or sequence of displaying the link
 	 */
-	public static function addLink($tabid, $type, $label, $url, $iconpath = '', $sequence = 0, $handlerInfo = null, $linkParams = null)
+	static function addLink($tabid, $type, $label, $url, $iconpath = '', $sequence = 0, $handlerInfo = null, $linkParams = null)
 	{
 		$db = \App\Db::getInstance();
 		if ($tabid != 0) {
@@ -110,7 +110,7 @@ class Link
 	 * @param String Display label
 	 * @param String URL of link to lookup while deleting
 	 */
-	public static function deleteLink($tabid, $type, $label, $url = false)
+	static function deleteLink($tabid, $type, $label, $url = false)
 	{
 		$db = \App\Db::getInstance();
 		if ($url) {
@@ -135,7 +135,7 @@ class Link
 	 * Delete all links related to module
 	 * @param Integer Module ID.
 	 */
-	public static function deleteAll($tabid)
+	static function deleteAll($tabid)
 	{
 		\App\Db::getInstance()->createCommand()->delete('vtiger_links', ['tabid' => $tabid])->execute();
 		self::log("Deleting Links ... DONE");
@@ -145,7 +145,7 @@ class Link
 	 * Get all the links related to module
 	 * @param Integer Module ID.
 	 */
-	public static function getAll($tabid)
+	static function getAll($tabid)
 	{
 		return self::getAllByType($tabid);
 	}
@@ -156,7 +156,7 @@ class Link
 	 * @param mixed String or List of types to select 
 	 * @param Map Key-Value pair to use for formating the link url
 	 */
-	public static function getAllByType($tabid, $type = false, $parameters = false)
+	static function getAllByType($tabid, $type = false, $parameters = false)
 	{
 		$currentUser = \Users_Record_Model::getCurrentUserModel();
 		if (\App\Cache::has('AllLinks', 'ByType')) {
@@ -273,7 +273,7 @@ class Link
 	/**
 	 * Extract the links of module for export.
 	 */
-	public static function getAllForExport($tabid)
+	static function getAllForExport($tabid)
 	{
 		$dataReader = (new \App\Db\Query())->from('vtiger_links')
 				->where(['tabid' => $tabid])
@@ -293,9 +293,9 @@ class Link
 	 * @param Boolean true appends linebreak, false to avoid it
 	 * @access private
 	 */
-	public static function log($message, $delimit = true)
+	static function log($message, $delimit = true)
 	{
-		Utils::log($message, $delimit);
+		Utils::Log($message, $delimit);
 	}
 
 	/**
@@ -303,7 +303,7 @@ class Link
 	 * @param vtlib\LinkData $linkData
 	 * @return Boolean
 	 */
-	public static function isAdmin($linkData)
+	static function isAdmin($linkData)
 	{
 		$user = $linkData->getUser();
 		return $user->is_admin == 'on' || $user->column_fields['is_admin'] == 'on';

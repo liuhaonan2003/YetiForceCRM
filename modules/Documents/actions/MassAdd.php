@@ -13,12 +13,12 @@ class Documents_MassAdd_Action extends Vtiger_Mass_Action
 	/**
 	 * Function to check permission
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
+	 * @throws \Exception\NoPermitted
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		if (!Users_Privileges_Model::isPermitted($request->getModule(), 'CreateView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 

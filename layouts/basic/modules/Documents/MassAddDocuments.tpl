@@ -21,6 +21,6 @@
 				</div>
 			</div>
 		</div>
-		{include file=\App\Layout::getTemplatePath('ModalFooter.tpl', $MODULE)}
+		{include file='ModalFooter.tpl'|@vtemplate_path:$MODULE}
 	</form>
 {/strip}

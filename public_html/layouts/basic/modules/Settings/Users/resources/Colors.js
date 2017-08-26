@@ -12,18 +12,17 @@ var Colors_Js = {
 		var editColorModal = jQuery('.UserColors .editColorContainer');
 		var clonedContainer = editColorModal.clone(true, true);
 		var metod = target.data('metod');
-		var colorPreview = $('#calendarColorPreview' + target.data('type') + target.data('id'));
+
 		var callBackFunction = function (data) {
 			data.find('.editColorContainer').removeClass('hide').show();
 			var selectedColor = data.find('.selectedColor');
-			selectedColor.val(colorPreview.data('color'));
+			selectedColor.val(closestTrElement.data('color'));
 			//register color picker
 			var params = {
 				flat: true,
-				color: colorPreview.data('color'),
+				color: closestTrElement.data('color'),
 				onChange: function (hsb, hex, rgb) {
 					selectedColor.val('#' + hex);
-					colorPreview.data('color', '#' + hex);
 				}
 			};
 			if (typeof customParams != 'undefined') {
@@ -41,12 +40,12 @@ var Colors_Js = {
 				});
 				Colors_Js.registerSaveEvent(metod, {
 					'color': selectedColor.val(),
-					'id': target.data('id'),
+					'id': closestTrElement.data('id'),
 					'table': closestTrElement.data('table'),
 					'field': closestTableElement.data('fieldname'),
 				});
-				colorPreview.css('background', selectedColor.val());
-				target.data('color', selectedColor.val());
+				closestTrElement.find('.calendarColor').css('background', selectedColor.val());
+				closestTrElement.data('color', selectedColor.val());
 				progress.progressIndicator({'mode': 'hide'});
 				app.hideModalWindow();
 			});
@@ -59,16 +58,17 @@ var Colors_Js = {
 	},
 	generateColor: function (e) {
 		var target = $(e.currentTarget);
+		var closestTrElement = target.closest('tr');
 		var closestTableElement = target.closest('table');
 		var metod = target.data('metod');
-		var colorPreview = $('#calendarColorPreview' + target.data('type') + target.data('id'));
+
 		var params = {
 			module: app.getModuleName(),
+			//	parent: app.getParentModuleName(), 
 			action: 'SaveAjax',
 			mode: 'generateColor',
-			params: {id: target.data('id'),
-				color: colorPreview.data('color'),
-				table: target.data('table'),
+			params: {id: closestTrElement.data('id'),
+				table: closestTrElement.data('table'),
 				field: closestTableElement.data('fieldname'),
 				mode: metod,
 			}
@@ -81,10 +81,9 @@ var Colors_Js = {
 						animation: 'show',
 						type: 'success'
 					};
-					colorPreview.css('background', response.color);
-					colorPreview.data('color', response.color);
-
 					Vtiger_Helper_Js.showPnotify(params);
+					closestTrElement.find('.calendarColor').css('background', response.color);
+					closestTrElement.data('color', response.color);
 				},
 				function (data, err) {
 				}
@@ -94,6 +93,7 @@ var Colors_Js = {
 		var params = {}
 		params.data = {
 			module: app.getModuleName(),
+			//	parent: app.getParentModuleName(), 
 			action: 'SaveAjax',
 			mode: mode,
 			params: data
@@ -117,7 +117,7 @@ var Colors_Js = {
 	},
 	activeColor: function (e) {
 		var target = $(e.currentTarget);
-		var colorPreview = $('#calendarColorPreview' + target.data('type') + target.data('id'));
+		var closestTrElement = target.closest('tr');
 		var params = {}
 		params.data = {
 			module: app.getModuleName(),
@@ -125,8 +125,8 @@ var Colors_Js = {
 			mode: 'activeColor',
 			params: {
 				'status': target.is(':checked'),
-				'color': colorPreview.data('color'),
-				'id': target.data('id')
+				'color': closestTrElement.data('color'),
+				'id': closestTrElement.data('id')
 			}
 		}
 		params.async = false;
@@ -140,9 +140,10 @@ var Colors_Js = {
 						type: 'success'
 					};
 					Vtiger_Helper_Js.showPnotify(params);
-					colorPreview.css('background', response.color);
-					colorPreview.data('color', response.color);
-
+					if (closestTrElement.data('color') == '') {
+						closestTrElement.find('.calendarColor').css('background', response['color']);
+						closestTrElement.data('color', response['color']);
+					}
 				}
 		);
 	},

@@ -12,11 +12,11 @@ class Reports_ScheduleReports_Model extends \App\Base
 {
 
 	public $scheduledFormat = 'CSV';
-	public static $SCHEDULED_DAILY = 1;
-	public static $SCHEDULED_WEEKLY = 2;
-	public static $SCHEDULED_MONTHLY_BY_DATE = 3;
-	public static $SCHEDULED_ANNUALLY = 4;
-	public static $SCHEDULED_ON_SPECIFIC_DATE = 5;
+	static $SCHEDULED_DAILY = 1;
+	static $SCHEDULED_WEEKLY = 2;
+	static $SCHEDULED_MONTHLY_BY_DATE = 3;
+	static $SCHEDULED_ANNUALLY = 4;
+	static $SCHEDULED_ON_SPECIFIC_DATE = 5;
 
 	public static function getInstance()
 	{
@@ -37,12 +37,12 @@ class Reports_ScheduleReports_Model extends \App\Base
 			$scheduledReportResult = $db->pquery('SELECT * FROM vtiger_schedulereports WHERE reportid = ?', array($recordId));
 			if ($db->num_rows($scheduledReportResult) > 0) {
 				$reportScheduleInfo = $db->query_result_rowdata($scheduledReportResult, 0);
-				$reportScheduleInfo['schdate'] = App\Purifier::decodeHtml($reportScheduleInfo['schdate']);
-				$reportScheduleInfo['schdayoftheweek'] = App\Purifier::decodeHtml($reportScheduleInfo['schdayoftheweek']);
-				$reportScheduleInfo['schdayofthemonth'] = App\Purifier::decodeHtml($reportScheduleInfo['schdayofthemonth']);
-				$reportScheduleInfo['schannualdates'] = App\Purifier::decodeHtml($reportScheduleInfo['schannualdates']);
-				$reportScheduleInfo['recipients'] = App\Purifier::decodeHtml($reportScheduleInfo['recipients']);
-				$reportScheduleInfo['specificemails'] = App\Purifier::decodeHtml($reportScheduleInfo['specificemails']);
+				$reportScheduleInfo['schdate'] = decode_html($reportScheduleInfo['schdate']);
+				$reportScheduleInfo['schdayoftheweek'] = decode_html($reportScheduleInfo['schdayoftheweek']);
+				$reportScheduleInfo['schdayofthemonth'] = decode_html($reportScheduleInfo['schdayofthemonth']);
+				$reportScheduleInfo['schannualdates'] = decode_html($reportScheduleInfo['schannualdates']);
+				$reportScheduleInfo['recipients'] = decode_html($reportScheduleInfo['recipients']);
+				$reportScheduleInfo['specificemails'] = decode_html($reportScheduleInfo['specificemails']);
 				$reportScheduleInfo['scheduleFileType'] = $reportScheduleInfo['filetype'];
 				$scheduledReportModel->setData($reportScheduleInfo);
 			}
@@ -161,8 +161,11 @@ class Reports_ScheduleReports_Model extends \App\Base
 			}
 
 			if (!empty($recipients['Groups'])) {
+				require_once 'include/utils/GetGroupUsers.php';
 				foreach ($recipients['Groups'] as $groupId) {
-					$recipientsList = array_merge($recipientsList, App\PrivilegeUtil::getUsersByGroup($groupId));
+					$userGroups = new GetGroupUsers();
+					$userGroups->getAllUsersInGroup($groupId);
+					$recipientsList = array_merge($recipientsList, $userGroups->group_users);
 				}
 			}
 		}
@@ -191,7 +194,7 @@ class Reports_ScheduleReports_Model extends \App\Base
 	public function sendEmail()
 	{
 		$recipientEmails = $this->getRecipientEmails();
-		vtlib\Utils::moduleLog('ScheduleReprots', $recipientEmails);
+		vtlib\Utils::ModuleLog('ScheduleReprots', $recipientEmails);
 		$to = [];
 		foreach ($recipientEmails as $name => $email) {
 			$to[$email] = $name;
@@ -199,9 +202,9 @@ class Reports_ScheduleReports_Model extends \App\Base
 		Vtiger_Loader::includeOnce('~modules/Report/models/Record.php');
 		$reportRecordModel = Reports_Record_Model::getInstanceById($this->get('reportid'));
 		$currentTime = date('Y-m-d.H.i.s');
-		vtlib\Utils::moduleLog('ScheduleReprots Send Mail Start ::', $currentTime);
+		vtlib\Utils::ModuleLog('ScheduleReprots Send Mail Start ::', $currentTime);
 		$reportname = \App\Purifier::decodeHtml($reportRecordModel->getName());
-		vtlib\Utils::moduleLog('ScheduleReprot Name ::', $reportname);
+		vtlib\Utils::ModuleLog('ScheduleReprot Name ::', $reportname);
 		$baseFileName = $reportname . '__' . $currentTime;
 		$fileName = $baseFileName . '.csv';
 
@@ -280,9 +283,9 @@ class Reports_ScheduleReports_Model extends \App\Base
 	{
 		$adb = PearDatabase::getInstance();
 		$nextTriggerTime = $this->getNextTriggerTime();
-		vtlib\Utils::moduleLog('ScheduleReprot Next Trigger Time >> ', $nextTriggerTime);
+		vtlib\Utils::ModuleLog('ScheduleReprot Next Trigger Time >> ', $nextTriggerTime);
 		$adb->pquery('UPDATE vtiger_schedulereports SET next_trigger_time=? WHERE reportid=?', array($nextTriggerTime, $this->get('reportid')));
-		vtlib\Utils::moduleLog('ScheduleReprot', 'Next Trigger Time updated');
+		vtlib\Utils::ModuleLog('ScheduleReprot', 'Next Trigger Time updated');
 	}
 
 	public static function getScheduledReports()
@@ -323,7 +326,7 @@ class Reports_ScheduleReports_Model extends \App\Base
 		$scheduledReports = self::getScheduledReports();
 		foreach ($scheduledReports as $scheduledReport) {
 			$status = $scheduledReport->sendEmail();
-			vtlib\Utils::moduleLog('ScheduleReprot Send Mail Status ', $status);
+			vtlib\Utils::ModuleLog('ScheduleReprot Send Mail Status ', $status);
 			if ($status)
 				$scheduledReport->updateNextTriggerTime();
 		}

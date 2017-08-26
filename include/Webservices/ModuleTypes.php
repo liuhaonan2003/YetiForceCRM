@@ -76,7 +76,14 @@ function vtws_listtypes($fieldTypeList, Users_Record_Model $user)
 		$accessibleEntities = [];
 		if (empty($fieldTypeList)) {
 			foreach ($entities as $entity) {
-				if (in_array($entity, ['Groups', 'Currency', 'DocumentFolders']) || App\Privilege::isPermitted($entity)) {
+				$webserviceObject = VtigerWebserviceObject::fromName($db, $entity);
+				$handlerPath = $webserviceObject->getHandlerPath();
+				$handlerClass = $webserviceObject->getHandlerClass();
+
+				require_once $handlerPath;
+				$handler = new $handlerClass($webserviceObject, $user, $db, $log);
+				$meta = $handler->getMeta();
+				if ($meta->hasAccess() === true) {
 					array_push($accessibleEntities, $entity);
 				}
 			}
@@ -93,8 +100,8 @@ function vtws_listtypes($fieldTypeList, Users_Record_Model $user)
 		$current_language = $default_language;
 	$current_language = vtws_preserveGlobal('current_language', $current_language);
 
-	$appStrings = \vtlib\Deprecated::returnAppListStringsLanguage($current_language);
-	$appListString = \vtlib\Deprecated::returnAppListStringsLanguage($current_language);
+	$appStrings = \vtlib\Deprecated::return_app_list_strings_language($current_language);
+	$appListString = \vtlib\Deprecated::return_app_list_strings_language($current_language);
 	vtws_preserveGlobal('app_strings', $appStrings);
 	vtws_preserveGlobal('app_list_strings', $appListString);
 

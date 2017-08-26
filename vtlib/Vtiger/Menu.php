@@ -39,7 +39,7 @@ class Menu
 	 * Get instance of menu by label
 	 * @param String Menu label
 	 */
-	public static function getInstance($value)
+	static function getInstance($value)
 	{
 		return false;
 	}
@@ -50,16 +50,16 @@ class Menu
 	 * @param Boolean true appends linebreak, false to avoid it
 	 * @access private
 	 */
-	public static function log($message, $delim = true)
+	static function log($message, $delim = true)
 	{
-		Utils::log($message, $delim);
+		Utils::Log($message, $delim);
 	}
 
 	/**
 	 * Delete all menus associated with module
 	 * @param Module Instnace of module to use
 	 */
-	public static function deleteForModule($moduleInstance)
+	static function deleteForModule($moduleInstance)
 	{
 		$id = (new \App\Db\Query)->select('id')->from('yetiforce_menu')->where(['module' => $moduleInstance->id])->scalar();
 		if ($id) {

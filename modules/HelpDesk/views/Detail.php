@@ -49,7 +49,7 @@ class HelpDesk_Detail_View extends Vtiger_Detail_View
 
 	public function showCharts(\App\Request $request)
 	{
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 
 		$viewer = $this->getViewer($request);

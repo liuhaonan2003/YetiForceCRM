@@ -14,24 +14,23 @@ class Vtiger_FileUpload_View extends Vtiger_BasicModal_View
 {
 
 	/**
-	 * Function to check permission
+	 * Checking permission
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 * @throws \App\Exceptions\NoPermittedToRecord
+	 * @throws \Exception\NoPermittedToRecord
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
 		$fieldName = $request->get('inputName');
 		if (!empty($record)) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($record, $moduleName);
 			if (!$recordModel->isEditable() || !\App\Field::getFieldPermission($moduleName, $fieldName, false)) {
-				throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		} else {
 			if (!\App\Field::getFieldPermission($moduleName, $fieldName, false) || !\App\Privilege::isPermitted($moduleName, 'CreateView')) {
-				throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		}
 	}

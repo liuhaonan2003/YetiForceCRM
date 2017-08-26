@@ -6,7 +6,7 @@ class EmailTemplates_Edit_View extends Vtiger_Edit_View
 	/**
 	 * Function to get the list of Script models to be included
 	 * @param \App\Request $request
-	 * @return Vtiger_JsScript_Model[]
+	 * @return array - List of Vtiger_JsScript_Model instances
 	 */
 	public function getFooterScripts(\App\Request $request)
 	{

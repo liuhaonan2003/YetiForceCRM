@@ -22,7 +22,7 @@ class LayoutExport extends Package
 	 * Generate unique id for insertion
 	 * @access private
 	 */
-	public static function __getUniqueId()
+	static function __getUniqueId()
 	{
 		$adb = \PearDatabase::getInstance();
 		return $adb->getUniqueID(self::TABLENAME);
@@ -94,8 +94,8 @@ class LayoutExport extends Package
 		$sqlresult = $adb->pquery($query, [$layoutName]);
 		$layoutresultrow = $adb->fetch_array($sqlresult);
 
-		$layoutname = \App\Purifier::decodeHtml($layoutresultrow['name']);
-		$layoutlabel = \App\Purifier::decodeHtml($layoutresultrow['label']);
+		$layoutname = decode_html($layoutresultrow['name']);
+		$layoutlabel = decode_html($layoutresultrow['label']);
 
 		$this->openNode('module');
 		$this->outputNode(date('Y-m-d H:i:s'), 'exporttime');
@@ -104,7 +104,7 @@ class LayoutExport extends Package
 		$this->outputNode('layout', 'type');
 
 		// Export dependency information
-		$this->exportDependencies();
+		$this->export_Dependencies();
 		$this->closeNode('module');
 	}
 
@@ -112,7 +112,7 @@ class LayoutExport extends Package
 	 * Export vtiger dependencies
 	 * @access private
 	 */
-	public function exportDependencies()
+	public function export_Dependencies()
 	{
 		$maxVersion = false;
 		$this->openNode('dependencies');
@@ -125,7 +125,7 @@ class LayoutExport extends Package
 	/**
 	 * Register layout pack information.
 	 */
-	public static function register($name, $label = '', $isdefault = false, $isactive = true, $overrideCore = false)
+	static function register($name, $label = '', $isdefault = false, $isactive = true, $overrideCore = false)
 	{
 		$prefix = trim($prefix);
 		// We will not allow registering core layouts unless forced
@@ -161,7 +161,7 @@ class LayoutExport extends Package
 		self::log("Registering Layout $name ... DONE");
 	}
 
-	public static function deregister($name)
+	static function deregister($name)
 	{
 		if (strtolower($name) == 'basic')
 			return;

@@ -186,7 +186,7 @@ class Assets extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 
@@ -229,11 +229,11 @@ class Assets extends CRMEntity
 	/**
 	 * Transform the value while exporting
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
 		if ($key == 'owner')
 			return \App\Fields\Owner::getLabel($value);
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -286,15 +286,20 @@ class Assets extends CRMEntity
 
 	/**
 	 * Invoked when special actions are performed on the module.
-	 * @param string Module name
-	 * @param string Event Type
+	 * @param String Module name
+	 * @param String Event Type
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 		require_once('include/utils/utils.php');
-		if ($eventType === 'module.postinstall') {
+		$adb = PearDatabase::getInstance();
+
+		if ($eventType == 'module.postinstall') {
+			//Add Assets Module to Customer Portal
+			$adb = PearDatabase::getInstance();
+
 			// Mark the module as Standard module
-			\App\Db::getInstance()->createCommand()->update('vtiger_tab', ['customized' => 0], ['name' => $moduleName]);
+			$adb->pquery('UPDATE vtiger_tab SET customized=0 WHERE name=?', array($moduleName));
 
 			//adds sharing accsess
 			$AssetsModule = vtlib\Module::getInstance('Assets');
@@ -305,20 +310,21 @@ class Assets extends CRMEntity
 			$assetLabel = 'Assets';
 
 			$accountInstance = vtlib\Module::getInstance('Accounts');
-			$accountInstance->setRelatedlist($assetInstance, $assetLabel, ['ADD'], 'getDependentsList');
+			$accountInstance->setRelatedlist($assetInstance, $assetLabel, array(ADD), 'getDependentsList');
+
 			$productInstance = vtlib\Module::getInstance('Products');
-			$productInstance->setRelatedlist($assetInstance, $assetLabel, ['ADD'], 'getDependentsList');
+			$productInstance->setRelatedlist($assetInstance, $assetLabel, array(ADD), 'getDependentsList');
 
 			\App\Fields\RecordNumber::setNumber($moduleName, 'ASSET', 1);
-		} else if ($eventType === 'module.disabled') {
+		} else if ($eventType == 'module.disabled') {
 			
-		} else if ($eventType === 'module.enabled') {
+		} else if ($eventType == 'module.enabled') {
 			
-		} else if ($eventType === 'module.preuninstall') {
+		} else if ($eventType == 'module.preuninstall') {
 			
-		} else if ($eventType === 'module.preupdate') {
+		} else if ($eventType == 'module.preupdate') {
 			
-		} else if ($eventType === 'module.postupdate') {
+		} else if ($eventType == 'module.postupdate') {
 			\App\Fields\RecordNumber::setNumber($moduleName, 'ASSET', 1);
 		}
 	}

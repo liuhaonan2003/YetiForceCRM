@@ -296,7 +296,7 @@ class Request
 	/**
 	 * Get request method
 	 * @return string
-	 * @throws \App\Exceptions\AppException
+	 * @throws Exceptions\AppException
 	 */
 	public function getRequestMethod()
 	{
@@ -307,7 +307,7 @@ class Request
 			} else if ($_SERVER['HTTP_X_HTTP_METHOD'] === 'PUT') {
 				$method = 'PUT';
 			} else {
-				throw new \App\Exceptions\AppException('Unexpected Header');
+				throw new Exceptions\AppException('Unexpected Header');
 			}
 		}
 		return $method;
@@ -395,7 +395,7 @@ class Request
 
 	/**
 	 * Validating read access request
-	 * @throws \App\Exceptions\Csrf
+	 * @throws \Exception\Csrf
 	 */
 	public function validateReadAccess()
 	{
@@ -403,7 +403,7 @@ class Request
 		// Referer check if present - to over come 
 		if (isset($_SERVER['HTTP_REFERER']) && $user) {//Check for user post authentication.
 			if ((stripos($_SERVER['HTTP_REFERER'], \AppConfig::main('site_URL')) !== 0) && ($this->get('module') != 'Install')) {
-				throw new \App\Exceptions\Csrf('Illegal request');
+				throw new \Exception\Csrf('Illegal request');
 			}
 		}
 	}
@@ -411,17 +411,17 @@ class Request
 	/**
 	 * Validating write access request
 	 * @param boolean $skipRequestTypeCheck
-	 * @throws \App\Exceptions\Csrf
+	 * @throws \Exception\Csrf
 	 */
 	public function validateWriteAccess($skipRequestTypeCheck = false)
 	{
 		if (!$skipRequestTypeCheck) {
 			if ($_SERVER['REQUEST_METHOD'] !== 'POST')
-				throw new \App\Exceptions\Csrf('Invalid request - validate Write Access');
+				throw new \Exception\Csrf('Invalid request - validate Write Access');
 		}
 		$this->validateReadAccess();
 		if (class_exists('CSRF') && !\CSRF::check(false)) {
-			throw new \App\Exceptions\Csrf('Unsupported request');
+			throw new \Exception\Csrf('Unsupported request');
 		}
 	}
 
@@ -443,7 +443,7 @@ class Request
 	 * @param string $name
 	 * @param null|array $arguments
 	 * @return mied
-	 * @throws \App\Exceptions\AppException
+	 * @throws Exceptions\AppException
 	 */
 	public static function __callStatic($name, $arguments = null)
 	{
@@ -452,7 +452,7 @@ class Request
 		}
 		$function = ltrim($name, '_');
 		if (!method_exists(static::$request, $function)) {
-			throw new \App\Exceptions\AppException('Method not found');
+			throw new Exceptions\AppException('Method not found');
 		}
 		if (empty($arguments)) {
 			return static::$request->$function();

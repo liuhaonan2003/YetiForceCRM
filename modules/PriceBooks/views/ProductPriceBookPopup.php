@@ -49,12 +49,12 @@ class PriceBooks_ProductPriceBookPopup_View extends Vtiger_Popup_View
 	{
 		$moduleName = $request->getModule();
 		$cvId = $request->get('cvid');
-		$pageNumber = $request->getInteger('page');
+		$pageNumber = $request->get('page');
 		$orderBy = $request->get('orderby');
 		$sortOrder = $request->get('sortorder');
 		$sourceModule = $request->get('src_module');
 		$sourceField = $request->get('src_field');
-		$sourceRecord = $request->getInteger('src_record');
+		$sourceRecord = $request->get('src_record');
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 

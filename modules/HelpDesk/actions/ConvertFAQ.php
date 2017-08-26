@@ -11,22 +11,19 @@
 class HelpDesk_ConvertFAQ_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
-		if (!Users_Privileges_Model::isPermitted('Faq', 'CreateView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		$recordPermission = Users_Privileges_Model::isPermitted('Faq', 'EditView');
+
+		if (!$recordPermission) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 
 		if (!empty($recordId)) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);

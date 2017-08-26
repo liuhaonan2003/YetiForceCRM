@@ -19,19 +19,19 @@ class Users_Save_Action extends Vtiger_Save_Action
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 
 		// Check for operation access.
-		$allowed = \App\Privilege::isPermitted($moduleName, 'Save', $record);
+		$allowed = Users_Privileges_Model::isPermitted($moduleName, 'Save', $record);
 		if ($allowed) {
 			// Deny access if not administrator or account-owner or self
 			if (!$currentUserModel->isAdminUser()) {
 				if (empty($record)) {
 					$allowed = false;
-				} else if (AppConfig::security('SHOW_MY_PREFERENCES') && ((int) $currentUserModel->get('id') !== $recordModel->getId())) {
+				} else if ((int) $currentUserModel->get('id') !== $recordModel->getId()) {
 					$allowed = false;
 				}
 			}
 		}
 		if (!$allowed) {
-			throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
 		}
 	}
 

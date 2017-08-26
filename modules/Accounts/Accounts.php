@@ -79,12 +79,13 @@ class Accounts extends CRMEntity
 	 * @param reference variable - where condition is passed when the query is executed
 	 * Returns Export Accounts Query.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
-		$current_user = vglobal('current_user');
-		\App\Log::trace('Entering createExportQuery(' . $where . ') method ...');
 
-		include('include/utils/ExportUtils.php');
+		$current_user = vglobal('current_user');
+		\App\Log::trace("Entering create_export_query(" . $where . ") method ...");
+
+		include("include/utils/ExportUtils.php");
 
 		//To get the Permitted fields query and the permitted fields list
 		$sql = getPermittedFieldsQuery("Accounts", "detail_view");
@@ -114,7 +115,7 @@ class Accounts extends CRMEntity
 		else
 			$query .= sprintf(' where %s', $where_auto);
 
-		\App\Log::trace('Exiting createExportQuery method ...');
+		\App\Log::trace("Exiting create_export_query method ...");
 		return $query;
 	}
 	/*
@@ -439,12 +440,12 @@ class Accounts extends CRMEntity
 		}
 	}
 
-	public function saveRelatedModule($module, $crmid, $with_module, $with_crmids, $relatedName = false)
+	public function save_related_module($module, $crmid, $with_module, $with_crmids, $relatedName = false)
 	{
 		if (!is_array($with_crmids))
 			$with_crmids = [$with_crmids];
 		if (!in_array($with_module, ['Products', 'Campaigns'])) {
-			parent::saveRelatedModule($module, $crmid, $with_module, $with_crmids, $relatedName);
+			parent::save_related_module($module, $crmid, $with_module, $with_crmids, $relatedName);
 		} else {
 			foreach ($with_crmids as $with_crmid) {
 				if ($with_module == 'Products') {

@@ -16,14 +16,13 @@ class Calendar_Detail_View extends Vtiger_Detail_View
 	{
 		parent::preProcess($request, false);
 
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 		if (!empty($recordId)) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($recordId);
 			$activityType = $recordModel->getType();
-			if ($activityType === 'Events') {
+			if ($activityType == 'Events')
 				$moduleName = 'Events';
-			}
 		}
 		if (!$this->record) {
 			$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);

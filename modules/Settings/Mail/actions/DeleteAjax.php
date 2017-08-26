@@ -9,20 +9,19 @@
  */
 class Settings_Mail_DeleteAjax_Action extends Settings_Vtiger_Delete_Action
 {
-
 	/**
 	 * Checking permission 
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedForAdmin
+	 * @throws \Exception\NoPermittedForAdmin
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserModel = \App\User::getCurrentUserModel();
 		if (!$currentUserModel->isAdmin()) {
-			throw new \App\Exceptions\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
 		}
 	}
-
+	
 	/**
 	 * Process
 	 * @param \App\Request $request
@@ -37,7 +36,7 @@ class Settings_Mail_DeleteAjax_Action extends Settings_Vtiger_Delete_Action
 		$moduleModel = Settings_Vtiger_Module_Model::getInstance($qualifiedModuleName);
 		header("Location: {$moduleModel->getDefaultUrl()}");
 	}
-
+	
 	/**
 	 * Validate Request
 	 * @param \App\Request $request

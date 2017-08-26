@@ -94,15 +94,15 @@ class HelpDesk extends CRMEntity
 	// For Alphabetical search
 	public $def_basicsearch_col = 'ticket_title';
 
-	public function saveRelatedModule($module, $crmid, $with_module, $with_crmid, $relatedName = false)
+	public function save_related_module($module, $crmid, $with_module, $with_crmid, $relatedName = false)
 	{
 		if ($with_module == 'ServiceContracts') {
-			parent::saveRelatedModule($module, $crmid, $with_module, $with_crmid);
-			$serviceContract = CRMEntity::getInstance('ServiceContracts');
+			parent::save_related_module($module, $crmid, $with_module, $with_crmid);
+			$serviceContract = CRMEntity::getInstance("ServiceContracts");
 			$serviceContract->updateHelpDeskRelatedTo($with_crmid, $crmid);
 			$serviceContract->updateServiceContractState($with_crmid);
 		} else {
-			parent::saveRelatedModule($module, $crmid, $with_module, $with_crmid, $relatedName);
+			parent::save_related_module($module, $crmid, $with_module, $with_crmid, $relatedName);
 		}
 	}
 
@@ -111,13 +111,13 @@ class HelpDesk extends CRMEntity
 	 * @param reference variable - where condition is passed when the query is executed
 	 * Returns Export Tickets Query.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 
 		$current_user = vglobal('current_user');
-		\App\Log::trace('Entering createExportQuery(' . $where . ') method ...');
+		\App\Log::trace("Entering create_export_query(" . $where . ") method ...");
 
-		include('include/utils/ExportUtils.php');
+		include("include/utils/ExportUtils.php");
 
 		//To get the Permitted fields query and the permitted fields list
 		$sql = getPermittedFieldsQuery("HelpDesk", "detail_view");

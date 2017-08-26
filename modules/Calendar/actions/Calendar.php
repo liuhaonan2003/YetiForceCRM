@@ -9,16 +9,14 @@
 class Calendar_Calendar_Action extends Vtiger_BasicAjax_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
+		$moduleName = $request->getModule();
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$userPrivilegesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		$permission = $userPrivilegesModel->hasModulePermission($moduleName);
+
+		if (!$permission) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -65,9 +63,9 @@ class Calendar_Calendar_Action extends Vtiger_BasicAjax_Action
 	public function updateEvent(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('id');
+		$recordId = $request->get('id');
 		$actionname = 'EditView';
-		if (!\App\Privilege::isPermitted($moduleName, 'EditView', $recordId)) {
+		if (isPermitted($moduleName, $actionname, $recordId) === 'no') {
 			$succes = false;
 		} else {
 			$delta = $request->get('delta');

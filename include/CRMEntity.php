@@ -141,10 +141,10 @@ class CRMEntity
 	 * @param integer $record - crmid of record
 	 * @param string $module - module name
 	 */
-	public function retrieveEntityInfo($record, $module)
+	public function retrieve_entity_info($record, $module)
 	{
 		if (!isset($record)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_RECORD_NOT_FOUND');
+			throw new \Exception\NoPermittedToRecord('LBL_RECORD_NOT_FOUND');
 		}
 
 		// Tables which has multiple rows for the same record
@@ -161,15 +161,15 @@ class CRMEntity
 		// Lookup module field cache
 		if ($module == 'Calendar' || $module == 'Events') {
 			getColumnFields('Calendar');
-			if (VTCacheUtils::lookupFieldInfoModule('Events'))
-				$cachedEventsFields = VTCacheUtils::lookupFieldInfoModule('Events');
+			if (VTCacheUtils::lookupFieldInfo_Module('Events'))
+				$cachedEventsFields = VTCacheUtils::lookupFieldInfo_Module('Events');
 			else
 				$cachedEventsFields = [];
-			$cachedCalendarFields = VTCacheUtils::lookupFieldInfoModule('Calendar');
+			$cachedCalendarFields = VTCacheUtils::lookupFieldInfo_Module('Calendar');
 			$cachedModuleFields = array_merge($cachedEventsFields, $cachedCalendarFields);
 			$module = 'Calendar';
 		} else {
-			$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module);
+			$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 		}
 		if ($cachedModuleFields === false) {
 			// Pull fields and cache for further use
@@ -187,7 +187,7 @@ class CRMEntity
 					);
 				}
 				// Get only active field information
-				$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module);
+				$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 			}
 		}
 
@@ -224,17 +224,24 @@ class CRMEntity
 			}
 			$resultRow = $query->one();
 			if (empty($resultRow)) {
-				throw new \App\Exceptions\NoPermittedToRecord('LBL_RECORD_NOT_FOUND');
+				throw new \Exception\NoPermittedToRecord('LBL_RECORD_NOT_FOUND');
 			} else {
 				if (!empty($resultRow['deleted'])) {
-					throw new \App\Exceptions\NoPermittedToRecord('LBL_RECORD_DELETE');
+					throw new \Exception\NoPermittedToRecord('LBL_RECORD_DELETE');
 				}
+				$showsAdditionalLabels = vglobal('showsAdditionalLabels');
 				foreach ($cachedModuleFields as $fieldInfo) {
 					$fieldvalue = '';
 					$fieldkey = $this->createColumnAliasForField($fieldInfo);
 					//Note : value is retrieved with a tablename+fieldname as we are using alias while building query
 					if (isset($resultRow[$fieldkey])) {
 						$fieldvalue = $resultRow[$fieldkey];
+					}
+					if ($showsAdditionalLabels && in_array($fieldInfo['uitype'], [10, 51, 73])) {
+						$this->column_fields[$fieldInfo['fieldname'] . '_label'] = vtlib\Functions::getCRMRecordLabel($fieldvalue);
+					}
+					if ($showsAdditionalLabels && in_array($fieldInfo['uitype'], [52, 53])) {
+						$this->column_fields[$fieldInfo['fieldname'] . '_label'] = vtlib\Functions::getOwnerRecordLabel($fieldvalue);
 					}
 					if ($fieldInfo['uitype'] === 120) {
 						$query = (new \App\Db\Query())->select('userid')->from('u_#__crmentity_showners')->where(['crmid' => $record])->distinct();
@@ -257,7 +264,7 @@ class CRMEntity
 	 * All Rights Reserved..
 	 * Contributor(s): ______________________________________..
 	 */
-	public function markDeleted($id)
+	public function mark_deleted($id)
 	{
 		\App\Db::getInstance()->createCommand()->update('vtiger_crmentity', ['deleted' => 1, 'modifiedtime' => date('Y-m-d H:i:s'), 'modifiedby' => \App\User::getCurrentUserId()], ['crmid' => $id])->execute();
 	}
@@ -311,7 +318,7 @@ class CRMEntity
 	/**
 	 * Function invoked during export of module record value.
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
 		// NOTE: The sub-class can override this function as required.
 		return $value;
@@ -336,9 +343,9 @@ class CRMEntity
 	public function trash($moduleName, $id)
 	{
 		if (vtlib\Functions::getCRMRecordType($id) !== $moduleName) {
-			throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
 		}
-		$this->markDeleted($id);
+		$this->mark_deleted($id);
 	}
 
 	/**
@@ -565,7 +572,7 @@ class CRMEntity
 	 * @param mixed Integer or Array of related module record number
 	 * @param String function name
 	 */
-	public function saveRelatedModule($module, $crmid, $withModule, $withCrmid, $relatedName = false)
+	public function save_related_module($module, $crmid, $withModule, $withCrmid, $relatedName = false)
 	{
 		if (!is_array($withCrmid))
 			$withCrmid = [$withCrmid];
@@ -641,7 +648,7 @@ class CRMEntity
 	 * @param String Related module name
 	 * @param mixed Integer or Array of related module record number
 	 */
-	public function deleteRelatedModule($module, $crmid, $withModule, $withCrmid)
+	public function delete_related_module($module, $crmid, $withModule, $withCrmid)
 	{
 		$db = PearDatabase::getInstance();
 		if (!is_array($withCrmid))
@@ -1052,6 +1059,76 @@ class CRMEntity
 	/** END * */
 
 	/**
+	 * This function handles the import for uitype 10 fieldtype
+	 * @param string $module - the current module name
+	 * @param string fieldname - the related to field name
+	 */
+	public function add_related_to($module, $fieldname)
+	{
+		$adb = PearDatabase::getInstance();
+		$current_user = vglobal('current_user');
+		$related_to = $this->column_fields[$fieldname];
+
+		if (empty($related_to)) {
+			return false;
+		}
+
+		//check if the field has module information; if not get the first module
+		if (!strpos($related_to, "::::")) {
+			$module = getFirstModule($module, $fieldname);
+			$value = $related_to;
+		} else {
+			//check the module of the field
+			$arr = [];
+			$arr = explode("::::", $related_to);
+			$module = $arr[0];
+			$value = $arr[1];
+		}
+
+		$focus1 = CRMEntity::getInstance($module);
+
+		$entityNameArr = \vtlib\Functions::getEntityModuleSQLColumnString($module);
+		$entityName = $entityNameArr['fieldname'];
+		$query = "SELECT vtiger_crmentity.deleted, $focus1->table_name.*
+					FROM $focus1->table_name
+					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=$focus1->table_name.$focus1->table_index
+						where $entityName=? and vtiger_crmentity.deleted=0";
+		$result = $adb->pquery($query, array($value));
+
+		if (!isset($this->checkFlagArr[$module])) {
+			$this->checkFlagArr[$module] = (isPermitted($module, 'EditView', '') == 'yes');
+		}
+
+		if ($adb->num_rows($result) > 0) {
+			//record found
+			$focus1->id = $adb->query_result($result, 0, $focus1->table_index);
+		} elseif ($this->checkFlagArr[$module]) {
+			//record not found; create it
+			$focus1->column_fields[$focus1->list_link_field] = $value;
+			$focus1->column_fields['assigned_user_id'] = $current_user->id;
+			$focus1->column_fields['modified_user_id'] = $current_user->id;
+			$focus1->save($module);
+
+			$last_import = new UsersLastImport();
+			$last_import->assigned_user_id = $current_user->id;
+			$last_import->bean_type = $module;
+			$last_import->bean_id = $focus1->id;
+			$last_import->save();
+		} else {
+			//record not found and cannot create
+			$this->column_fields[$fieldname] = "";
+			return false;
+		}
+		if (!empty($focus1->id)) {
+			$this->column_fields[$fieldname] = $focus1->id;
+			return true;
+		} else {
+			$this->column_fields[$fieldname] = "";
+			return false;
+		}
+	}
+
+	/**
 	 * To keep track of action of field filtering and avoiding doing more than once.
 	 *
 	 * @var Array
@@ -1069,11 +1146,11 @@ class CRMEntity
 			return;
 		}
 		// Look for fields that has presence value NOT IN (0,2)
-		$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module, array('1'));
+		$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module, array('1'));
 		if ($cachedModuleFields === false) {
 			// Initialize the fields calling suitable API
 			getColumnFields($module);
-			$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module, array('1'));
+			$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module, array('1'));
 		}
 
 		$hiddenFields = [];
@@ -1351,7 +1428,7 @@ class CRMEntity
 	 * @param String $moduleName Module name
 	 * @param String $eventType Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 		
 	}

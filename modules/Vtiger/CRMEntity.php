@@ -119,7 +119,7 @@ class Vtiger_CRMEntity extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$currentUser = vglobal('current_user');
 

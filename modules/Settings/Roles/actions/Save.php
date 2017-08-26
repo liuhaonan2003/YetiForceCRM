@@ -15,13 +15,13 @@ class Settings_Roles_Save_Action extends Vtiger_Action_Controller
 	/**
 	 * Checking permission
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		if (!$currentUser->isAdminUser()) {
-			throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
 		}
 	}
 

@@ -11,15 +11,14 @@ class Chat_Entries_Action extends Vtiger_Action_Controller
 {
 
 	/**
-	 * Function to check permission
+	 * Check permission
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
+	 * @throws \Exception\NoPermittedToRecord
 	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if (!App\Privilege::isPermitted($request->getModule())) {
+			throw new \Exception\NoPermittedToRecord('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -39,7 +38,7 @@ class Chat_Entries_Action extends Vtiger_Action_Controller
 			$this->invokeExposedMethod($mode, $request);
 			return;
 		}
-		throw new \App\Exceptions\AppException('LBL_NOT_ACCESSIBLE');
+		throw new \Exception\AppException('LBL_NOT_ACCESSIBLE');
 	}
 
 	/**

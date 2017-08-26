@@ -1,93 +1,45 @@
 <?php
+
 /**
- * Mail Scanner bind email action
+ * Mail Scanner bind email action 
  * @package YetiForce.Model
  * @copyright YetiForce Sp. z o.o.
  * @license YetiForce Public License 2.0 (licenses/License.html or yetiforce.com)
  * @author Mariusz Krzaczkowski <m.krzaczkowski@yetiforce.com>
  */
-
-/**
- * Mail Scanner bind email action
- */
 class OSSMail_Mail_Model extends \App\Base
 {
 
-	/**
-	 * Mail account
-	 * @var array
-	 */
 	protected $mailAccount = [];
-
-	/**
-	 * Mail folder
-	 * @var string
-	 */
 	protected $mailFolder = '';
-
-	/**
-	 * Mail crm id
-	 * @var int|bool
-	 */
 	protected $mailCrmId = false;
-
-	/**
-	 * Action result
-	 * @var array
-	 */
 	protected $actionResult = [];
 
-	/**
-	 * Set account
-	 * @param array $account
-	 */
 	public function setAccount($account)
 	{
 		$this->mailAccount = $account;
 	}
 
-	/**
-	 * Set folder
-	 * @param string $folder
-	 */
 	public function setFolder($folder)
 	{
 		$this->mailFolder = $folder;
 	}
 
-	/**
-	 * Add action result
-	 * @param string $type
-	 * @param string $result
-	 */
 	public function addActionResult($type, $result)
 	{
 		$this->actionResult[$type] = $result;
 	}
 
-	/**
-	 * Get account
-	 * @return array
-	 */
 	public function getAccount()
 	{
 		return $this->mailAccount;
 	}
 
-	/**
-	 * Get folder
-	 * @return string
-	 */
 	public function getFolder()
 	{
 		return $this->mailFolder;
 	}
 
-	/**
-	 * Get action result
-	 * @param string $action
-	 * @return array
-	 */
 	public function getActionResult($action = false)
 	{
 		if ($action && isset($this->actionResult[$action])) {
@@ -96,11 +48,6 @@ class OSSMail_Mail_Model extends \App\Base
 		return $this->actionResult;
 	}
 
-	/**
-	 * Get type email
-	 * @param bool $returnText
-	 * @return string|int
-	 */
 	public function getTypeEmail($returnText = false)
 	{
 		$account = $this->getAccount();
@@ -133,20 +80,16 @@ class OSSMail_Mail_Model extends \App\Base
 		}
 	}
 
-	/**
-	 * Find email user
-	 * @param string $emails
-	 * @return array
-	 */
 	public static function findEmailUser($emails)
 	{
+		$db = PearDatabase::getInstance();
 		$return = [];
 		$notFound = 0;
 		if (!empty($emails)) {
 			foreach (explode(',', $emails) as $email) {
-				$result = (new \App\Db\Query())->select(['id'])->from('vtiger_users')->where(['email1' => $email])->scalar();
-				if ($result) {
-					$return[] = $result;
+				$result = $db->pquery('SELECT id FROM vtiger_users WHERE email1 = ?', [$email]);
+				if ($db->getRowCount($result) > 0) {
+					$return[] = $db->getSingleValue($result);
 				} else {
 					$notFound++;
 				}
@@ -155,10 +98,6 @@ class OSSMail_Mail_Model extends \App\Base
 		return ['users' => $return, 'notFound' => $notFound];
 	}
 
-	/**
-	 * Get account owner
-	 * @return int
-	 */
 	public function getAccountOwner()
 	{
 		$account = $this->getAccount();
@@ -183,7 +122,7 @@ class OSSMail_Mail_Model extends \App\Base
 	}
 
 	/**
-	 * Get mail crm id
+	 * Get mail crm id 
 	 * @return int|bool
 	 */
 	public function getMailCrmId()
@@ -199,20 +138,11 @@ class OSSMail_Mail_Model extends \App\Base
 		return $this->mailCrmId = $query->scalar();
 	}
 
-	/**
-	 * Set mail crm id
-	 * @param int $id
-	 */
 	public function setMailCrmId($id)
 	{
 		$this->mailCrmId = $id;
 	}
 
-	/**
-	 * Get email
-	 * @param string $name
-	 * @return string
-	 */
 	public function getEmail($name)
 	{
 		$header = $this->get('header');
@@ -232,13 +162,6 @@ class OSSMail_Mail_Model extends \App\Base
 		return $return;
 	}
 
-	/**
-	 * Find email address
-	 * @param string $field
-	 * @param string $searchModule
-	 * @param bool $returnArray
-	 * @return string|array
-	 */
 	public function findEmailAdress($field, $searchModule = false, $returnArray = true)
 	{
 		$return = [];

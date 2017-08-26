@@ -39,7 +39,12 @@ class OSSTimeControl_AllTimeControl_Dashboard extends Vtiger_IndexAjax_View
 			$accessibleUsers[$user] = Users_Record_Model::getInstanceById($user, 'Users')->getName();
 			$user = [$user];
 		}
-		$colors = (new App\Db\Query())->select(['timecontrol_type', 'color'])->from('vtiger_timecontrol_type')->createCommand()->queryAllByGroup(0);
+		$db = PearDatabase::getInstance();
+		$sql = "SELECT timecontrol_type, color FROM vtiger_timecontrol_type";
+		$result = $db->query($sql);
+		while ($row = $db->fetch_array($result)) {
+			$colors[$row['timecontrol_type']] = $row['color'];
+		}
 		$module = 'OSSTimeControl';
 		$param[] = $module;
 		$param = array_merge($param, $user);

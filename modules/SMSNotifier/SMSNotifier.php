@@ -206,7 +206,7 @@ class SMSNotifier extends Vtiger_CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 		$thismodule = \App\Request::_get('module');
@@ -268,9 +268,9 @@ class SMSNotifier extends Vtiger_CRMEntity
 	/**
 	 * Transform the value while exporting (if required)
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -326,7 +326,7 @@ class SMSNotifier extends Vtiger_CRMEntity
 	 * @param string Module name
 	 * @param string Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
 	 */
-	public function moduleHandler($modulename, $eventType)
+	public function vtlib_handler($modulename, $eventType)
 	{
 		//adds sharing accsess
 		$SMSNotifierModule = vtlib\Module::getInstance('SMSNotifier');

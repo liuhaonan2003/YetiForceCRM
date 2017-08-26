@@ -11,7 +11,7 @@
 class VTWorkflowApplication
 {
 
-	public function __construct($action)
+	function __construct($action)
 	{
 		$this->request;
 		$this->name = "com_vtiger_workflow";
@@ -20,22 +20,22 @@ class VTWorkflowApplication
 		$this->returnUrl = $_SERVER["REQUEST_URI"];
 	}
 
-	public function currentUrl()
+	function currentUrl()
 	{
 		return $_SERVER["REQUEST_URI"];
 	}
 
-	public function returnUrl()
+	function returnUrl()
 	{
 		return $this->returnUrl;
 	}
 
-	public function listViewUrl()
+	function listViewUrl()
 	{
 		return "index.php?module={$this->name}&action=workflowlist";
 	}
 
-	public function editWorkflowUrl($id = null)
+	function editWorkflowUrl($id = null)
 	{
 		if ($id !== null) {
 			$idPart = "&workflow_id=$id";
@@ -43,13 +43,13 @@ class VTWorkflowApplication
 		return "index.php?module={$this->name}&action=editworkflow$idPart&return_url=" . urlencode($this->returnUrl());
 	}
 
-	public function deleteWorkflowUrl($id)
+	function deleteWorkflowUrl($id)
 	{
 		$idPart = "&workflow_id=$id";
 		return "index.php?module={$this->name}&action=deleteworkflow$idPart&return_url=" . urlencode($this->returnUrl());
 	}
 
-	public function editTaskUrl($id = null)
+	function editTaskUrl($id = null)
 	{
 		if ($id !== null) {
 			$idPart = "&task_id=$id";
@@ -57,18 +57,18 @@ class VTWorkflowApplication
 		return "index.php?module={$this->name}&action=edittask$idPart&return_url=" . urlencode($this->returnUrl());
 	}
 
-	public function deleteTaskUrl($id)
+	function deleteTaskUrl($id)
 	{
 		$idPart = "&task_id=$id";
 		return "index.php?module={$this->name}&action=deletetask$idPart&return_url=" . urlencode($this->returnUrl());
 	}
 
-	public function setReturnUrl($returnUrl)
+	function setReturnUrl($returnUrl)
 	{
 		$this->returnUrl = $returnUrl;
 	}
 
-	public function errorPageUrl($message)
+	function errorPageUrl($message)
 	{
 		return "index.php?module={$this->name}&action=errormessage&message=" . urlencode($message);
 	}

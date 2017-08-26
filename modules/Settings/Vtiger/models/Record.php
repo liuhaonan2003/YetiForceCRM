@@ -14,9 +14,9 @@
 abstract class Settings_Vtiger_Record_Model extends App\Base
 {
 
-	abstract public function getId();
+	abstract function getId();
 
-	abstract public function getName();
+	abstract function getName();
 
 	public function getRecordLinks()
 	{

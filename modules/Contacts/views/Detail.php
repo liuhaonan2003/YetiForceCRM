@@ -13,11 +13,13 @@ class Contacts_Detail_View extends Vtiger_Detail_View
 
 	public function showModuleDetailView(\App\Request $request)
 	{
-		if (!$this->record) {
-			$this->record = Vtiger_DetailView_Model::getInstance($request->getModule(), $request->getInteger('record'));
-		}
+		$recordId = $request->get('record');
+		$moduleName = $request->getModule();
+
+		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+
 		$viewer = $this->getViewer($request);
-		$viewer->assign('IMAGE_DETAILS', $this->record->getRecord()->getImageDetails());
+		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
 
 		return parent::showModuleDetailView($request);
 	}

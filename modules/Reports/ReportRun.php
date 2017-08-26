@@ -391,13 +391,13 @@ class ReportRun extends CRMEntity
 			$field_label_data = explode('__', $selectedfields[2]);
 			$module = $field_label_data[0];
 			if ($module != $this->primarymodule) {
-				$columnSQL = 'case when (' . $selectedfields[0] . '.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity$module.crmid !='') then 'no' else '-' end end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+				$columnSQL = 'case when (' . $selectedfields[0] . '.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity$module.crmid !='') then 'no' else '-' end end AS '" . decode_html($selectedfields[2]) . "'";
 				$this->queryPlanner->addTable("vtiger_crmentity$module");
 			} else {
 				if ($selectedfields[0] == 'vtiger_crmentity' . $this->primarymodule) {
-					$columnSQL = 'case when ( vtiger_crmentity.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity.crmid !='') then 'no' else '-' end end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+					$columnSQL = 'case when ( vtiger_crmentity.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity.crmid !='') then 'no' else '-' end end AS '" . decode_html($selectedfields[2]) . "'";
 				} else {
-					$columnSQL = 'case when (' . $selectedfields[0] . '.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity.crmid !='') then 'no' else '-' end end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+					$columnSQL = 'case when (' . $selectedfields[0] . '.' . $selectedfields[1] . "='1')then 'yes' else case when (vtiger_crmentity.crmid !='') then 'no' else '-' end end AS '" . decode_html($selectedfields[2]) . "'";
 					$this->queryPlanner->addTable($selectedfields[0]);
 				}
 			}
@@ -406,27 +406,27 @@ class ReportRun extends CRMEntity
 				if ($selectedfields[0] == 'vtiger_activity' && $selectedfields[1] == 'date_start') {
 					$columnSQL = "YEAR(cast(concat(vtiger_activity.date_start,'  ',vtiger_activity.time_start) as DATETIME)) AS Calendar__Start__Date__and__Time__Year";
 				} else if ($selectedfields[0] == 'vtiger_crmentity' . $this->primarymodule) {
-					$columnSQL = 'YEAR(vtiger_crmentity.' . $selectedfields[1] . ") AS '" . App\Purifier::decodeHtml($header_label) . "__Year'";
+					$columnSQL = 'YEAR(vtiger_crmentity.' . $selectedfields[1] . ") AS '" . decode_html($header_label) . "__Year'";
 				} else {
-					$columnSQL = 'YEAR(' . $selectedfields[0] . '.' . $selectedfields[1] . ") AS '" . App\Purifier::decodeHtml($header_label) . "__Year'";
+					$columnSQL = 'YEAR(' . $selectedfields[0] . '.' . $selectedfields[1] . ") AS '" . decode_html($header_label) . "__Year'";
 				}
 				$this->queryPlanner->addTable($selectedfields[0]);
 			} elseif ($selectedfields[5] == 'M') {
 				if ($selectedfields[0] == 'vtiger_activity' && $selectedfields[1] == 'date_start') {
 					$columnSQL = "MONTHNAME(cast(concat(vtiger_activity.date_start,'  ',vtiger_activity.time_start) as DATETIME)) AS Calendar__Start__Date__and__Time__Month";
 				} else if ($selectedfields[0] == 'vtiger_crmentity' . $this->primarymodule) {
-					$columnSQL = "MONTHNAME(vtiger_crmentity." . $selectedfields[1] . ") AS '" . App\Purifier::decodeHtml($header_label) . "__Month'";
+					$columnSQL = "MONTHNAME(vtiger_crmentity." . $selectedfields[1] . ") AS '" . decode_html($header_label) . "__Month'";
 				} else {
-					$columnSQL = 'MONTHNAME(' . $selectedfields[0] . "." . $selectedfields[1] . ") AS '" . App\Purifier::decodeHtml($header_label) . "__Month'";
+					$columnSQL = 'MONTHNAME(' . $selectedfields[0] . "." . $selectedfields[1] . ") AS '" . decode_html($header_label) . "__Month'";
 				}
 				$this->queryPlanner->addTable($selectedfields[0]);
 			} elseif ($selectedfields[5] == 'MY') { // used in charts to get the year also, which will be used for click throughs
 				if ($selectedfields[0] == 'vtiger_activity' && $selectedfields[1] == 'date_start') {
 					$columnSQL = "date_format(cast(concat(vtiger_activity.date_start,'  ',vtiger_activity.time_start) as DATETIME), '%M %Y') AS Calendar__Start__Date__and__Time__Month";
 				} else if ($selectedfields[0] == 'vtiger_crmentity' . $this->primarymodule) {
-					$columnSQL = 'date_format(vtiger_crmentity.' . $selectedfields[1] . ", '%M %Y') AS '" . App\Purifier::decodeHtml($header_label) . "__Month'";
+					$columnSQL = 'date_format(vtiger_crmentity.' . $selectedfields[1] . ", '%M %Y') AS '" . decode_html($header_label) . "__Month'";
 				} else {
-					$columnSQL = 'date_format(' . $selectedfields[0] . "." . $selectedfields[1] . ", '%M %Y') AS '" . App\Purifier::decodeHtml($header_label) . "__Month'";
+					$columnSQL = 'date_format(' . $selectedfields[0] . "." . $selectedfields[1] . ", '%M %Y') AS '" . decode_html($header_label) . "__Month'";
 				}
 				$this->queryPlanner->addTable($selectedfields[0]);
 			} else {
@@ -439,9 +439,9 @@ class ReportRun extends CRMEntity
 				if ($selectedfields[0] == 'vtiger_activity' && $selectedfields[1] == 'date_start') {
 					$columnSQL = "cast(concat(vtiger_activity.date_start,'  ',vtiger_activity.time_start) as DATETIME) AS Calendar__Start__Date__and__Time";
 				} else if ($selectedfields[0] == 'vtiger_crmentity' . $this->primarymodule) {
-					$columnSQL = "date_format(vtiger_crmentity." . $selectedfields[1] . ",'$userformat') AS '" . App\Purifier::decodeHtml($header_label) . "'";
+					$columnSQL = "date_format(vtiger_crmentity." . $selectedfields[1] . ",'$userformat') AS '" . decode_html($header_label) . "'";
 				} else {
-					$columnSQL = "date_format (" . $selectedfields[0] . "." . $selectedfields[1] . ",'$userformat') AS '" . App\Purifier::decodeHtml($header_label) . "'";
+					$columnSQL = "date_format (" . $selectedfields[0] . "." . $selectedfields[1] . ",'$userformat') AS '" . decode_html($header_label) . "'";
 				}
 
 				$this->queryPlanner->addTable($selectedfields[0]);
@@ -460,10 +460,10 @@ class ReportRun extends CRMEntity
 			}
 			if ($temp_module_from_tablename == $module) {
 				$concatSql = \vtlib\Deprecated::getSqlForNameInDisplayFormat(array('first_name' => $selectedfields[0] . ".first_name", 'last_name' => $selectedfields[0] . ".last_name"), 'Users');
-				$columnSQL = " case when(" . $selectedfields[0] . ".last_name NOT LIKE '' $condition ) THEN " . $concatSql . " else vtiger_groups" . $module . ".groupname end AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = " case when(" . $selectedfields[0] . ".last_name NOT LIKE '' $condition ) THEN " . $concatSql . " else vtiger_groups" . $module . ".groupname end AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable('vtiger_groups' . $module); // Auto-include the dependent module table.
 			} else {//Some Fields can't assigned to groups so case avoided (fields like inventory manager)
-				$columnSQL = $selectedfields[0] . ".user_name AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = $selectedfields[0] . ".user_name AS '" . decode_html($header_label) . "'";
 			}
 			$this->queryPlanner->addTable($selectedfields[0]);
 		} elseif (stristr($selectedfields[0], "vtiger_crmentity") && ($selectedfields[1] == 'modifiedby')) {
@@ -479,7 +479,7 @@ class ReportRun extends CRMEntity
 		} else if (stristr($selectedfields[0], "vtiger_crmentity") && ($selectedfields[1] == 'smcreatorid')) {
 			$targetTableName = 'vtiger_createdby' . $module;
 			$concatSql = \vtlib\Deprecated::getSqlForNameInDisplayFormat(array('last_name' => $targetTableName . '.last_name', 'first_name' => $targetTableName . '.first_name'), 'Users');
-			$columnSQL = "trim($concatSql) AS " . App\Purifier::decodeHtml($header_label) . "";
+			$columnSQL = "trim($concatSql) AS " . decode_html($header_label) . "";
 			$this->queryPlanner->addTable("vtiger_crmentity$module");
 			$this->queryPlanner->addTable($targetTableName);
 
@@ -499,47 +499,47 @@ class ReportRun extends CRMEntity
 
 			$this->queryPlanner->addTable($moduleInstance->table_name);
 		} elseif ($selectedfields[0] == "vtiger_crmentity" . $this->primarymodule) {
-			$columnSQL = "vtiger_crmentity." . $selectedfields[1] . " AS '" . App\Purifier::decodeHtml($header_label) . "'";
+			$columnSQL = "vtiger_crmentity." . $selectedfields[1] . " AS '" . decode_html($header_label) . "'";
 		} elseif ($selectedfields[0] == 'vtiger_products' && $selectedfields[1] == 'unit_price') {
-			$columnSQL = "concat(" . $selectedfields[0] . ".currency_id,'::',innerProduct.actual_unit_price) AS '" . App\Purifier::decodeHtml($header_label) . "'";
+			$columnSQL = "concat(" . $selectedfields[0] . ".currency_id,'::',innerProduct.actual_unit_price) AS '" . decode_html($header_label) . "'";
 			$this->queryPlanner->addTable("innerProduct");
 		} elseif (in_array($selectedfields[2], $this->append_currency_symbol_to_value)) {
 			if ($selectedfields[1] == 'discount_amount') {
-				$columnSQL = "CONCAT(" . $selectedfields[0] . ".currency_id,'::', IF(" . $selectedfields[0] . ".discount_amount != ''," . $selectedfields[0] . ".discount_amount, (" . $selectedfields[0] . ".discount_percent/100) * " . $selectedfields[0] . ".subtotal)) AS " . App\Purifier::decodeHtml($header_label);
+				$columnSQL = "CONCAT(" . $selectedfields[0] . ".currency_id,'::', IF(" . $selectedfields[0] . ".discount_amount != ''," . $selectedfields[0] . ".discount_amount, (" . $selectedfields[0] . ".discount_percent/100) * " . $selectedfields[0] . ".subtotal)) AS " . decode_html($header_label);
 			} else {
-				$columnSQL = "concat(" . $selectedfields[0] . ".currency_id,'::'," . $selectedfields[0] . "." . $selectedfields[1] . ") AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = "concat(" . $selectedfields[0] . ".currency_id,'::'," . $selectedfields[0] . "." . $selectedfields[1] . ") AS '" . decode_html($header_label) . "'";
 			}
 		} elseif ($selectedfields[0] == 'vtiger_notes' && ($selectedfields[1] == 'filelocationtype' || $selectedfields[1] == 'filesize' || $selectedfields[1] == 'folderid' || $selectedfields[1] == 'filestatus')) {
 			if ($selectedfields[1] == 'filelocationtype') {
-				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when 'I' then 'Internal' when 'E' then 'External' else '-' end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when 'I' then 'Internal' when 'E' then 'External' else '-' end AS '" . decode_html($selectedfields[2]) . "'";
 			} else if ($selectedfields[1] == 'folderid') {
 				$columnSQL = "`vtiger_trees_templates_data`.name AS '$selectedfields[2]'";
 				$this->queryPlanner->addTable("`vtiger_trees_templates_data`");
 			} elseif ($selectedfields[1] == 'filestatus') {
-				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when '1' then 'yes' when '0' then 'no' else '-' end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when '1' then 'yes' when '0' then 'no' else '-' end AS '" . decode_html($selectedfields[2]) . "'";
 			} elseif ($selectedfields[1] == 'filesize') {
-				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when '' then '-' else concat(" . $selectedfields[0] . "." . $selectedfields[1] . "/1024,'  ','KB') end AS '" . App\Purifier::decodeHtml($selectedfields[2]) . "'";
+				$columnSQL = "case " . $selectedfields[0] . "." . $selectedfields[1] . " when '' then '-' else concat(" . $selectedfields[0] . "." . $selectedfields[1] . "/1024,'  ','KB') end AS '" . decode_html($selectedfields[2]) . "'";
 			}
 		} elseif ($selectedfields[0] == 'vtiger_inventoryproductrel') {
 			if ($selectedfields[1] == 'discount_amount') {
-				$columnSQL = " case when (vtiger_inventoryproductrel{$module}.discount_amount != '') then vtiger_inventoryproductrel{$module}.discount_amount else ROUND((vtiger_inventoryproductrel{$module}.listprice * vtiger_inventoryproductrel{$module}.quantity * (vtiger_inventoryproductrel{$module}.discount_percent/100)),3) end AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = " case when (vtiger_inventoryproductrel{$module}.discount_amount != '') then vtiger_inventoryproductrel{$module}.discount_amount else ROUND((vtiger_inventoryproductrel{$module}.listprice * vtiger_inventoryproductrel{$module}.quantity * (vtiger_inventoryproductrel{$module}.discount_percent/100)),3) end AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable($selectedfields[0] . $module);
 			} else if ($selectedfields[1] == 'productid') {
-				$columnSQL = "vtiger_products{$module}.productname AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = "vtiger_products{$module}.productname AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable("vtiger_products{$module}");
 			} else if ($selectedfields[1] == 'serviceid') {
-				$columnSQL = "vtiger_service{$module}.servicename AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = "vtiger_service{$module}.servicename AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable("vtiger_service{$module}");
 			} else if ($selectedfields[1] == 'listprice') {
 				$moduleInstance = CRMEntity::getInstance($module);
-				$columnSQL = $selectedfields[0] . $module . "." . $selectedfields[1] . "/" . $moduleInstance->table_name . ".conversion_rate AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = $selectedfields[0] . $module . "." . $selectedfields[1] . "/" . $moduleInstance->table_name . ".conversion_rate AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable($selectedfields[0] . $module);
 			} else {
-				$columnSQL = $selectedfields[0] . $module . "." . $selectedfields[1] . " AS '" . App\Purifier::decodeHtml($header_label) . "'";
+				$columnSQL = $selectedfields[0] . $module . "." . $selectedfields[1] . " AS '" . decode_html($header_label) . "'";
 				$this->queryPlanner->addTable($selectedfields[0] . $module);
 			}
 		} else {
-			$columnSQL = $selectedfields[0] . "." . $selectedfields[1] . " AS '" . App\Purifier::decodeHtml($header_label) . "'";
+			$columnSQL = $selectedfields[0] . "." . $selectedfields[1] . " AS '" . decode_html($header_label) . "'";
 			$this->queryPlanner->addTable($selectedfields[0]);
 		}
 		return $columnSQL;
@@ -617,7 +617,7 @@ class ReportRun extends CRMEntity
 				foreach ($fieldSqlColumns as $columnSql) {
 					$queryColumn .= " WHEN $columnSql NOT LIKE '' THEN $columnSql";
 				}
-				$moduleFieldLabel = App\Purifier::purify(App\Purifier::decodeHtml($moduleFieldLabel));
+				$moduleFieldLabel = App\Purifier::purify(decode_html($moduleFieldLabel));
 				$queryColumn .= " ELSE '' END) ELSE '' END) AS '$moduleFieldLabel'";
 				$this->queryPlanner->addTable($tableName);
 			}
@@ -1355,13 +1355,44 @@ class ReportRun extends CRMEntity
 		return $stdfilterlist;
 	}
 
+	/** Function to get the RunTime filter columns for the given $filtercolumn,$filter,$startdate,$enddate
+	 *  @ param $filtercolumn : Type String
+	 *  @ param $filter : Type String
+	 *  @ param $startdate: Type String
+	 *  @ param $enddate : Type String
+	 *  This function returns  $stdfilterlist Array($columnname => $tablename:$columnname:$fieldlabel=>$tablename.$columnname 'between' $startdate 'and' $enddate)
+	 *
+	 */
+	public function RunTimeFilter($filtercolumn, $filter, $startdate, $enddate)
+	{
+		if ($filtercolumn != "none") {
+			$selectedfields = explode(":", $filtercolumn);
+			if ($selectedfields[0] == "vtiger_crmentity" . $this->primarymodule)
+				$selectedfields[0] = "vtiger_crmentity";
+			if ($filter == "custom") {
+				if ($startdate != "0000-00-00" && $enddate != "0000-00-00" && $startdate != "" &&
+					$enddate != "" && $selectedfields[0] != "" && $selectedfields[1] != "") {
+					$stdfilterlist[$filtercolumn] = $selectedfields[0] . "." . $selectedfields[1] . " between '" . $startdate . " 00:00:00' and '" . $enddate . " 23:59:00'";
+				}
+			} else {
+				if ($startdate != "" && $enddate != "") {
+					$startenddate = $this->getStandarFiltersStartAndEndDate($filter);
+					if ($startenddate[0] != "" && $startenddate[1] != "" && $selectedfields[0] != "" && $selectedfields[1] != "") {
+						$stdfilterlist[$filtercolumn] = $selectedfields[0] . "." . $selectedfields[1] . " between '" . $startenddate[0] . " 00:00:00' and '" . $startenddate[1] . " 23:59:00'";
+					}
+				}
+			}
+		}
+		return $stdfilterlist;
+	}
+
 	/** Function to get the RunTime Advanced filter conditions
 	 *  @ param $advft_criteria : Type Array
 	 *  @ param $advft_criteria_groups : Type Array
 	 *  This function returns  $advfiltersql
 	 *
 	 */
-	public function runTimeAdvFilter($advft_criteria, $advft_criteria_groups)
+	public function RunTimeAdvFilter($advft_criteria, $advft_criteria_groups)
 	{
 		$adb = PearDatabase::getInstance();
 
@@ -1561,21 +1592,21 @@ class ReportRun extends CRMEntity
 				if (stripos($selectedfields[1], 'cf_') == 0 && stristr($selectedfields[1], 'cf_') === true) {
 					//In sql queries forward slash(/) is treated as query terminator,so to avoid this problem
 					//the column names are enclosed within ('[]'),which will treat this as part of column name
-					$sqlvalue = "`" . $adb->sql_escape_string(App\Purifier::decodeHtml($selectedfields[2])) . "` " . $sortorder;
+					$sqlvalue = "`" . $adb->sql_escape_string(decode_html($selectedfields[2])) . "` " . $sortorder;
 				} else {
 					$sqlvalue = "`" . self::replaceSpecialChar($selectedfields[2]) . "` " . $sortorder;
 				}
-				if ($selectedfields[4] == 'D' && strtolower($reportsortrow['dategroupbycriteria']) != 'none') {
+				if ($selectedfields[4] == "D" && strtolower($reportsortrow["dategroupbycriteria"]) != "none") {
 					$groupField = $module_field;
-					$groupCriteria = $reportsortrow['dategroupbycriteria'];
+					$groupCriteria = $reportsortrow["dategroupbycriteria"];
 					if (in_array($groupCriteria, array_keys($this->groupByTimeParent))) {
 						$parentCriteria = $this->groupByTimeParent[$groupCriteria];
 						foreach ($parentCriteria as $criteria) {
-							$groupByCondition[] = $this->getTimeCriteriaCondition($criteria, $groupField) . ' ' . $sortorder;
+							$groupByCondition[] = $this->GetTimeCriteriaCondition($criteria, $groupField) . " " . $sortorder;
 						}
 					}
-					$groupByCondition[] = $this->getTimeCriteriaCondition($groupCriteria, $groupField) . ' ' . $sortorder;
-					$sqlvalue = implode(', ', $groupByCondition);
+					$groupByCondition[] = $this->GetTimeCriteriaCondition($groupCriteria, $groupField) . " " . $sortorder;
+					$sqlvalue = implode(", ", $groupByCondition);
 				}
 				$grouplist[$fieldcolname] = $sqlvalue;
 				$temp = explode('__', $selectedfields[2], 2);
@@ -1605,7 +1636,7 @@ class ReportRun extends CRMEntity
 	 */
 	public function replaceSpecialChar($selectedfield)
 	{
-		$selectedfield = App\Purifier::decodeHtml(App\Purifier::decodeHtml($selectedfield));
+		$selectedfield = decode_html(decode_html($selectedfield));
 		preg_match('/&/', $selectedfield, $matches);
 		if (!empty($matches)) {
 			$selectedfield = str_replace('&', 'and', ($selectedfield));
@@ -2208,7 +2239,7 @@ class ReportRun extends CRMEntity
 		$reportquery = $instance->listQueryNonAdminChange($reportquery, '');
 		if (trim($groupsquery) != "" && $type !== 'COLUMNSTOTOTAL') {
 			if ($chartReport === true) {
-				$reportquery .= sprintf(' group by %s', $this->getFirstSortByField($reportid));
+				$reportquery .= sprintf(' group by %s', $this->GetFirstSortByField($reportid));
 			} else {
 				$reportquery .= sprintf(' order by %s', $groupsquery);
 			}
@@ -2274,7 +2305,7 @@ class ReportRun extends CRMEntity
 	 * 		HTML strings for
 	 */
 	// Performance Optimization: Added parameter directOutput to avoid building big-string!
-	public function generateReport($outputformat, $filtersql, $directOutput = false, $startLimit = false, $endLimit = false)
+	public function GenerateReport($outputformat, $filtersql, $directOutput = false, $startLimit = false, $endLimit = false)
 	{
 		$adb = PearDatabase::getInstance();
 		$current_user = Users_Privileges_Model::getCurrentUserPrivilegesModel();
@@ -3186,7 +3217,7 @@ class ReportRun extends CRMEntity
 	{
 		$current_user = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$rep_header = ltrim($fldname);
-		$rep_header = App\Purifier::decodeHtml($rep_header);
+		$rep_header = decode_html($rep_header);
 		$labelInfo = explode('__', $rep_header);
 		$rep_module = $labelInfo[0];
 		if (is_array($this->labelMapping) && !empty($this->labelMapping[$rep_header])) {
@@ -3196,7 +3227,7 @@ class ReportRun extends CRMEntity
 				$rep_module = '';
 			}
 			array_shift($labelInfo);
-			$fieldLabel = App\Purifier::decodeHtml(implode("__", $labelInfo));
+			$fieldLabel = decode_html(implode("__", $labelInfo));
 			$rep_header = "$rep_module $fieldLabel";
 		}
 		$curr_symb = "";
@@ -3329,7 +3360,7 @@ class ReportRun extends CRMEntity
 						continue;
 					}
 					if (is_string($value)) {
-						$value = App\Purifier::decodeHtml($value);
+						$value = decode_html($value);
 					}
 					$worksheet->setCellValueExplicitByColumnAndRow($count, $rowcount, $value, $this->getPhpExcelTypeFromValue($value));
 					$count = $count + 1;
@@ -3362,7 +3393,7 @@ class ReportRun extends CRMEntity
 				$worksheet->setCellValueExplicitByColumnAndRow($count, $key + $rowcount, App\Language::translate($moduleName, $moduleName) . '-' . App\Language::translate($fieldLabel, $moduleName));
 				$count++;
 				foreach ($array_value as $hdr => $value) {
-					$value = \App\Purifier::decodeHtml($value);
+					$value = decode_html($value);
 					$worksheet->setCellValueExplicitByColumnAndRow($count, $key + $rowcount, $value);
 					$count = $count + 1;
 				}
@@ -3386,7 +3417,7 @@ class ReportRun extends CRMEntity
 			fputcsv($fp, $csv_values);
 			foreach ($arr_val as $key => $array_value) {
 				array_pop($array_value); //removed action link
-				$csv_values = array_map('App\Purifier::decodeHtml', array_values($array_value));
+				$csv_values = array_map('decode_html', array_values($array_value));
 				fputcsv($fp, $csv_values);
 			}
 		}
@@ -3407,18 +3438,18 @@ class ReportRun extends CRMEntity
 			if (in_array($groupCriteria, array_keys($this->groupByTimeParent))) {
 				$parentCriteria = $this->groupByTimeParent[$groupCriteria];
 				foreach ($parentCriteria as $criteria) {
-					$groupByCondition[] = $this->getTimeCriteriaCondition($criteria, $groupField);
+					$groupByCondition[] = $this->GetTimeCriteriaCondition($criteria, $groupField);
 				}
 			}
-			$groupByCondition[] = $this->getTimeCriteriaCondition($groupCriteria, $groupField);
+			$groupByCondition[] = $this->GetTimeCriteriaCondition($groupCriteria, $groupField);
 			$this->queryPlanner->addTable($tablename);
 		}
 		return $groupByCondition;
 	}
 
-	public function getTimeCriteriaCondition($criteria, $dateField)
+	public function GetTimeCriteriaCondition($criteria, $dateField)
 	{
-		$condition = '';
+		$condition = "";
 		if (strtolower($criteria) == 'year') {
 			$condition = "DATE_FORMAT($dateField, '%Y' )";
 		} else if (strtolower($criteria) == 'month') {
@@ -3429,7 +3460,7 @@ class ReportRun extends CRMEntity
 		return $condition;
 	}
 
-	public function getFirstSortByField($reportid)
+	public function GetFirstSortByField($reportid)
 	{
 		$adb = PearDatabase::getInstance();
 		$groupByField = "";
@@ -3449,15 +3480,15 @@ class ReportRun extends CRMEntity
 					if (in_array($groupCriteria, array_keys($this->groupByTimeParent))) {
 						$parentCriteria = $this->groupByTimeParent[$groupCriteria];
 						foreach ($parentCriteria as $criteria) {
-							$groupByCondition[] = $this->getTimeCriteriaCondition($criteria, $groupByField);
+							$groupByCondition[] = $this->GetTimeCriteriaCondition($criteria, $groupByField);
 						}
 					}
-					$groupByCondition[] = $this->getTimeCriteriaCondition($groupCriteria, $groupByField);
-					$groupByField = implode(', ', $groupByCondition);
+					$groupByCondition[] = $this->GetTimeCriteriaCondition($groupCriteria, $groupByField);
+					$groupByField = implode(", ", $groupByCondition);
 				}
 			} elseif (!\App\Field::getFieldPermission($modulename, $fieldname)) {
 				if (!(in_array($modulename, $inventoryModules) && $fieldname === 'serviceid')) {
-					$groupByField = $tablename . '.' . $colname;
+					$groupByField = $tablename . "." . $colname;
 				}
 			}
 		}

@@ -14,7 +14,7 @@ require_once 'modules/PickList/PickListUtils.php';
 class Vtiger_DependencyPicklist
 {
 
-	public static function getDependentPicklistFields($module = '')
+	static function getDependentPicklistFields($module = '')
 	{
 		$adb = PearDatabase::getInstance();
 
@@ -55,7 +55,7 @@ class Vtiger_DependencyPicklist
 		return $dependentPicklists;
 	}
 
-	public static function getAvailablePicklists($module)
+	static function getAvailablePicklists($module)
 	{
 		$adb = PearDatabase::getInstance();
 
@@ -78,7 +78,7 @@ class Vtiger_DependencyPicklist
 		return $fieldlist;
 	}
 
-	public static function savePickListDependencies($module, $dependencyMap)
+	static function savePickListDependencies($module, $dependencyMap)
 	{
 		$db = App\Db::getInstance();
 		$tabId = \App\Module::getModuleId($module);
@@ -128,7 +128,7 @@ class Vtiger_DependencyPicklist
 		}
 	}
 
-	public static function deletePickListDependencies($module, $sourceField, $targetField)
+	static function deletePickListDependencies($module, $sourceField, $targetField)
 	{
 		App\Db::getInstance()->createCommand()->delete('vtiger_picklist_dependency', [
 			'tabid' => \App\Module::getModuleId($module),
@@ -137,7 +137,7 @@ class Vtiger_DependencyPicklist
 		])->execute();
 	}
 
-	public static function getPickListDependency($module, $sourceField, $targetField)
+	static function getPickListDependency($module, $sourceField, $targetField)
 	{
 		$dependencyMap['sourcefield'] = $sourceField;
 		$dependencyMap['targetfield'] = $targetField;
@@ -154,13 +154,13 @@ class Vtiger_DependencyPicklist
 		return $dependencyMap;
 	}
 
-	public static function getJSPicklistDependencyDatasource($module)
+	static function getJSPicklistDependencyDatasource($module)
 	{
 		$picklistDependencyDatasource = \App\Fields\Picklist::getPicklistDependencyDatasource($module);
 		return \App\Json::encode($picklistDependencyDatasource);
 	}
 
-	public static function checkCyclicDependency($module, $sourceField, $targetField)
+	static function checkCyclicDependency($module, $sourceField, $targetField)
 	{
 		// If another parent field exists for the same target field - 2 parent fields should not be allowed for a target field
 		return (new App\Db\Query())->from('vtiger_picklist_dependency')
@@ -168,7 +168,7 @@ class Vtiger_DependencyPicklist
 				->exists();
 	}
 
-	public static function getDependentPickListModules()
+	static function getDependentPickListModules()
 	{
 		$adb = PearDatabase::getInstance();
 

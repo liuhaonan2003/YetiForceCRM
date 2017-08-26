@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Address book model class
  * @package YetiForce.Model
@@ -6,34 +7,18 @@
  * @license YetiForce Public License 2.0 (licenses/License.html or yetiforce.com)
  * @author Mariusz Krzaczkowski <m.krzaczkowski@yetiforce.com>
  */
-
-/**
- * Address book model class
- */
 class OSSMail_AddressBook_Model
 {
 
-	/**
-	 * Table
-	 * @var string
-	 */
-	const TABLE = 'u_#__mail_address_book';
-
-	/**
-	 * Last record cache
-	 * @var string
-	 */
+	const TABLE = 'u_yf_mail_address_book';
 	const LAST_RECORD_CACHE = 'cache/addressBook.php';
 
-	/**
-	 * Create address book file
-	 */
 	public static function createABFile()
 	{
 		$mails = [];
-		$query = (new \App\Db\Query())->from(self::TABLE);
-		$dataReader = $query->createCommand()->query();
-		while ($row = $dataReader->read()) {
+		$adb = PearDatabase::getInstance();
+		$result = $adb->query(sprintf('SELECT * FROM %s', self::TABLE));
+		while ($row = $adb->getRow($result)) {
 			$name = $row['name'];
 			$email = $row['email'];
 			$users = $row['users'];
@@ -52,10 +37,6 @@ class OSSMail_AddressBook_Model
 		}
 	}
 
-	/**
-	 * Get last record cache
-	 * @return int|boolean
-	 */
 	public static function getLastRecord()
 	{
 		if (file_exists(self::LAST_RECORD_CACHE)) {
@@ -64,19 +45,11 @@ class OSSMail_AddressBook_Model
 		return false;
 	}
 
-	/**
-	 * Save last record
-	 * @param int $record
-	 * @param string $module
-	 */
 	public static function saveLastRecord($record, $module)
 	{
 		file_put_contents(self::LAST_RECORD_CACHE, "<?php return ['module' => '$module','record' => $record];");
 	}
 
-	/**
-	 * Clear last record
-	 */
 	public static function clearLastRecord()
 	{
 		unlink(self::LAST_RECORD_CACHE);

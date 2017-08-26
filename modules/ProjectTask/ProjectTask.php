@@ -204,7 +204,7 @@ class ProjectTask extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 
@@ -255,9 +255,9 @@ class ProjectTask extends CRMEntity
 	/**
 	 * Transform the value while exporting
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -310,41 +310,45 @@ class ProjectTask extends CRMEntity
 
 	/**
 	 * Invoked when special actions are performed on the module.
-	 * @param string $moduleName Module name
-	 * @param string $eventType Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
+	 * @param String Module name
+	 * @param String Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($modulename, $event_type)
 	{
-		if ($eventType === 'module.postinstall') {
+		$adb = PearDatabase::getInstance();
+		if ($event_type == 'module.postinstall') {
+			$projectTaskResult = $adb->pquery('SELECT tabid FROM vtiger_tab WHERE name=?', array('ProjectTask'));
+			$projecttaskTabid = $adb->query_result($projectTaskResult, 0, 'tabid');
+
 			// Mark the module as Standard module
-			\App\Db::getInstance()->createCommand()->update('vtiger_tab', ['customized' => 0], ['name' => $moduleName])->execute();
+			$adb->pquery('UPDATE vtiger_tab SET customized=0 WHERE name=?', array($modulename));
 
 			$modcommentsModuleInstance = vtlib\Module::getInstance('ModComments');
 			if ($modcommentsModuleInstance && file_exists('modules/ModComments/ModComments.php')) {
 				include_once 'modules/ModComments/ModComments.php';
 				if (class_exists('ModComments'))
-					ModComments::addWidgetTo(['ProjectTask']);
+					ModComments::addWidgetTo(array('ProjectTask'));
 			}
 
-			\App\Fields\RecordNumber::setNumber($moduleName, 'PT', 1);
-		} else if ($eventType === 'module.disabled') {
-
-		} else if ($eventType === 'module.enabled') {
-
-		} else if ($eventType === 'module.preuninstall') {
-
-		} else if ($eventType === 'module.preupdate') {
-
-		} else if ($eventType === 'module.postupdate') {
+			\App\Fields\RecordNumber::setNumber($modulename, 'PT', 1);
+		} else if ($event_type == 'module.disabled') {
+			
+		} else if ($event_type == 'module.enabled') {
+			
+		} else if ($event_type == 'module.preuninstall') {
+			
+		} else if ($event_type == 'module.preupdate') {
+			
+		} else if ($event_type == 'module.postupdate') {
 
 			$modcommentsModuleInstance = vtlib\Module::getInstance('ModComments');
 			if ($modcommentsModuleInstance && file_exists('modules/ModComments/ModComments.php')) {
 				include_once 'modules/ModComments/ModComments.php';
 				if (class_exists('ModComments'))
-					ModComments::addWidgetTo(['ProjectTask']);
+					ModComments::addWidgetTo(array('ProjectTask'));
 			}
 
-			\App\Fields\RecordNumber::setNumber($moduleName, 'PT', 1);
+			\App\Fields\RecordNumber::setNumber($modulename, 'PT', 1);
 		}
 	}
 
@@ -352,7 +356,7 @@ class ProjectTask extends CRMEntity
 	 * Function to check the module active and user action permissions before showing as link in other modules
 	 * like in more actions of detail view(Projects).
 	 */
-	public static function isLinkPermitted($linkData)
+	static function isLinkPermitted($linkData)
 	{
 		$moduleName = "ProjectTask";
 		if (\App\Module::isModuleActive($moduleName) && isPermitted($moduleName, 'EditView') == 'yes') {

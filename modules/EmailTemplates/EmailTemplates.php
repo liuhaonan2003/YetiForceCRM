@@ -77,7 +77,7 @@ class EmailTemplates extends Vtiger_CRMEntity
 	 * @param String Module name
 	 * @param String Event Type
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 		if ($eventType == 'module.postinstall') {
 			

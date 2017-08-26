@@ -61,7 +61,7 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model
 				}
 			}
 			//Need to decode the picklist values twice which are saved from old ui
-			$pickListValues[] = \App\Purifier::decodeHtml(\App\Purifier::decodeHtml($rowData[$fieldName]));
+			$pickListValues[] = decode_html(decode_html($rowData[$fieldName]));
 		}
 		return $pickListValues;
 	}

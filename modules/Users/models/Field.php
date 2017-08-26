@@ -24,7 +24,6 @@ class Users_Field_Model extends Vtiger_Field_Model
 		if (($currentUserModel->isAdminUser() === false && $this->get('uitype') == 98) || in_array($this->get('uitype'), array(115, 156))) {
 			return true;
 		}
-		return parent::isReadOnly();
 	}
 
 	/**
@@ -36,7 +35,7 @@ class Users_Field_Model extends Vtiger_Field_Model
 		if ($this->getDisplayType() === 4 || in_array($this->get('presence'), [1, 3])) {
 			return false;
 		}
-		return parent::isViewEnabled();
+		return true;
 	}
 
 	/**
@@ -45,21 +44,18 @@ class Users_Field_Model extends Vtiger_Field_Model
 	 */
 	public function getFieldDataType()
 	{
-		switch ($this->get('uitype')) {
-			case 99:
-				return 'password';
-			case 115:
-				return 'picklist';
-			case 98:
-				return 'userRole';
-			case 101:
-				return 'userReference';
-			case 105:
-				return 'image';
-			case 31:
-				return 'theme';
-			default:
-				break;
+		if ($this->get('uitype') == 99) {
+			return 'password';
+		} else if (in_array($this->get('uitype'), array(32, 115))) {
+			return 'picklist';
+		} else if ($this->get('uitype') == 101) {
+			return 'userReference';
+		} else if ($this->get('uitype') == 98) {
+			return 'userRole';
+		} elseif ($this->get('uitype') == 105) {
+			return 'image';
+		} else if ($this->get('uitype') == 31) {
+			return 'theme';
 		}
 		return parent::getFieldDataType();
 	}
@@ -74,7 +70,7 @@ class Users_Field_Model extends Vtiger_Field_Model
 			$this->get('uitype') === 106 || $this->get('uitype') === 98 || $this->get('uitype') === 101 || 'date_format' === $this->getFieldName()) {
 			return false;
 		}
-		return parent::isAjaxEditable();
+		return true;
 	}
 
 	/**
@@ -83,7 +79,9 @@ class Users_Field_Model extends Vtiger_Field_Model
 	 */
 	public function getPicklistValues($skipCheckingRole = false)
 	{
-		if ($this->get('uitype') == '115') {
+		if ($this->get('uitype') == 32) {
+			return Vtiger_Language_Handler::getAllLanguages();
+		} else if ($this->get('uitype') == '115') {
 			$fieldPickListValues = [];
 			$query = (new \App\Db\Query())->select([$this->getFieldName()])->from('vtiger_' . $this->getFieldName());
 			$dataReader = $query->createCommand($db)->query();
@@ -112,6 +110,9 @@ class Users_Field_Model extends Vtiger_Field_Model
 	 */
 	public function getDisplayValue($value, $record = false, $recordInstance = false, $rawText = false)
 	{
+		if ($this->get('uitype') === 32) {
+			return \App\Language::getLanguageLabel($value);
+		}
 		$fieldName = $this->getFieldName();
 		if (($fieldName === 'currency_decimal_separator' || $fieldName === 'currency_grouping_separator') && ($value == '&nbsp;')) {
 			return \App\Language::translate('LBL_SPACE', 'Users');

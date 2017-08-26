@@ -11,26 +11,10 @@
 class Calendar_ActivityStateModal_View extends Vtiger_BasicModal_View
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
-	public function checkPermission(\App\Request $request)
-	{
-		$recordId = $request->getInteger('record');
-		if (!$recordId) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
-		if (!\App\Privilege::isPermitted($request->getModule(), 'EditView', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
-	}
-
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$id = $request->getInteger('record');
+		$id = $request->get('record');
 		$recordInstance = Vtiger_Record_Model::getInstanceById($id, $moduleName);
 		$permissionToSendEmail = \App\Module::isModuleActive('OSSMail') && Users_Privileges_Model::isPermitted('OSSMail');
 

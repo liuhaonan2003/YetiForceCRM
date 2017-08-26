@@ -28,8 +28,18 @@ function vtws_convertlead($entityvalues, Users_Record_Model $user)
 	if (empty($entityvalues['transferRelatedRecordsTo'])) {
 		$entityvalues['transferRelatedRecordsTo'] = 'Accounts';
 	}
-	$recordModel = Vtiger_Record_Model::getInstanceById($entityvalues['leadId']);
-	$leadInfo = $recordModel->getData();
+
+
+	$leadObject = VtigerWebserviceObject::fromName($adb, 'Leads');
+	$handlerPath = $leadObject->getHandlerPath();
+	$handlerClass = $leadObject->getHandlerClass();
+
+	require_once $handlerPath;
+
+	$leadHandler = new $handlerClass($leadObject, $user, $adb, $log);
+
+
+	$leadInfo = Vtiger_Record_Model::getInstanceById($entityvalues['leadId'])->getData();
 	$sql = "select converted from vtiger_leaddetails where converted = 1 and leadid=?";
 	$leadIdComponents = $entityvalues['leadId'];
 	$result = $adb->pquery($sql, [$leadIdComponents]);
@@ -58,10 +68,17 @@ function vtws_convertlead($entityvalues, Users_Record_Model $user)
 	foreach ($availableModules as $entityName) {
 		if ($entityvalues['entities'][$entityName]['create']) {
 			$entityvalue = $entityvalues['entities'][$entityName];
+			$entityObject = VtigerWebserviceObject::fromName($adb, $entityvalue['name']);
+			$handlerPath = $entityObject->getHandlerPath();
+			$handlerClass = $entityObject->getHandlerClass();
+
+			require_once $handlerPath;
+
+			$entityHandler = new $handlerClass($entityObject, $user, $adb, $log);
 
 			$entityObjectValues = [];
 			$entityObjectValues['assigned_user_id'] = $entityvalues['assignedTo'];
-			$entityObjectValues = vtws_populateConvertLeadEntities($entityvalue, $entityObjectValues, $recordModel, $leadInfo);
+			$entityObjectValues = vtws_populateConvertLeadEntities($entityvalue, $entityObjectValues, $entityHandler, $leadHandler, $leadInfo);
 
 			//update the contacts relation
 			if ($entityvalue['name'] == 'Contacts') {
@@ -127,10 +144,11 @@ function vtws_convertlead($entityvalues, Users_Record_Model $user)
  * returns the entity array.
  */
 
-function vtws_populateConvertLeadEntities($entityvalue, $entity, $recordModel, $leadinfo)
+function vtws_populateConvertLeadEntities($entityvalue, $entity, $entityHandler, $leadHandler, $leadinfo)
 {
-	$targetModuleModel = Vtiger_Module_Model::getInstance($entityvalue['name']);
 	$adb = PearDatabase::getInstance();
+
+	$column;
 	$entityName = $entityvalue['name'];
 	$sql = "SELECT * FROM vtiger_convertleadmapping";
 	$result = $adb->pquery($sql, []);
@@ -143,20 +161,23 @@ function vtws_populateConvertLeadEntities($entityvalue, $entity, $recordModel, $
 			default:$column = 'leadfid';
 				break;
 		}
+
+		$leadFields = $leadHandler->getMeta()->getModuleFields();
+		$entityFields = $entityHandler->getMeta()->getModuleFields();
 		$row = $adb->fetch_array($result);
 		$count = 1;
-		foreach ($targetModuleModel->getFields() as $fieldname => $field) {
-			$defaultvalue = $field->getDefaultFieldValue();
+		foreach ($entityFields as $fieldname => $field) {
+			$defaultvalue = $field->getDefault();
 			if ($defaultvalue && $entity[$fieldname] == '') {
 				$entity[$fieldname] = $defaultvalue;
 			}
 		}
 		do {
-			$entityField = vtws_getFieldfromFieldId($row[$column], $targetModuleModel);
+			$entityField = vtws_getFieldfromFieldId($row[$column], $entityFields);
 			if ($entityField === null) {
 				continue;
 			}
-			$leadField = vtws_getFieldfromFieldId($row['leadfid'], $recordModel->getModule());
+			$leadField = vtws_getFieldfromFieldId($row['leadfid'], $leadFields);
 			if ($leadField === null) {
 				continue;
 			}
@@ -172,19 +193,19 @@ function vtws_populateConvertLeadEntities($entityvalue, $entity, $recordModel, $
 			}
 		}
 
-		$entity = vtws_validateConvertLeadEntityMandatoryValues($entity, $targetModuleModel, $entityName);
+		$entity = vtws_validateConvertLeadEntityMandatoryValues($entity, $entityHandler, $entityName);
 	}
 	return $entity;
 }
 
-function vtws_validateConvertLeadEntityMandatoryValues($entity, $targetModuleModel, $module)
+function vtws_validateConvertLeadEntityMandatoryValues($entity, $entityHandler, $module)
 {
 
-	$mandatoryFields = $targetModuleModel->getMandatoryFieldModels();
-	foreach ($mandatoryFields as $field => $fieldModel) {
+	$mandatoryFields = $entityHandler->getMeta()->getMandatoryFields();
+	foreach ($mandatoryFields as $field) {
 		if (empty($entity[$field])) {
 			$fieldInfo = vtws_getConvertLeadFieldInfo($module, $field);
-			if (($fieldInfo['type']['name'] === 'picklist' || $fieldInfo['type']['name'] === 'multipicklist' || $fieldInfo['type']['name'] === 'date' || $fieldInfo['type']['name'] === 'datetime') && ($fieldInfo['editable'] === true)) {
+			if (($fieldInfo['type']['name'] == 'picklist' || $fieldInfo['type']['name'] == 'multipicklist' || $fieldInfo['type']['name'] == 'date' || $fieldInfo['type']['name'] == 'datetime') && ($fieldInfo['editable'] === true)) {
 				$entity[$field] = $fieldInfo['default'];
 			} else {
 				$entity[$field] = '????';
@@ -237,11 +258,13 @@ function vtws_updateConvertLeadStatus($entityIds, $leadId, Users_Record_Model $u
 	foreach ($moduleArray as $module) {
 		if (!empty($entityIds[$module])) {
 			$id = $entityIds[$module];
-			$moduleModel = Vtiger_Module_Model::getInstance($module);
-			$field = $moduleModel->getFieldByName('isconvertedfromlead');
+			$webserviceModule = vtws_getModuleHandlerFromName($module, $user);
+			$meta = $webserviceModule->getMeta();
+			$fields = $meta->getModuleFields();
+			$field = $fields['isconvertedfromlead'];
 			$tablename = $field->getTableName();
-			$entity = $moduleModel->getEntityInstance();
-			$tableIndex = $entity->tab_name_index[$tablename];
+			$tableList = $meta->getEntityTableIndexList();
+			$tableIndex = $tableList[$tablename];
 			$adb->pquery("UPDATE $tablename SET isconvertedfromlead = ? WHERE $tableIndex = ?", array(1, $id));
 		}
 	}

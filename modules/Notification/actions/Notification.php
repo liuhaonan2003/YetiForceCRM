@@ -11,28 +11,23 @@
 class Notification_Notification_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$id = $request->get('id');
-		if ($id) {
+		if (!empty($id)) {
 			$notice = Notification_NoticeEntries_Model::getInstanceById($id);
 			$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 			if ($userPrivilegesModel->getId() != $notice->getUserId()) {
-				throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 			}
 		}
 		$mode = $request->getMode();
-		if ($mode === 'createMessage' && !Users_Privileges_Model::isPermitted('Notification', 'CreateView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		} elseif ($mode === 'createMail' && (!Users_Privileges_Model::isPermitted('Notification', 'NotificationCreateMail') || !AppConfig::main('isActiveSendingMails') || !Users_Privileges_Model::isPermitted('OSSMail'))) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if ($mode == 'createMessage' && !Users_Privileges_Model::isPermitted('Notification', 'CreateView')) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
+		} elseif ($mode == 'createMail' && (!Users_Privileges_Model::isPermitted('Notification', 'NotificationCreateMail') || !AppConfig::main('isActiveSendingMails') || !Users_Privileges_Model::isPermitted('OSSMail'))) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		} elseif (in_array($mode, ['setMark', 'saveWatchingModules']) && !Users_Privileges_Model::isPermitted('Notification', 'DetailView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -54,7 +49,7 @@ class Notification_Notification_Action extends Vtiger_Action_Controller
 			$this->invokeExposedMethod($mode, $request);
 			return;
 		}
-		throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 	}
 
 	public function setMark(\App\Request $request)

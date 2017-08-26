@@ -81,7 +81,7 @@ class FieldBasic
 	}
 
 	/** Cache (Record) the schema changes to improve performance */
-	public static $__cacheSchemaChanges = [];
+	static $__cacheSchemaChanges = [];
 
 	/**
 	 * Get unique id for this instance
@@ -184,7 +184,7 @@ class FieldBasic
 		])->execute();
 		Profile::initForField($this);
 		if (!empty($this->columntype)) {
-			Utils::addColumn($this->table, $this->column, $this->columntype);
+			Utils::AddColumn($this->table, $this->column, $this->columntype);
 			if ($this->uitype === 10) {
 				$db->createCommand()->createIndex("{$this->table}_{$this->column}_idx", $this->table, $this->column)->execute();
 			}
@@ -316,9 +316,9 @@ class FieldBasic
 	 * @param Boolean true appends linebreak, false to avoid it
 	 * @access private
 	 */
-	public static function log($message, $delim = true)
+	static function log($message, $delim = true)
 	{
-		Utils::log($message, $delim);
+		Utils::Log($message, $delim);
 	}
 
 	/**

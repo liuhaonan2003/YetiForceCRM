@@ -62,10 +62,7 @@ class Cache
 	 */
 	public static function save($nameSpace, $key, $value = null, $duration = self::MEDIUM)
 	{
-		if (!static::$pool->save("$nameSpace-$key", $value, $duration)) {
-			Log::warning("Error writing to cache. Key: $nameSpace-$keym | Value: " . var_export($value, true));
-		}
-		return $value;
+		return static::$pool->save("$nameSpace-$key", $value, $duration);
 	}
 
 	/**

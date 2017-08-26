@@ -20,12 +20,12 @@ class VTScheduledReport extends Reports
 	public $scheduledInterval = null;
 	public $scheduledFormat = null;
 	public $scheduledRecipients = null;
-	public static $SCHEDULED_HOURLY = 1;
-	public static $SCHEDULED_DAILY = 2;
-	public static $SCHEDULED_WEEKLY = 3;
-	public static $SCHEDULED_BIWEEKLY = 4;
-	public static $SCHEDULED_MONTHLY = 5;
-	public static $SCHEDULED_ANNUALLY = 6;
+	static $SCHEDULED_HOURLY = 1;
+	static $SCHEDULED_DAILY = 2;
+	static $SCHEDULED_WEEKLY = 3;
+	static $SCHEDULED_BIWEEKLY = 4;
+	static $SCHEDULED_MONTHLY = 5;
+	static $SCHEDULED_ANNUALLY = 6;
 
 	public function __construct($adb, $user, $reportid = "")
 	{
@@ -40,7 +40,7 @@ class VTScheduledReport extends Reports
 		$adb = PearDatabase::getInstance();
 
 		if (!empty($this->id)) {
-			$cachedInfo = VTCacheUtils::lookupReportScheduledInfo($this->user->id, $this->id);
+			$cachedInfo = VTCacheUtils::lookupReport_ScheduledInfo($this->user->id, $this->id);
 
 			if ($cachedInfo === false) {
 				$result = $adb->pquery('SELECT * FROM vtiger_scheduled_reports WHERE reportid=?', array($this->id));
@@ -51,9 +51,9 @@ class VTScheduledReport extends Reports
 					$scheduledInterval = (!empty($reportScheduleInfo['schedule'])) ? \App\Json::decode($reportScheduleInfo['schedule']) : [];
 					$scheduledRecipients = (!empty($reportScheduleInfo['recipients'])) ? \App\Json::decode($reportScheduleInfo['recipients']) : [];
 
-					VTCacheUtils::updateReportScheduledInfo($this->user->id, $this->id, true, $reportScheduleInfo['format'], $scheduledInterval, $scheduledRecipients, $reportScheduleInfo['next_trigger_time']);
+					VTCacheUtils::updateReport_ScheduledInfo($this->user->id, $this->id, true, $reportScheduleInfo['format'], $scheduledInterval, $scheduledRecipients, $reportScheduleInfo['next_trigger_time']);
 
-					$cachedInfo = VTCacheUtils::lookupReportScheduledInfo($this->user->id, $this->id);
+					$cachedInfo = VTCacheUtils::lookupReport_ScheduledInfo($this->user->id, $this->id);
 				}
 			}
 			if ($cachedInfo) {
@@ -68,10 +68,6 @@ class VTScheduledReport extends Reports
 		return false;
 	}
 
-	/**
-	 * Get recipient emails
-	 * @return array
-	 */
 	public function getRecipientEmails()
 	{
 		$recipientsInfo = $this->scheduledRecipients;
@@ -102,8 +98,11 @@ class VTScheduledReport extends Reports
 
 
 			if (!empty($recipientsInfo['groups'])) {
+				require_once 'include/utils/GetGroupUsers.php';
 				foreach ($recipientsInfo['groups'] as $groupId) {
-					$recipientsList = array_merge($recipientsList, App\PrivilegeUtil::getUsersByGroup($groupId));
+					$userGroups = new GetGroupUsers();
+					$userGroups->getAllUsersInGroup($groupId);
+					$recipientsList = array_merge($recipientsList, $userGroups->group_users);
 				}
 			}
 		}
@@ -248,23 +247,23 @@ class VTScheduledReport extends Reports
 		switch ($type) {
 			case 'users' : if (empty($name))
 					$name = \App\Fields\Owner::getUserLabel($value);
-				$optionName = 'User::' . addslashes(App\Purifier::decodeHtml($name));
+				$optionName = 'User::' . addslashes(decode_html($name));
 				$optionValue = 'users::' . $value;
 				break;
 			case 'groups' : if (empty($name)) {
 					$name = \App\Fields\Owner::getGroupName($value);
 				}
-				$optionName = 'Group::' . addslashes(App\Purifier::decodeHtml($name));
+				$optionName = 'Group::' . addslashes(decode_html($name));
 				$optionValue = 'groups::' . $value;
 				break;
 			case 'roles' : if (empty($name))
 					$name = \App\PrivilegeUtil::getRoleName($value);
-				$optionName = 'Roles::' . addslashes(App\Purifier::decodeHtml($name));
+				$optionName = 'Roles::' . addslashes(decode_html($name));
 				$optionValue = 'roles::' . $value;
 				break;
 			case 'rs' : if (empty($name))
 					$name = \App\PrivilegeUtil::getRoleName($value);
-				$optionName = 'RoleAndSubordinates::' . addslashes(App\Purifier::decodeHtml($name));
+				$optionName = 'RoleAndSubordinates::' . addslashes(decode_html($name));
 				$optionValue = 'rs::' . $value;
 				break;
 		}

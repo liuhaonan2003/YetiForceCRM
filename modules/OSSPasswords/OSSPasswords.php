@@ -184,7 +184,7 @@ class OSSPasswords extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 
@@ -227,11 +227,11 @@ class OSSPasswords extends CRMEntity
 	/**
 	 * Transform the value while exporting
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
 		if ($key == 'owner')
 			return \App\Fields\Owner::getLabel($value);
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -287,7 +287,7 @@ class OSSPasswords extends CRMEntity
 	 * @param String Module name
 	 * @param String Event Type
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 		$db = App\Db::getInstance();
 		$registerLink = false;

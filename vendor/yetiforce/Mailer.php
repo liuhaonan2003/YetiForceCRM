@@ -173,7 +173,7 @@ class Mailer
 	public function setSmtp()
 	{
 		if (!$this->smtp) {
-			throw new \App\Exceptions\AppException('ERR_NO_SMTP_CONFIGURATION');
+			throw new Exceptions\AppException('ERR_NO_SMTP_CONFIGURATION');
 		}
 		switch ($this->smtp['mailer_type']) {
 			case 'smtp': $this->mailer->isSMTP();
@@ -196,7 +196,9 @@ class Mailer
 		if ($this->smtp['options']) {
 			$this->mailer->SMTPOptions = Json::decode($this->smtp['options'], true);
 		}
-		$this->mailer->From = $this->smtp['from_email'] ? $this->smtp['from_email'] : $this->smtp['username'];
+		if ($this->smtp['from_email']) {
+			$this->mailer->From = $this->smtp['from_email'];
+		}
 		if ($this->smtp['from_name']) {
 			$this->mailer->FromName = $this->smtp['from_name'];
 		}
@@ -403,14 +405,13 @@ class Mailer
 		}
 		if ($mailer->getSmtp('individual_delivery')) {
 			foreach (Json::decode($rowQueue['to']) as $email => $name) {
-				$separateMailer = $mailer->cloneMailer();
+				$separateMailer = clone $mailer;
 				if (is_numeric($email)) {
 					$email = $name;
 					$name = '';
 				}
 				$separateMailer->to($email, $name);
 				$status = $separateMailer->send();
-				unset($separateMailer);
 				if (!$status) {
 					return false;
 				}
@@ -424,7 +425,6 @@ class Mailer
 				$mailer->to($email, $name);
 			}
 			$status = $mailer->send();
-			unset($mailer);
 		}
 		if ($status) {
 			foreach ($attachmentsToRemove as $file) {
@@ -476,16 +476,5 @@ class Mailer
 		imap_append($mbox, \OSSMail_Record_Model::$imapConnectMailbox, $this->mailer->getSentMIMEMessage(), "\\Seen");
 		imap_close($mbox);
 		return true;
-	}
-
-	/**
-	 * Clone the mailer object for individual shipment
-	 * @return \App\Mailer
-	 */
-	public function cloneMailer()
-	{
-		$clonedThis = clone $this;
-		$clonedThis->mailer = clone $this->mailer;
-		return $clonedThis;
 	}
 }

@@ -53,7 +53,7 @@ class Settings_Vtiger_Menu_Model extends \App\Base
 	public function getUrl()
 	{
 		$url = $this->get('linkto');
-		$url = App\Purifier::decodeHtml($url);
+		$url = decode_html($url);
 		$url .= '&block=' . $this->getId();
 		return $url;
 	}
@@ -111,7 +111,7 @@ class Settings_Vtiger_Menu_Model extends \App\Base
 	 * Array with instances, kay as number id element of menu
 	 * @var array 
 	 */
-	public static $cacheInstance = false;
+	static $cacheInstance = false;
 
 	/**
 	 * Static Function to get the instance of Settings Menu model for given menu id

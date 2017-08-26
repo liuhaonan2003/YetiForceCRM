@@ -11,7 +11,7 @@
 class VTExpressionToken
 {
 
-	public function __construct($label)
+	function __construct($label)
 	{
 		$this->label = $label;
 	}
@@ -30,9 +30,9 @@ function _vt_processtoken_symbol($token)
 class VTExpressionTokenizer
 {
 
-	public function __construct($expr)
+	function __construct($expr)
 	{
-		$expr = App\Purifier::decodeHtml($expr);
+		$expr = decode_html($expr);
 		$tokenTypes = array(
 			"SPACE" => array('\s+', '_vt_processtoken_id'),
 			"SYMBOL" => array('[a-zA-Z][\w]*', '_vt_processtoken_symbol'),
@@ -67,7 +67,7 @@ class VTExpressionTokenizer
 		$this->idx = 0;
 	}
 
-	public function nextToken()
+	function nextToken()
 	{
 		$matches = $this->matches;
 		$idx = $this->idx;
@@ -91,12 +91,12 @@ class VTExpressionTokenizer
 class VTExpressionSpaceFilter
 {
 
-	public function __construct($tokens)
+	function __construct($tokens)
 	{
 		$this->tokens = $tokens;
 	}
 
-	public function nextToken()
+	function nextToken()
 	{
 		do {
 			$token = $this->tokens->nextToken();

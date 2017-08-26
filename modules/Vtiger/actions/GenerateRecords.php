@@ -9,18 +9,12 @@
 class Vtiger_GenerateRecords_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$targetModuleName = $request->get('target');
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($targetModuleName, 'CreateView') || !$currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'RecordMappingList')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if (!Users_Privileges_Model::isPermitted($moduleName, 'RecordMappingList') ||
+			!Users_Privileges_Model::isPermitted($moduleName, 'CreateView')) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -37,8 +31,7 @@ class Vtiger_GenerateRecords_Action extends Vtiger_Action_Controller
 
 	public function process(\App\Request $request)
 	{
-		$records = $request->getArray('records');
-		$moduleName = $request->getModule();
+		$records = $request->get('records');
 		$template = $request->get('template');
 		$targetModuleName = $request->get('target');
 		$method = $request->get('method');
@@ -46,7 +39,7 @@ class Vtiger_GenerateRecords_Action extends Vtiger_Action_Controller
 		if (!empty($template)) {
 			$templateRecord = Vtiger_MappedFields_Model::getInstanceById($template);
 			foreach ($records as $recordId) {
-				if (\App\Privilege::isPermitted($moduleName, 'DetailView', $recordId) && $templateRecord->checkFiltersForRecord(intval($recordId))) {
+				if ($templateRecord->checkFiltersForRecord(intval($recordId))) {
 					if ($method == 0) {
 						$recordModel = Vtiger_Record_Model::getCleanInstance($targetModuleName);
 						$parentRecordModel = Vtiger_Record_Model::getInstanceById($recordId);

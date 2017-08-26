@@ -20,37 +20,37 @@ class Reservations extends Vtiger_CRMEntity
 	/**
 	 * Mandatory table for supporting custom fields.
 	 */
-	public $customFieldTable = ['vtiger_reservationscf', 'reservationsid'];
+	public $customFieldTable = Array('vtiger_reservationscf', 'reservationsid');
 
 	/**
 	 * Mandatory for Saving, Include tables related to this module.
 	 */
-	public $tab_name = ['vtiger_crmentity', 'vtiger_reservations', 'vtiger_reservationscf'];
+	public $tab_name = Array('vtiger_crmentity', 'vtiger_reservations', 'vtiger_reservationscf');
 
 	/**
 	 * Mandatory for Saving, Include tablename and tablekey columnname here.
 	 */
-	public $tab_name_index = [
+	public $tab_name_index = Array(
 		'vtiger_crmentity' => 'crmid',
 		'vtiger_reservations' => 'reservationsid',
-		'vtiger_reservationscf' => 'reservationsid'];
+		'vtiger_reservationscf' => 'reservationsid');
 
 	/**
 	 * Mandatory for Listing (Related listview)
 	 */
-	public $list_fields = [
+	public $list_fields = Array(
 		/* Format: Field Label => Array(tablename, columnname) */
 		// tablename should not have prefix 'vtiger_'
-		'No.' => ['reservations', 'reservations_no'],
-		'Assigned To' => ['crmentity', 'smownerid'],
-		'Created Time' => ['crmentity', 'createdtime'],
-	];
-	public $list_fields_name = [
+		'No.' => Array('reservations', 'reservations_no'),
+		'Assigned To' => Array('crmentity', 'smownerid'),
+		'Created Time' => Array('crmentity', 'createdtime'),
+	);
+	public $list_fields_name = Array(
 		/* Format: Field Label => fieldname */
 		'No.' => 'reservations_no',
 		'Assigned To' => 'assigned_user_id',
 		'Created Time' => 'createdtime',
-	];
+	);
 
 	/**
 	 * @var string[] List of fields in the RelationListView
@@ -59,70 +59,72 @@ class Reservations extends Vtiger_CRMEntity
 	// Make the field link to detail view from list view (Fieldname)
 	public $list_link_field = 'assigned_user_id';
 	// For Popup listview and UI type support
-	public $search_fields = [
-		'No.' => ['reservations', 'reservations_no'],
-		'Assigned To' => ['crmentity', 'smownerid'],
-		'Created Time' => ['crmentity', 'createdtime'],
-	];
-	public $search_fields_name = [
+	public $search_fields = Array(
+		'No.' => Array('reservations', 'reservations_no'),
+		'Assigned To' => Array('crmentity', 'smownerid'),
+		'Created Time' => Array('crmentity', 'createdtime'),
+	);
+	public $search_fields_name = Array(
 		'No.' => 'reservations_no',
 		'Assigned To' => 'assigned_user_id',
 		'Created Time' => 'createdtime',
-	];
+	);
 	// For Popup window record selection
-	public $popup_fields = ['name'];
+	public $popup_fields = Array('name');
 	// For Alphabetical search
 	public $def_basicsearch_col = 'name';
 	// Column value to use on detail view record text display
 	public $def_detailview_recname = 'name';
 	// Required Information for enabling Import feature
-	public $required_fields = ['assigned_user_id' => 1];
+	public $required_fields = Array('assigned_user_id' => 1);
 	// Callback function list during Importing
-	public $special_functions = ['set_import_assigned_user'];
+	public $special_functions = Array('set_import_assigned_user');
 	public $default_order_by = '';
 	public $default_sort_order = 'DESC';
 	// Used when enabling/disabling the mandatory fields for the module.
 	// Refers to vtiger_field.fieldname values.
-	public $mandatory_fields = ['createdtime', 'modifiedtime', 'assigned_user_id'];
+	public $mandatory_fields = Array('createdtime', 'modifiedtime', 'assigned_user_id');
 
 	/**
 	 * Invoked when special actions are performed on the module.
-	 * @param string $moduleName Module name
-	 * @param string $eventType Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
+	 * @param String Module name
+	 * @param String Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($modulename, $event_type)
 	{
-		if ($eventType === 'module.postinstall') {
+		$adb = PearDatabase::getInstance();
+
+		if ($event_type == 'module.postinstall') {
 			$moduleInstance = CRMEntity::getInstance('Reservations');
 			\App\Fields\RecordNumber::setNumber($moduleName, 'RES', '1');
-			\App\Db::getInstance()->createCommand()->update('vtiger_tab', ['customized' => 0], ['name' => 'Reservations'])->execute();
-			$moduleInstance = vtlib\Module::getInstance($moduleName);
+			$adb->pquery('UPDATE vtiger_tab SET customized=0 WHERE name=?', array('Reservations'));
+			$moduleInstance = vtlib\Module::getInstance($modulename);
 			$targetModule = vtlib\Module::getInstance('Accounts');
-			$targetModule->setRelatedList($moduleInstance, 'Reservations', ['ADD'], 'getDependentsList');
+			$targetModule->setRelatedList($moduleInstance, 'Reservations', array('ADD'), 'getDependentsList');
 			$targetModule = vtlib\Module::getInstance('HelpDesk');
-			$targetModule->setRelatedList($moduleInstance, 'Reservations', ['ADD'], 'getDependentsList');
+			$targetModule->setRelatedList($moduleInstance, 'Reservations', array('ADD'), 'getDependentsList');
 			$targetModule = vtlib\Module::getInstance('Leads');
-			$targetModule->setRelatedList($moduleInstance, 'Reservations', ['ADD'], 'getDependentsList');
+			$targetModule->setRelatedList($moduleInstance, 'Reservations', array('ADD'), 'getDependentsList');
 			$targetModule = vtlib\Module::getInstance('Project');
-			$targetModule->setRelatedList($moduleInstance, 'Reservations', ['ADD'], 'getDependentsList');
+			$targetModule->setRelatedList($moduleInstance, 'Reservations', array('ADD'), 'getDependentsList');
 			$targetModule = vtlib\Module::getInstance('Vendors');
-			$targetModule->setRelatedList($moduleInstance, 'Reservations', ['ADD'], 'getDependentsList');
-		} else if ($eventType === 'module.disabled') {
-
-		} else if ($eventType === 'module.enabled') {
-
-		} else if ($eventType === 'module.preuninstall') {
-
-		} else if ($eventType === 'module.preupdate') {
-
-		} else if ($eventType === 'module.postupdate') {
-
+			$targetModule->setRelatedList($moduleInstance, 'Reservations', array('ADD'), 'getDependentsList');
+		} else if ($event_type == 'module.disabled') {
+			
+		} else if ($event_type == 'module.enabled') {
+			
+		} else if ($event_type == 'module.preuninstall') {
+			
+		} else if ($event_type == 'module.preupdate') {
+			
+		} else if ($event_type == 'module.postupdate') {
+			
 		}
 	}
 
-	public function retrieveEntityInfo($record, $module)
+	public function retrieve_entity_info($record, $module)
 	{
-		parent::retrieveEntityInfo($record, $module);
+		parent::retrieve_entity_info($record, $module);
 		$start = DateTimeField::convertToUserTimeZone($this->column_fields['date_start'] . ' ' . $this->column_fields['time_start']);
 		$this->column_fields['date_start'] = $start->format('Y-m-d');
 		$end = DateTimeField::convertToUserTimeZone($this->column_fields['due_date'] . ' ' . $this->column_fields['time_end']);

@@ -13,11 +13,11 @@ class Users_SwitchUsers_Action extends Vtiger_Action_Controller
 	/**
 	 * Function checks permissions
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
+	 * @throws \Exception\NoPermitted
 	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$userId = $request->getInteger('id');
+		$userId = $request->get('id');
 		require('user_privileges/switchUsers.php');
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		$baseUserId = $currentUserModel->getRealId();
@@ -33,7 +33,7 @@ class Users_SwitchUsers_Action extends Vtiger_Action_Controller
 				'agent' => $_SERVER['HTTP_USER_AGENT'],
 				'status' => 'Failed login - No permission',
 			])->execute();
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 

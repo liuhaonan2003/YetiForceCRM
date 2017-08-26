@@ -1,12 +1,11 @@
-{*<!-- {[The file is published on the basis of YetiForce Public License 2.0 that can be found in the following directory: licenses/License.html or yetiforce.com]} -->*}
 {strip}
 	<style>
 	{if empty($COLOR_LIST)}	
 		{foreach item=ITEM from=Settings_Calendar_Module_Model::getCalendarConfig('colors')}
-			.borderColor{$ITEM['label']}{
+			.borderColor{$ITEM['name']}{
 				border-color: {$ITEM['value']};
 			}
-			.headingColor{$ITEM['label']}{
+			.headingColor{$ITEM['name']}{
 				background-color: {$ITEM['value']} !important;
 				border-color: {$ITEM['value']};
 			}
@@ -28,7 +27,7 @@
 					<button class="btn btn-success btn-xs pull-right showModal" data-url="index.php?module=Calendar&view=ActivityStateModal&trigger=Reminders&record={$RECORD->getId()}">
 						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 					</button>
-					<img class="activityTypeIcon" src="{\App\Layout::getImagePath($RECORD->getActivityTypeIcon())}" />&nbsp;
+					<img class="activityTypeIcon" src="{vimage_path($RECORD->getActivityTypeIcon())}" />&nbsp;
 					<a target="_blank" href="index.php?module=Calendar&view=Detail&record={$RECORD_ID}">
 						{$RECORD->get('subject')}
 					</a>

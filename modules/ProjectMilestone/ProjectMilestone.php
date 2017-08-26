@@ -196,7 +196,7 @@ class ProjectMilestone extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = vglobal('current_user');
 
@@ -247,9 +247,9 @@ class ProjectMilestone extends CRMEntity
 	/**
 	 * Transform the value while exporting
 	 */
-	public function transformExportValue($key, $value)
+	public function transform_export_value($key, $value)
 	{
-		return parent::transformExportValue($key, $value);
+		return parent::transform_export_value($key, $value);
 	}
 
 	/**
@@ -302,25 +302,28 @@ class ProjectMilestone extends CRMEntity
 
 	/**
 	 * Invoked when special actions are performed on the module.
-	 * @param string $moduleName Module name
-	 * @param string $eventType Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
+	 * @param String Module name
+	 * @param String Event Type (module.postinstall, module.disabled, module.enabled, module.preuninstall)
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($modulename, $event_type)
 	{
-		if ($eventType === 'module.postinstall') {
+		$adb = PearDatabase::getInstance();
+		if ($event_type == 'module.postinstall') {
 			// Mark the module as Standard module
-			\App\Db::getInstance()->createCommand()->update('vtiger_tab', ['customized' => 0], ['name' => $moduleName])->execute();
-			\App\Fields\RecordNumber::setNumber($moduleName, 'PM', 1);
-		} else if ($eventType === 'module.disabled') {
+			$adb->pquery('UPDATE vtiger_tab SET customized=0 WHERE name=?', array($modulename));
 
-		} else if ($eventType === 'module.enabled') {
+			\App\Fields\RecordNumber::setNumber($modulename, 'PM', 1);
+		} else if ($event_type == 'module.disabled') {
+			
+		} else if ($event_type == 'module.enabled') {
+			
+		} else if ($event_type == 'module.preuninstall') {
+			
+		} else if ($event_type == 'module.preupdate') {
+			
+		} else if ($event_type == 'module.postupdate') {
 
-		} else if ($eventType === 'module.preuninstall') {
-
-		} else if ($eventType === 'module.preupdate') {
-
-		} else if ($eventType === 'module.postupdate') {
-			\App\Fields\RecordNumber::setNumber($moduleName, 'PM', 1);
+			\App\Fields\RecordNumber::setNumber($modulename, 'PM', 1);
 		}
 	}
 }

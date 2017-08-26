@@ -56,7 +56,6 @@ class Users_Colors_Model extends Vtiger_Record_Model
 	{
 		$adb = PearDatabase::getInstance();
 		$adb->pquery('UPDATE vtiger_users SET cal_color = ? WHERE id = ?;', array($params['color'], $params['id']));
-		\App\Colors::generate('user');
 	}
 
 	public static function getColor()
@@ -118,7 +117,7 @@ class Users_Colors_Model extends Vtiger_Record_Model
 		while ($row = $dataReader->read()) {
 			$groupColors[] = [
 				'id' => $row[$primaryKey],
-				'value' => App\Purifier::decodeHtml(App\Purifier::decodeHtml($row[$fieldName])),
+				'value' => decode_html(decode_html($row[$fieldName])),
 				'color' => $row['color']
 			];
 		}
@@ -160,6 +159,8 @@ class Users_Colors_Model extends Vtiger_Record_Model
 	 */
 	public static function updateModuleColor($params)
 	{
-		\App\Db::getInstance()->createCommand()->update('vtiger_tab', ['color' => str_replace('#', '', $params['color'])], ['tabid' => $params['id']])->execute();
+		\App\Db::getInstance()->createCommand()
+			->update('vtiger_tab', ['color' => str_replace('#', '', $params['color'])], ['tabid' => $params['id']])
+			->execute();
 	}
 }

@@ -77,6 +77,7 @@ class Settings_ModuleManager_Library_Model
 
 	/**
 	 * Download all missing libraries
+	 * @throws \Exception\NoPermitted
 	 */
 	public static function downloadAll()
 	{
@@ -95,7 +96,7 @@ class Settings_ModuleManager_Library_Model
 	{
 		if (!static::$libraries[$name]) {
 			App\Log::warning('Library does not exist: ' . $name);
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 
 		$lib = static::$libraries[$name];
@@ -137,6 +138,7 @@ class Settings_ModuleManager_Library_Model
 	/**
 	 * Function to update library
 	 * @param string $name
+	 * @throws \Exception\NoPermitted
 	 */
 	public static function update($name)
 	{

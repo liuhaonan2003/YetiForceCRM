@@ -14,7 +14,7 @@
 class VTExpressionsManager
 {
 
-	public function __construct($adb)
+	function __construct($adb)
 	{
 		$this->adb = $adb;
 	}
@@ -30,7 +30,7 @@ class VTExpressionsManager
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public static function addToCache($key, $value)
+	static function addToCache($key, $value)
 	{
 		self::$cache[$key] = $value;
 	}
@@ -40,7 +40,7 @@ class VTExpressionsManager
 	 * @param string $key
 	 * @return mixed|boolean
 	 */
-	public static function fromCache($key)
+	static function fromCache($key)
 	{
 		if (isset(self::$cache[$key]))
 			return self::$cache[$key];
@@ -50,7 +50,7 @@ class VTExpressionsManager
 	/**
 	 * Clear cache array
 	 */
-	public static function clearCache()
+	static function clearCache()
 	{
 		self::$cache = [];
 	}
@@ -60,7 +60,7 @@ class VTExpressionsManager
 	 * @param string $moduleName
 	 * @return array
 	 */
-	public function fields($moduleName)
+	function fields($moduleName)
 	{
 		$current_user = vglobal('current_user');
 		$result = vtws_describe($moduleName, $current_user);
@@ -76,7 +76,7 @@ class VTExpressionsManager
 	 * Get expression functions
 	 * @return array
 	 */
-	public function expressionFunctions()
+	function expressionFunctions()
 	{
 		return ['concat' => 'concat(a,b)', 'time_diffdays(a,b)' => 'time_diffdays(a,b)', 'time_diffdays(a)' => 'time_diffdays(a)', 'time_diff(a,b)' => 'time_diff(a,b)', 'time_diff(a)' => 'time_diff(a)',
 			'add_days' => 'add_days(datefield, noofdays)', 'sub_days' => 'sub_days(datefield, noofdays)', 'add_time(timefield, minutes)' => 'add_time(timefield, minutes)', 'sub_time(timefield, minutes)' => 'sub_time(timefield, minutes)',

@@ -15,16 +15,15 @@ class Vtiger_NoteBook_Action extends Vtiger_Action_Controller
 	/**
 	 * Function to check permission
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedForAdmin
+	 * @throws \Exception\NoPermittedForAdmin
 	 */
-	public function checkPermission(\App\Request $request)
-	{
+	public function checkPermission(\App\Request $request) {
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		if (!$currentUserModel->isAdminUser()) {
-			throw new \App\Exceptions\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
 		}
 	}
-
+	
 	public function __construct()
 	{
 		$this->exposeMethod('noteBookCreate');
@@ -32,7 +31,9 @@ class Vtiger_NoteBook_Action extends Vtiger_Action_Controller
 
 	public function process(\App\Request $request)
 	{
-		if ($mode = $request->getMode()) {
+		$mode = $request->getMode();
+
+		if ($mode) {
 			$this->invokeExposedMethod($mode, $request);
 		}
 	}

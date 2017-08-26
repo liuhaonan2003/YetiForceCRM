@@ -13,29 +13,24 @@ class Vtiger_EditFieldByModal_View extends Vtiger_BasicModal_View
 	protected $showFields = [];
 	protected $restrictItems = [];
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
-		if (!$recordId) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+		$recordId = $request->get('record');
+
+		$recordPermission = Users_Privileges_Model::isPermitted($moduleName, 'Save', $recordId);
+		if (!$recordPermission) {
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
-		if (!\App\Privilege::isPermitted($moduleName, 'Save', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
+		return true;
 	}
 
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$ID = $request->get('record');
 
-		$recordModel = Vtiger_DetailView_Model::getInstance($moduleName, $recordId)->getRecord();
+		$recordModel = Vtiger_DetailView_Model::getInstance($moduleName, $ID)->getRecord();
 		$recordStrucure = Vtiger_RecordStructure_Model::getInstanceFromRecordModel($recordModel, Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_SUMMARY);
 		$structuredValues = $recordStrucure->getStructure();
 
@@ -45,7 +40,7 @@ class Vtiger_EditFieldByModal_View extends Vtiger_BasicModal_View
 		$viewer->assign('SHOW_FIELDS', $this->getFieldsToShow());
 		$viewer->assign('RECORD_STRUCTURE', $structuredValues);
 		$viewer->assign('RESTRICTS_ITEM', $this->getRestrictItems());
-		$viewer->assign('CONDITION_TO_RESTRICTS', $this->getConditionToRestricts($moduleName, $recordId));
+		$viewer->assign('CONDITION_TO_RESTRICTS', $this->getConditionToRestricts($moduleName, $ID));
 		$this->preProcess($request);
 		$viewer->view('EditFieldByModal.tpl', $moduleName);
 		$this->postProcess($request);

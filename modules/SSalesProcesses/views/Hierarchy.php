@@ -10,19 +10,10 @@
 class SSalesProcesses_Hierarchy_View extends Vtiger_View_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$recordId = $request->getInteger('record');
-		if (!$recordId) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
-		if (!\App\Privilege::isPermitted($request->getModule(), 'DetailView', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+		if (!App\Privilege::isPermitted($request->getModule(), 'DetailView', $request->get('record'))) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -35,7 +26,7 @@ class SSalesProcesses_Hierarchy_View extends Vtiger_View_Controller
 	{
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 
 		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
 		$hierarchy = $recordModel->getHierarchy();

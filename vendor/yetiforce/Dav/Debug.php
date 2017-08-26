@@ -18,11 +18,6 @@ class Debug extends DAV\ServerPlugin
 	const DEBUG_FILE = 'cache/logs/davDebug.log';
 	const EXCEPTION_FILE = 'cache/logs/davException.log';
 
-	/**
-	 * Initializes selected functions
-	 * 
-	 * @param \Sabre\DAV\Server $server
-	 */
 	public function initialize(DAV\Server $server)
 	{
 		$this->server = $server;
@@ -31,13 +26,6 @@ class Debug extends DAV\ServerPlugin
 		$server->on('afterResponse', [$this, 'afterResponse']);
 	}
 
-	/**
-	 * Force user authentication
-	 * 
-	 * @param RequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return boolean
-	 */
 	public function beforeMethod(RequestInterface $request, ResponseInterface $response)
 	{
 		file_put_contents(self::DEBUG_FILE, '============ ' . date('Y-m-d H:i:s') . ' ====== Request ======' . PHP_EOL, FILE_APPEND);
@@ -60,13 +48,6 @@ class Debug extends DAV\ServerPlugin
 		return true;
 	}
 
-	/**
-	 * Places a list of headers
-	 * 
-	 * @param RequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return boolean
-	 */
 	public function afterResponse(RequestInterface $request, ResponseInterface $response)
 	{
 		$contentType = explode(';', $response->getHeader('Content-Type'));
@@ -79,13 +60,6 @@ class Debug extends DAV\ServerPlugin
 		return true;
 	}
 
-	/**
-	 * This function will cause the "exception" event
-	 * to occur as soon as the error document is returned
-	 * 
-	 * @param string $e
-	 * @return boolean
-	 */
 	public function exception($e)
 	{
 		$error = 'exception: ' . get_class($e) . PHP_EOL;
@@ -138,8 +112,7 @@ class Debug extends DAV\ServerPlugin
 	 *
 	 * While this is not strictly needed, it makes a lot of sense to do so. If an
 	 * E_NOTICE or anything appears in your code, this allows SabreDAV to intercept
-	 * the issue and send a proper response back to the client (HTTP/1.1 500).
-	 * 
+	 * the issue and send a proper response back to the client (HTTP/1.1 500). 
 	 * @param int $errno
 	 * @param string $errstr
 	 * @param string $errfile

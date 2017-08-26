@@ -9,7 +9,6 @@ $languageStrings = [
 	'SVendorEnquiries' => 'Solicitud de pedidos a Proveedores',
 	'SQuoteEnquiries' => 'Solicitud de pedido a Proveedor',
 	'SINGLE_SQuoteEnquiries' => 'Consulta de facturas',
-	'SINGLE_SVendorEnquiries' => 'Vendor enquiry',
 	//BLOCKS
 	'LBL_QUOTESENQUIRES_INFORMATION' => 'Información sobre la Solicitud de pedido a Proveedor',
 	'LBL_CUSTOM_INFORMATION' => 'Información adicional',

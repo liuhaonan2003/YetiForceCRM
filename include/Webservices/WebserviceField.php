@@ -271,7 +271,8 @@ class WebserviceField
 				$this->getFieldTypeFromUIType();
 			}
 			$fieldTypeData = WebserviceField::$fieldTypeMapping[$this->getUIType()];
-			$types = vtws_listtypes(null, Users_Privileges_Model::getCurrentUserModel());
+			$current_user = vglobal('current_user');
+			$types = vtws_listtypes(null, $current_user);
 
 			$accessibleTypes = $types['types'];
 			//If it is non admin user or the edit and view is there for profile then users module will be accessible
@@ -392,7 +393,7 @@ class WebserviceField
 			for ($i = 0; $i < $numRows; ++$i) {
 				$elem = [];
 				$picklistValue = $db->query_result($result, $i, $fieldName);
-				$picklistValue = App\Purifier::decodeHtml($picklistValue);
+				$picklistValue = decode_html($picklistValue);
 				$moduleName = \App\Module::getModuleName($this->getTabId());
 				if ($moduleName == 'Events')
 					$moduleName = 'Calendar';

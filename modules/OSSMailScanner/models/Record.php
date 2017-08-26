@@ -265,13 +265,13 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * Manually scan mail
 	 * @param array $params
 	 * @return array
-	 * @throws \App\Exceptions\NoPermitted
+	 * @throws \Exception\NoPermitted
 	 */
 	public function manualScanMail($params)
 	{
 		$account = OSSMail_Record_Model::getAccountByHash($params['rcId']);
 		if (!$account) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 		$params['folder'] = urldecode($params['folder']);
 		$mailModel = Vtiger_Record_Model::getCleanInstance('OSSMail');
@@ -297,7 +297,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * @param int $countEmails
 	 * @return int
 	 */
-	public static function mailScan($mbox, $account, $folder, $scan_id, $countEmails)
+	public static function mail_Scan($mbox, $account, $folder, $scan_id, $countEmails)
 	{
 		$lastScanUid = self::getUidFolder($account['user_id'], $folder);
 		$msgno = imap_msgno($mbox, $lastScanUid);
@@ -406,7 +406,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	{
 		$dbCommand = App\Db::getInstance();
 		if ($value === null || $value == 'null') {
-			$dbCommand->createCommand()->update('vtiger_ossmailscanner_config', ['value' => ''], ['conf_type' => 'emailsearch', 'parameter' => 'fields'])->execute();
+			$dbCommand->update('vtiger_ossmailscanner_config', ['value' => ''], ['conf_type' => 'emailsearch', 'parameter' => 'fields'])->execute();
 		} else {
 			$isExists = (new App\Db\Query())->from('vtiger_ossmailscanner_config')->where(['conf_type' => 'emailsearch', 'parameter' => 'fields'])->exists();
 			if (!$isExists) {
@@ -416,7 +416,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 					'value' => $value
 				])->execute();
 			} else {
-				$dbCommand->createCommand()->update('vtiger_ossmailscanner_config', ['value' => $value], ['conf_type' => 'emailsearch', 'parameter' => 'fields'])->execute();
+				$dbCommand->update('vtiger_ossmailscanner_config', ['value' => $value], ['conf_type' => 'emailsearch', 'parameter' => 'fields'])->execute();
 			}
 		}
 	}
@@ -427,7 +427,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * @param array $tab2
 	 * @return array
 	 */
-	public static function mergeArray($tab1, $tab2)
+	public static function _merge_array($tab1, $tab2)
 	{
 		$return = [];
 		if (count($tab1) != 0 && count($tab2) != 0) {
@@ -473,7 +473,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 			return false;
 		}
 		self::setCronStatus('2');
-		$scanId = $scannerModel->addScanHistory(['user' => $who_trigger]);
+		$scanId = $scannerModel->add_scan_history(['user' => $who_trigger]);
 		foreach ($accounts as $account) {
 			\App\Log::trace('Start checking account: ' . $account['username']);
 			foreach ($scannerModel->getFolders($account['user_id']) as &$folderRow) {
@@ -482,7 +482,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 
 				$mbox = $mailModel->imapConnect($account['username'], $account['password'], $account['mail_host'], $folder, false);
 				if (is_resource($mbox)) {
-					$countEmails = $scannerModel->mailScan($mbox, $account, $folder, $scanId, $countEmails);
+					$countEmails = $scannerModel->mail_Scan($mbox, $account, $folder, $scanId, $countEmails);
 					imap_close($mbox);
 					if ($countEmails >= AppConfig::performance('NUMBERS_EMAILS_DOWNLOADED_DURING_ONE_SCANNING')) {
 						\App\Log::info('Reached the maximum number of scanned mails');
@@ -499,6 +499,16 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 		self::setCronStatus('1');
 		\App\Log::trace('End executeCron');
 		return 'ok';
+	}
+
+	/**
+	 * Return cron history
+	 * @return string
+	 */
+	public function get_cron_history()
+	{
+
+		return '';
 	}
 
 	/**
@@ -524,7 +534,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * @param int $startNumber
 	 * @return array
 	 */
-	public function getScanHistory($startNumber = 0)
+	public function get_scan_history($startNumber = 0)
 	{
 		$limit = 30;
 		$endNumber = $startNumber + $limit;
@@ -553,7 +563,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * @param array $array
 	 * @return int|bool
 	 */
-	public function addScanHistory($array)
+	public function add_scan_history($array)
 	{
 		$db = \App\Db::getInstance();
 		$db->createCommand()->insert('vtiger_ossmails_logs', ['status' => 1, 'user' => $array['user'], 'start_time' => date('Y-m-d H:i:s')])->execute();
@@ -747,7 +757,7 @@ class OSSMailScanner_Record_Model extends Vtiger_Record_Model
 	 * Delete user email accounts
 	 * @param int $id
 	 */
-	public static function accontDelete($id)
+	public static function AccontDelete($id)
 	{
 		\App\Db::getInstance()->createCommand()->delete('roundcube_users', ['user_id' => $id])->execute();
 	}

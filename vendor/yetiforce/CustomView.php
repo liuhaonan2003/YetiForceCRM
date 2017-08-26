@@ -264,7 +264,7 @@ class CustomView
 	/**
 	 * Get custom view from file
 	 * @param string $cvId
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public function getCustomViewFromFile($cvId)
 	{
@@ -279,14 +279,14 @@ class CustomView
 			return $filter;
 		}
 		\App\Log::error(Language::translate('LBL_NO_FOUND_VIEW') . "cvId: $cvId");
-		throw new \App\Exceptions\AppException('LBL_NO_FOUND_VIEW');
+		throw new \Exception\AppException('LBL_NO_FOUND_VIEW');
 	}
 
 	/**
 	 * Columns list by cvid
 	 * @param mixed $cvId
 	 * @return array
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public function getColumnsListByCvid($cvId)
 	{
@@ -308,7 +308,7 @@ class CustomView
 			return $columnList;
 		}
 		\App\Log::error(Language::translate('LBL_NO_FOUND_VIEW') . "cvId: $cvId");
-		throw new \App\Exceptions\AppException('LBL_NO_FOUND_VIEW');
+		throw new \Exception\AppException('LBL_NO_FOUND_VIEW');
 	}
 
 	/**

@@ -13,10 +13,10 @@ class OSSTimeControl_InRelation_View extends Vtiger_RelatedList_View
 	{
 		$moduleName = $request->getModule();
 		$relatedModuleName = $request->get('relatedModule');
-		$parentId = $request->getInteger('record');
+		$parentId = $request->get('record');
 		$label = $request->get('tab_label');
-		$totalCount = $request->getInteger('totalCount');
-		$requestedPage = $request->getInteger('page');
+		$totalCount = $request->get('totalCount');
+		$requestedPage = $request->get('page');
 		if (empty($requestedPage)) {
 			$requestedPage = 1;
 		}

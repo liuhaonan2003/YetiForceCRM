@@ -12,13 +12,14 @@ class SQuotes_EditFieldByModal_Action extends Vtiger_EditFieldByModal_Action
 
 	public function process(\App\Request $request)
 	{
-		$params = $request->getArray('param');
+		$params = $request->get('param');
+		$moduleName = $request->getModule();
+		$recordId = $params['record'];
 		$state = $params['state'];
 		$fieldName = $params['fieldName'];
-		$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($request->getInteger('record'), $request->getModule());
-		if (!$recordModel->getField($fieldName)->isEditable()) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
+
+		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+		$recordModel->setId($recordId);
 		$recordModel->set($fieldName, $state);
 		if (in_array($state, ['PLL_CANCELLED', 'PLL_ACCEPTED'])) {
 			$currentTime = date('Y-m-d H:i:s');

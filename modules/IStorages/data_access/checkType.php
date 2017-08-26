@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Lock save
  * @package YetiForce.DataAccess
@@ -6,32 +7,21 @@
  * @license YetiForce Public License 2.0 (licenses/License.html or yetiforce.com)
  * @author Tomasz Kur <t.kur@yetiforce.com>
  */
-
-/**
- * Class data access check type for module istorages
- */
 class DataAccess_checkType
 {
 
-	/**
-	 * Config
-	 * @var array
-	 */
 	public $config = false;
 
-	/**
-	 * Process
-	 * @param string $moduleName
-	 * @param int $id
-	 * @param array $recordData
-	 * @param array $config
-	 * @return array
-	 */
 	public function process($moduleName, $id, $recordData, $config)
 	{
 		if ((empty($recordData['storage_type']) || $recordData['storage_type'] == 'PLL_INTERNAL') && empty($recordData['parentid'])) {
-			$result = (new App\Db\Query())->select(['u_#__istorages.istorageid'])->from('u_#__istorages')->innerJoin('vtiger_crmentity', 'u_#__istorages.istorageid = vtiger_crmentity.crmid')->where(['parentid' => 0, 'vtiger_crmentity.deleted' => 0])->scalar();
-			if ($result) {
+			$db = PearDatabase::getInstance();
+			$query = 'SELECT u_yf_istorages.istorageid FROM u_yf_istorages 
+				INNER JOIN vtiger_crmentity ON u_yf_istorages.istorageid = vtiger_crmentity.crmid 
+				WHERE parentid = ? AND vtiger_crmentity.deleted = ?';
+			$result = $db->pquery($query, [0, 0]);
+			if ($db->getRowCount($result) > 0) {
+				$row = $db->getSingleValue($result);
 				if (!empty($id) && $row == $id) {
 					$saveRecord = true;
 				} else {
@@ -57,13 +47,6 @@ class DataAccess_checkType
 			return ['save_record' => true];
 	}
 
-	/**
-	 * Get config
-	 * @param int $id
-	 * @param string $module
-	 * @param string $baseModule
-	 * @return boolean
-	 */
 	public function getConfig($id, $module, $baseModule)
 	{
 		return false;

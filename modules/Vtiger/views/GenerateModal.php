@@ -16,13 +16,16 @@ class Vtiger_GenerateModal_View extends Vtiger_BasicModal_View
 
 	public function process(\App\Request $request)
 	{
+
+		\App\Log::trace('Entering ' . __METHOD__ . '() method ...');
+
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$view = $request->get('fromview');
 		$viewer = $this->getViewer($request);
 		$handlerClass = Vtiger_Loader::getComponentClassName('Model', 'MappedFields', $moduleName);
 		$mfModel = new $handlerClass();
-		if ($view === 'List') {
+		if ($view == 'List') {
 			$allRecords = Vtiger_Mass_Action::getRecordsListFromRequest($request);
 			$templates = $mfModel->getActiveTemplatesForModule($moduleName, $view);
 			$viewer->assign('ALL_RECORDS', $allRecords);
@@ -30,6 +33,7 @@ class Vtiger_GenerateModal_View extends Vtiger_BasicModal_View
 			$templates = $mfModel->getActiveTemplatesForRecord($recordId, $view, $moduleName);
 			$viewer->assign('RECORD', $recordId);
 		}
+
 		$viewer->assign('TEMPLATES', $templates);
 		$viewer->assign('VIEW', $view);
 		$viewer->assign('MODULE_NAME', $moduleName);
@@ -37,5 +41,6 @@ class Vtiger_GenerateModal_View extends Vtiger_BasicModal_View
 		$this->preProcess($request);
 		$viewer->view('GenerateModal.tpl', $moduleName);
 		$this->postProcess($request);
+		\App\Log::trace('Exiting ' . __METHOD__ . ' method ...');
 	}
 }

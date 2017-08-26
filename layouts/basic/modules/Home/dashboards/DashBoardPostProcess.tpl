@@ -14,4 +14,4 @@
 	</div>
 </div>
 
-{include file=\App\Layout::getTemplatePath('Footer.tpl', $MODULE)}
+{include file="Footer.tpl"|vtemplate_path:$MODULE}

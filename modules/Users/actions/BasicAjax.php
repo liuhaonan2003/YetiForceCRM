@@ -11,16 +11,11 @@
 class Users_BasicAjax_Action extends Vtiger_BasicAjax_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		if (!$currentUser->isAdminUser()) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -28,7 +23,8 @@ class Users_BasicAjax_Action extends Vtiger_BasicAjax_Action
 	{
 		$searchValue = $request->get('search_value');
 		$searchModule = $request->get('search_module');
-		$parentRecordId = $request->getInteger('parent_id');
+
+		$parentRecordId = $request->get('parent_id');
 		$parentModuleName = $request->get('parent_module');
 
 		$searchModuleModel = Users_Module_Model::getInstance($searchModule);
@@ -38,7 +34,7 @@ class Users_BasicAjax_Action extends Vtiger_BasicAjax_Action
 		if (is_array($records)) {
 			foreach ($records as $moduleName => $recordModels) {
 				foreach ($recordModels as $recordModel) {
-					$result[] = array('label' => App\Purifier::decodeHtml($recordModel->getName()), 'value' => App\Purifier::decodeHtml($recordModel->getName()), 'id' => $recordModel->getId());
+					$result[] = array('label' => decode_html($recordModel->getName()), 'value' => decode_html($recordModel->getName()), 'id' => $recordModel->getId());
 				}
 			}
 		}

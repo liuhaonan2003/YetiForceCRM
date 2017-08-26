@@ -12,16 +12,11 @@
 class Reports_CheckDuplicate_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPriviligesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -29,7 +24,7 @@ class Reports_CheckDuplicate_Action extends Vtiger_Action_Controller
 	{
 		$moduleName = $request->getModule();
 		$reportName = $request->get('reportname');
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
 
 		if ($record) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($record, $moduleName);

@@ -53,7 +53,7 @@ class Import_Data_Action extends Vtiger_Action_Controller
 	{
 		$currentUserPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPrivilegesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -127,7 +127,7 @@ class Import_Data_Action extends Vtiger_Action_Controller
 	public function initializeImport()
 	{
 		$lockInfo = Import_Lock_Action::isLockedForModule($this->module);
-		if ($lockInfo) {
+		if ($lockInfo !== null) {
 			if ($lockInfo['userid'] != $this->user->id) {
 				Import_Utils_Helper::showImportLockedError($lockInfo);
 				return false;
@@ -489,7 +489,7 @@ class Import_Data_Action extends Vtiger_Action_Controller
 				$referenceModuleName = trim($fieldValueDetails[0]);
 				$entityLabel = trim($fieldValueDetails[1]);
 				if (\App\Module::isModuleActive($referenceModuleName)) {
-					$entityId = \App\Record::getCrmIdByLabel($referenceModuleName, App\Purifier::decodeHtml($entityLabel));
+					$entityId = \App\Record::getCrmIdByLabel($referenceModuleName, decode_html($entityLabel));
 				} else {
 					$referenceModuleName = $defaultFieldValues[$fieldName];
 					$referencedModules = $fieldInstance->getReferenceList();
@@ -510,7 +510,7 @@ class Import_Data_Action extends Vtiger_Action_Controller
 					} elseif ($referenceModule === 'Currency') {
 						$referenceEntityId = \App\Currency::getCurrencyIdByName($entityLabel);
 					} else {
-						$referenceEntityId = \App\Record::getCrmIdByLabel($referenceModule, App\Purifier::decodeHtml($entityLabel));
+						$referenceEntityId = \App\Record::getCrmIdByLabel($referenceModule, decode_html($entityLabel));
 					}
 					if ($referenceEntityId) {
 						$entityId = $referenceEntityId;
@@ -787,7 +787,7 @@ class Import_Data_Action extends Vtiger_Action_Controller
 			$userId = $importInfo['user_id'];
 			$user = new Users();
 			$user->id = $userId;
-			$user->retrieveEntityInfo($userId, 'Users');
+			$user->retrieve_entity_info($userId, 'Users');
 
 			$scheduledImports[$importId] = new Import_Data_Action($importInfo, $user);
 		}

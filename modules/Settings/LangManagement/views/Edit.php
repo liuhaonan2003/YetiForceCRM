@@ -31,25 +31,24 @@ class Settings_LangManagement_Edit_View extends Settings_Vtiger_Index_View
 		$lang = $request->get('lang');
 		$mod = $request->get('mod');
 		$tpl = $request->get('tpl');
-		$showDifferences = $request->get('sd');
+		$ShowDifferences = $request->get('sd');
 		$moduleModel = Settings_LangManagement_Module_Model::getInstance($qualifiedModuleName);
 		$data = null;
 		if ($lang != '' && $mod != '') {
 			if ($tpl == 'editLang') {
-				$data = $moduleModel->loadLangTranslation($lang, $mod, $showDifferences);
+				$data = $moduleModel->loadLangTranslation($lang, $mod, $ShowDifferences);
 			} else {
-				$data = $moduleModel->loadAllFieldsFromModule($lang, $mod, $showDifferences);
+				$data = $moduleModel->loadAllFieldsFromModule($lang, $mod, $ShowDifferences);
 			}
 		}
 		$mods = $moduleModel->getModFromLang($lang);
 		unset($mods['mods']['HelpInfo']);
 		$viewer->assign('MODS', $mods);
 		$viewer->assign('MODULE_MODEL', $moduleModel);
-		$viewer->assign('SELECTED_LANGS', array_filter(explode(',', $lang)));
-		$viewer->assign('SELECTED_MODE', $mod);
+		$viewer->assign('REQUEST', $request);
 		$viewer->assign('LANGS', App\Language::getAll());
 		$viewer->assign('DATA', $data);
-		$viewer->assign('SD', $showDifferences);
+		$viewer->assign('SD', $ShowDifferences);
 		$viewer->assign('QUALIFIED_MODULE', $qualifiedModuleName);
 		$viewer->assign('MODULE', $moduleName);
 		$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());

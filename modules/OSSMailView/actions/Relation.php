@@ -10,24 +10,15 @@
 class OSSMailView_Relation_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPriviligesModel->hasModulePermission($moduleName)) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 		if (!\App\Privilege::isPermitted($moduleName, 'ReloadRelationRecord')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
-		if (!\App\Privilege::isPermitted($request->get('moduleName'), 'DetailView', $request->getInteger('record'))) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -35,7 +26,7 @@ class OSSMailView_Relation_Action extends Vtiger_Action_Controller
 	{
 		$moduleName = $request->getModule();
 		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
-		$recordModel->setReloadRelationRecord($request->get('moduleName'), $request->getInteger('record'));
+		$recordModel->setReloadRelationRecord($request->get('moduleName'), $request->get('record'));
 
 		$response = new Vtiger_Response();
 		$response->setResult(\App\Language::translate('LBL_SET_RELOAD_RELATIONS', $moduleName));

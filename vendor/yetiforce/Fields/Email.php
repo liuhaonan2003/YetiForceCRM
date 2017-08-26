@@ -31,13 +31,6 @@ class Email
 		}
 	}
 
-	/**
-	 * Find crm id by email.
-	 * @param string|int $value
-	 * @param array $allowedModules
-	 * @param array $skipModules
-	 * @return string
-	 */
 	public static function findCrmidByEmail($value, $allowedModules = [], $skipModules = [])
 	{
 		$db = \PearDatabase::getInstance();
@@ -97,11 +90,6 @@ class Email
 		return $rows;
 	}
 
-	/**
-	 * Get user mail.
-	 * @param int $userId
-	 * @return string
-	 */
 	public static function getUserMail($userId)
 	{
 		$userModel = \App\User::getUserModel($userId);

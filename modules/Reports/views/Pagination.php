@@ -9,6 +9,14 @@
 class Reports_Pagination_View extends Vtiger_IndexAjax_View
 {
 
+	public function checkPermission(\App\Request $request)
+	{
+		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		if (!$currentUserPriviligesModel->hasModulePermission($request->getModule())) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
+		}
+	}
+
 	public function __construct()
 	{
 		parent::__construct();

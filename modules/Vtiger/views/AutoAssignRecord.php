@@ -14,7 +14,7 @@ class Vtiger_AutoAssignRecord_View extends Vtiger_BasicModal_View
 	 * Checking permission 
 	 * @param \App\Request $request
 	 * @return boolean
-	 * @throws \App\Exceptions\NoPermitted
+	 * @throws \Exception\NoPermitted
 	 */
 	public function checkPermission(\App\Request $request)
 	{
@@ -25,7 +25,7 @@ class Vtiger_AutoAssignRecord_View extends Vtiger_BasicModal_View
 				return true;
 			}
 		}
-		throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 	}
 
 	/**

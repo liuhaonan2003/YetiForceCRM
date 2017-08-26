@@ -29,11 +29,20 @@ require_once 'include/Webservices/PreserveGlobal.php';
 
 function vtws_getUsersInTheSameGroup($id)
 {
+	require_once('include/utils/GetGroupUsers.php');
+	require_once('include/utils/GetUserGroups.php');
+
+	$groupUsers = new GetGroupUsers();
+	$userGroups = new GetUserGroups();
 	$allUsers = [];
-	foreach (App\PrivilegeUtil::getAllGroupsByUser($id) as $group) {
-		$usersInGroup = App\PrivilegeUtil::getUsersByGroup($group);
+	$userGroups->getAllUserGroups($id);
+	$groups = $userGroups->user_groups;
+
+	foreach ($groups as $group) {
+		$groupUsers->getAllUsersInGroup($group);
+		$usersInGroup = $groupUsers->group_users;
 		foreach ($usersInGroup as $user) {
-			if ($user !== $id) {
+			if ($user != $id) {
 				$allUsers[$user] = \App\Fields\Owner::getUserLabel($user);
 			}
 		}
@@ -62,7 +71,7 @@ function vtws_getUserAccessibleGroups($moduleId, $user)
 		($defaultOrgSharingPermission[$moduleId] == 3 || $defaultOrgSharingPermission[$moduleId] == 0)) {
 		$result = get_current_user_access_groups($tabName);
 	} else {
-		$result = \vtlib\Functions::getGroupOptions();
+		$result = \vtlib\Functions::get_group_options();
 	}
 
 	$groups = [];
@@ -568,16 +577,10 @@ function vtws_saveLeadRelations($leadId, $relatedId, $setype)
 	return true;
 }
 
-/**
- * vtws_getFieldfromFieldId
- * @param int $fieldId
- * @param Vtiger_Module_Model $moduleModel
- * @return null|Vtiger_Field_Model
- */
-function vtws_getFieldfromFieldId($fieldId, $moduleModel)
+function vtws_getFieldfromFieldId($fieldId, $fieldObjectList)
 {
-	foreach ($moduleModel->getFields() as $field) {
-		if ($fieldId == $field->getId()) {
+	foreach ($fieldObjectList as $field) {
+		if ($fieldId == $field->getFieldId()) {
 			return $field;
 		}
 	}

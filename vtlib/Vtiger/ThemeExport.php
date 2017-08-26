@@ -22,7 +22,7 @@ class ThemeExport extends Package
 	 * Generate unique id for insertion
 	 * @access private
 	 */
-	public static function __getUniqueId()
+	static function __getUniqueId()
 	{
 		$adb = \PearDatabase::getInstance();
 		return $adb->getUniqueID(self::TABLENAME);
@@ -94,9 +94,9 @@ class ThemeExport extends Package
 		$sqlresult = $adb->pquery("SELECT * FROM vtiger_layoutskins WHERE name = ?", array($themeName));
 		$layoutresultrow = $adb->fetch_array($sqlresult);
 
-		$resultThemename = \App\Purifier::decodeHtml($layoutresultrow['name']);
-		$resultThemelabel = \App\Purifier::decodeHtml($layoutresultrow['label']);
-		$resultthemeparent = \App\Purifier::decodeHtml($layoutresultrow['parent']);
+		$resultThemename = decode_html($layoutresultrow['name']);
+		$resultThemelabel = decode_html($layoutresultrow['label']);
+		$resultthemeparent = decode_html($layoutresultrow['parent']);
 
 		if (!empty($resultThemename)) {
 			$themeName = $resultThemename;
@@ -123,7 +123,7 @@ class ThemeExport extends Package
 		$this->outputNode('theme', 'type');
 
 		// Export dependency information
-		$this->exportDependencies();
+		$this->export_Dependencies();
 
 		$this->closeNode('module');
 	}
@@ -132,7 +132,7 @@ class ThemeExport extends Package
 	 * Export vtiger dependencies
 	 * @access private
 	 */
-	public function exportDependencies()
+	public function export_Dependencies()
 	{
 		$maxVersion = false;
 		$this->openNode('dependencies');
@@ -146,11 +146,11 @@ class ThemeExport extends Package
 	 * Initialize Language Schema
 	 * @access private
 	 */
-	public static function __initSchema()
+	static function __initSchema()
 	{
-		$hastable = Utils::checkTable(self::TABLENAME);
+		$hastable = Utils::CheckTable(self::TABLENAME);
 		if (!$hastable) {
-			Utils::createTable(
+			Utils::CreateTable(
 				self::TABLENAME, '(id INT NOT NULL PRIMARY KEY,
                             name VARCHAR(50), label VARCHAR(30), parent VARCHAR(100), lastupdated DATETIME, isdefault INT(1), active INT(1))', true
 			);
@@ -165,7 +165,7 @@ class ThemeExport extends Package
 	/**
 	 * Register language pack information.
 	 */
-	public static function register($label, $name = '', $parent = '', $isdefault = false, $isactive = true, $overrideCore = false)
+	static function register($label, $name = '', $parent = '', $isdefault = false, $isactive = true, $overrideCore = false)
 	{
 		self::__initSchema();
 

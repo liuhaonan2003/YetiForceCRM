@@ -8,6 +8,44 @@
  */
 class Settings_Calendar_Module_Model extends Settings_Vtiger_Module_Model
 {
+
+	/**
+	 * To get the lists of View Types
+	 * @param $id --  user id
+	 * @returns <Array> $calendarViewTypes
+	 */
+	public static function getCalendarViewTypes()
+	{
+		$query = (new \App\Db\Query())->from('vtiger_calendar_default_activitytypes');
+		$dataReader = $query->createCommand()->query();
+		$calendarViewTypes = $dataReader->readAll();
+		return $calendarViewTypes;
+	}
+
+	/**
+	 * Color update
+	 * @param $color -- new color
+	 * @param $viewtypesid -- view type id 
+	 */
+	public static function updateModuleColor($params)
+	{
+		$db = \App\Db::getInstance();
+		$db->createCommand()->update('vtiger_calendar_default_activitytypes', [
+			'defaultcolor' => $params['color']], ['id' => $params['viewtypesid']]
+		)->execute();
+		$db->createCommand()->update('vtiger_calendar_user_activitytypes', [
+			'color' => $params['color']], ['defaultid' => $params['viewtypesid']]
+		)->execute();
+	}
+
+	public static function updateModuleActiveType($params)
+	{
+		$active = $params['active'] == 'true' ? '1' : '0';
+		\App\Db::getInstance()->createCommand()->update('vtiger_calendar_default_activitytypes', [
+			'active' => $active], ['id' => $params['viewtypesid']]
+		)->execute();
+	}
+
 	public static function getUserColors()
 	{
 		$instance = new \App\Fields\Owner();
@@ -60,7 +98,6 @@ class Settings_Calendar_Module_Model extends Settings_Vtiger_Module_Model
 			\App\Db::getInstance()->createCommand()->update('vtiger_calendar_config', ['value' => $params['color']], ['name' => $params['id']]
 			)->execute();
 		}
-		\App\Colors::generate('calendar');
 	}
 
 	public static function updateNotWorkingDays($params)
@@ -92,10 +129,6 @@ class Settings_Calendar_Module_Model extends Settings_Vtiger_Module_Model
 		return $fields = ['activitytype'];
 	}
 
-	/**
-	 * Get picklist values
-	 * @return array
-	 */
 	public static function getPicklistValue()
 	{
 		$keys = ['name', 'label', 'value', 'table', 'field'];
@@ -103,6 +136,7 @@ class Settings_Calendar_Module_Model extends Settings_Vtiger_Module_Model
 		foreach (self::getCalendarColorPicklist() as $picklistName) {
 			$picklistValues = Users_Colors_Model::getValuesFromField($picklistName);
 			foreach ($picklistValues as $picklistValue) {
+				$picklistValue['id'] = $picklistValue['value'];
 				$picklistValue['table'] = 'vtiger_' . $picklistName;
 				$picklistValue['field'] = $picklistName;
 				$calendarConfig[] = array_combine($keys, $picklistValue);

@@ -10,16 +10,11 @@
 class OSSMailView_ChangeType_Action extends Vtiger_Mass_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPriviligesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -28,11 +23,11 @@ class OSSMailView_ChangeType_Action extends Vtiger_Mass_Action
 		$moduleName = $request->getModule();
 		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		$selectedIds = $request->get('data');
-		$mailType = $request->get('mail_type');
+		$mail_type = $request->get('mail_type');
 		if ($selectedIds == 'all') {
-			$recordModel->changeTypeAllRecords($mailType);
+			$recordModel->ChangeTypeAllRecords($mail_type);
 		} else {
-			$recordModel->changeTypeSelectedRecords($selectedIds, $mailType);
+			$recordModel->ChangeTypeSelectedRecords($selectedIds, $mail_type);
 		}
 		$response = new Vtiger_Response();
 		$response->setResult(\App\Language::translate('LBL_ChangeTypeOK', $moduleName));

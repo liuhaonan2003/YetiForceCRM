@@ -51,17 +51,16 @@ class Tree
 	 */
 	public static function getPicklistValue($templateId, $moduleName)
 	{
-		$values = [];
 		$dataTree = self::getValuesById((int) $templateId);
 		foreach ($dataTree as $row) {
 			$tree = $row['tree'];
 			$parent = '';
 			$parentName = '';
 			if ($row['depth'] > 0) {
-				$parentTrre = $row['parenttrre'];
+				$parenttrre = $row['parenttrre'];
 				$cut = strlen('::' . $tree);
-				$parentTrre = substr($parentTrre, 0, - $cut);
-				$pieces = explode('::', $parentTrre);
+				$parenttrre = substr($parenttrre, 0, - $cut);
+				$pieces = explode('::', $parenttrre);
 				$parent = end($pieces);
 				$parentName = $dataTree[$parent]['name'];
 				$parentName = '(' . \App\Language::translate($parentName, $moduleName) . ') ';

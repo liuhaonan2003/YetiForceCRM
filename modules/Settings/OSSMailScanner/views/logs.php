@@ -12,17 +12,17 @@ class Settings_OSSMailScanner_logs_View extends Settings_Vtiger_Index_View
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$ossMailScannerRecordModel = Vtiger_Record_Model::getCleanInstance('OSSMailScanner');
+		$OSSMailScanner_Record_Model = Vtiger_Record_Model::getCleanInstance('OSSMailScanner');
 
-		$cronHistoryActionList = $ossMailScannerRecordModel->getScanHistory();
+		$cron_history_action_list = $OSSMailScanner_Record_Model->get_scan_history();
 		$viewer = $this->getViewer($request);
-		$viewer->assign('RecordModel', $ossMailScannerRecordModel);
+		$viewer->assign('RecordModel', $OSSMailScanner_Record_Model);
 		$viewer->assign('MODULENAME', $moduleName);
-		$viewer->assign('WIDGET_CFG', $ossMailScannerRecordModel->getConfig(''));
-		$viewer->assign('HISTORYACTIONLIST', $cronHistoryActionList);
+		$viewer->assign('WIDGET_CFG', $OSSMailScanner_Record_Model->getConfig(''));
+		$viewer->assign('HISTORYACTIONLIST', $cron_history_action_list);
 		$viewer->assign('HISTORYACTIONLIST_NUM', $this->getNumLog());
 
-		$stopButtonStatus = $ossMailScannerRecordModel->checkLogStatus();
+		$stopButtonStatus = $OSSMailScanner_Record_Model->checkLogStatus();
 		if (false !== $stopButtonStatus) {
 			$viewer->assign('STOP_BUTTON_STATUS', 'true');
 		} else {

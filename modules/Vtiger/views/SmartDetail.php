@@ -3,26 +3,21 @@
 class Vtiger_SmartDetail_View extends Vtiger_IndexAjax_View
 {
 
-	/**
-	 * Checking permissions
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
-		if (!$recordId) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+		$recordId = $request->get('record');
+
+		$recordPermission = Users_Privileges_Model::isPermitted($moduleName, 'DetailView', $recordId);
+		if (!$recordPermission) {
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
-		if (!\App\Privilege::isPermitted($moduleName, 'DetailView', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
-		}
+		return true;
 	}
 
 	public function process(\App\Request $request)
 	{
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 
 		if (!$this->record) {

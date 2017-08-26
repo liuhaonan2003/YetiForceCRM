@@ -127,7 +127,7 @@ class PackageExport
 		$this->__initExport($module);
 
 		// Call module export function
-		$this->exportModule();
+		$this->export_Module();
 
 		$this->__finishExport();
 
@@ -240,18 +240,18 @@ class PackageExport
 	 * Export vtiger dependencies
 	 * @access private
 	 */
-	public function exportDependencies($moduleInstance)
+	public function export_Dependencies($moduleInstance)
 	{
 		$adb = \PearDatabase::getInstance();
-		$moduleId = $moduleInstance->id;
+		$moduleid = $moduleInstance->id;
 
-		$sqlResult = $adb->pquery('SELECT * FROM vtiger_tab_info WHERE tabid = ?', array($moduleId));
+		$sqlresult = $adb->pquery("SELECT * FROM vtiger_tab_info WHERE tabid = ?", array($moduleid));
 		$minVersion = \App\Version::get();
 		$maxVersion = false;
-		$noOfPreferences = $adb->num_rows($sqlResult);
+		$noOfPreferences = $adb->num_rows($sqlresult);
 		for ($i = 0; $i < $noOfPreferences; ++$i) {
-			$prefName = $adb->query_result($sqlResult, $i, 'prefname');
-			$prefValue = $adb->query_result($sqlResult, $i, 'prefvalue');
+			$prefName = $adb->query_result($sqlresult, $i, 'prefname');
+			$prefValue = $adb->query_result($sqlresult, $i, 'prefvalue');
 			if ($prefName == 'vtiger_min_version') {
 				$minVersion = $prefValue;
 			}
@@ -270,13 +270,13 @@ class PackageExport
 	 * Export Module Handler
 	 * @access private
 	 */
-	public function exportModule()
+	public function export_Module()
 	{
 		$adb = \PearDatabase::getInstance();
 
-		$moduleId = $this->moduleInstance->id;
+		$moduleid = $this->moduleInstance->id;
 
-		$sqlresult = $adb->pquery('SELECT * FROM vtiger_tab WHERE tabid = ?', [$moduleId]);
+		$sqlresult = $adb->pquery('SELECT * FROM vtiger_tab WHERE tabid = ?', [$moduleid]);
 		$tabInfo = $adb->getRow($sqlresult);
 
 		$tabname = $tabInfo['name'];
@@ -302,16 +302,16 @@ class PackageExport
 		}
 
 		// Export dependency information
-		$this->exportDependencies($this->moduleInstance);
+		$this->export_Dependencies($this->moduleInstance);
 
 		// Export module tables
-		$this->exportTables();
+		$this->export_Tables();
 
 		// Export module blocks
-		$this->exportBlocks($this->moduleInstance);
+		$this->export_Blocks($this->moduleInstance);
 
 		// Export module filters
-		$this->exportCustomViews($this->moduleInstance);
+		$this->export_CustomViews($this->moduleInstance);
 
 		// Export module inventory fields
 		if ($tabInfo['type'] == 1) {
@@ -319,19 +319,19 @@ class PackageExport
 		}
 
 		// Export Sharing Access
-		$this->exportSharingAccess($this->moduleInstance);
+		$this->export_SharingAccess($this->moduleInstance);
 
 		// Export Actions
-		$this->exportActions($this->moduleInstance);
+		$this->export_Actions($this->moduleInstance);
 
 		// Export Related Lists
-		$this->exportRelatedLists($this->moduleInstance);
+		$this->export_RelatedLists($this->moduleInstance);
 
 		// Export Custom Links
-		$this->exportCustomLinks($this->moduleInstance);
+		$this->export_CustomLinks($this->moduleInstance);
 
 		//Export cronTasks
-		$this->exportCronTasks($this->moduleInstance);
+		$this->export_CronTasks($this->moduleInstance);
 
 		$this->closeNode('module');
 	}
@@ -340,7 +340,7 @@ class PackageExport
 	 * Export module base and related tables
 	 * @access private
 	 */
-	public function exportTables()
+	public function export_Tables()
 	{
 		$modulename = $this->moduleInstance->name;
 		$this->openNode('tables');
@@ -357,7 +357,7 @@ class PackageExport
 			foreach ($tables as $table) {
 				$this->openNode('table');
 				$this->outputNode($table, 'name');
-				$this->outputNode('<![CDATA[' . Utils::createTableSql($table) . ']]>', 'sql');
+				$this->outputNode('<![CDATA[' . Utils::CreateTableSql($table) . ']]>', 'sql');
 				$this->closeNode('table');
 			}
 		}
@@ -368,10 +368,10 @@ class PackageExport
 	 * Export module blocks with its related fields
 	 * @access private
 	 */
-	public function exportBlocks($moduleInstance)
+	public function export_Blocks($moduleInstance)
 	{
 		$adb = \PearDatabase::getInstance();
-		$sqlresult = $adb->pquery('SELECT * FROM vtiger_blocks WHERE tabid = ?', Array($moduleInstance->id));
+		$sqlresult = $adb->pquery("SELECT * FROM vtiger_blocks WHERE tabid = ?", Array($moduleInstance->id));
 		$resultrows = $adb->num_rows($sqlresult);
 
 		if (empty($resultrows))
@@ -404,7 +404,7 @@ class PackageExport
 			$this->outputNode($block_islist, 'islist');
 
 			// Export fields associated with the block
-			$this->exportFields($moduleInstance, $blockid);
+			$this->export_Fields($moduleInstance, $blockid);
 			$this->closeNode('block');
 		}
 		$this->closeNode('blocks');
@@ -414,11 +414,11 @@ class PackageExport
 	 * Export fields related to a module block
 	 * @access private
 	 */
-	public function exportFields($moduleInstance, $blockid)
+	public function export_Fields($moduleInstance, $blockid)
 	{
 		$adb = \PearDatabase::getInstance();
 
-		$fieldresult = $adb->pquery('SELECT * FROM vtiger_field WHERE tabid=? && block=?', Array($moduleInstance->id, $blockid));
+		$fieldresult = $adb->pquery("SELECT * FROM vtiger_field WHERE tabid=? && block=?", Array($moduleInstance->id, $blockid));
 		$fieldcount = $adb->num_rows($fieldresult);
 
 		if (empty($fieldcount))
@@ -532,11 +532,11 @@ class PackageExport
 	 * Export Custom views of the module
 	 * @access private
 	 */
-	public function exportCustomViews($moduleInstance)
+	public function export_CustomViews($moduleInstance)
 	{
 		$db = \PearDatabase::getInstance();
 
-		$customviewres = $db->pquery('SELECT * FROM vtiger_customview WHERE entitytype = ?', [$moduleInstance->name]);
+		$customviewres = $db->pquery("SELECT * FROM vtiger_customview WHERE entitytype = ?", [$moduleInstance->name]);
 		if (!$customviewres->rowCount())
 			return;
 
@@ -591,11 +591,11 @@ class PackageExport
 	 * Export Sharing Access of the module
 	 * @access private
 	 */
-	public function exportSharingAccess($moduleInstance)
+	public function export_SharingAccess($moduleInstance)
 	{
 		$adb = \PearDatabase::getInstance();
 
-		$deforgshare = $adb->pquery('SELECT * FROM vtiger_def_org_share WHERE tabid=?', Array($moduleInstance->id));
+		$deforgshare = $adb->pquery("SELECT * FROM vtiger_def_org_share WHERE tabid=?", Array($moduleInstance->id));
 		$deforgshareCount = $adb->num_rows($deforgshare);
 
 		if (empty($deforgshareCount))
@@ -621,7 +621,7 @@ class PackageExport
 		$this->closeNode('sharingaccess');
 	}
 
-	public function exportActions($moduleInstance)
+	public function export_Actions($moduleInstance)
 	{
 
 		if (!$moduleInstance->isentitytype)
@@ -647,14 +647,14 @@ class PackageExport
 	 * Export related lists associated with module.
 	 * @access private
 	 */
-	public function exportRelatedLists($moduleInstance)
+	public function export_RelatedLists($moduleInstance)
 	{
 
 		if (!$moduleInstance->isentitytype)
 			return;
 
 		$adb = \PearDatabase::getInstance();
-		$result = $adb->pquery('SELECT * FROM vtiger_relatedlists WHERE tabid = ?', Array($moduleInstance->id));
+		$result = $adb->pquery("SELECT * FROM vtiger_relatedlists WHERE tabid = ?", Array($moduleInstance->id));
 		if ($adb->num_rows($result)) {
 			$this->openNode('relatedlists');
 
@@ -721,7 +721,7 @@ class PackageExport
 	 * Export custom links of the module.
 	 * @access private
 	 */
-	public function exportCustomLinks($moduleInstance)
+	public function export_CustomLinks($moduleInstance)
 	{
 		$customlinks = $moduleInstance->getLinksForExport();
 		if (!empty($customlinks)) {
@@ -746,7 +746,7 @@ class PackageExport
 	 * Export cron tasks for the module.
 	 * @access private
 	 */
-	public function exportCronTasks($moduleInstance)
+	public function export_CronTasks($moduleInstance)
 	{
 		$cronTasks = Cron::listAllInstancesByModule($moduleInstance->name);
 		$this->openNode('crons');
@@ -769,9 +769,9 @@ class PackageExport
 	 * @param Boolean true appends linebreak, false to avoid it
 	 * @access private
 	 */
-	public static function log($message, $delim = true)
+	static function log($message, $delim = true)
 	{
-		Utils::log($message, $delim);
+		Utils::Log($message, $delim);
 	}
 
 	/**

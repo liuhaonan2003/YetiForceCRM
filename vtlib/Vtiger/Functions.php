@@ -339,7 +339,7 @@ class Functions
 		return $string;
 	}
 
-	public static function fromHtmlPopup($string, $encode = true)
+	public static function fromHTML_Popup($string, $encode = true)
 	{
 		$popup_toHtml = array(
 			'"' => '&quot;',
@@ -670,7 +670,7 @@ class Functions
 	public static function getHtmlOrPlainText($content)
 	{
 		if ($content !== strip_tags($content)) {
-			$content = \App\Purifier::decodeHtml($content);
+			$content = decode_html($content);
 		} else {
 			$content = nl2br($content);
 		}
@@ -682,10 +682,10 @@ class Functions
 	 * Takes no value as input
 	 * returns the query result set object
 	 */
-	public static function getGroupOptions()
+	public static function get_group_options()
 	{
 		$adb = \PearDatabase::getInstance();
-		$sql = 'select groupname,groupid from vtiger_groups';
+		$sql = "select groupname,groupid from vtiger_groups";
 		$result = $adb->pquery($sql, []);
 		return $result;
 	}

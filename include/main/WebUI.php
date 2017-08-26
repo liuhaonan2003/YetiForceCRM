@@ -27,7 +27,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint
 	/**
 	 * Function to check if the User has logged in
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	protected function checkLogin(\App\Request $request)
 	{
@@ -41,7 +41,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint
 			if (!$request->isAjax()) {
 				header('Location: index.php');
 			}
-			throw new \App\Exceptions\AppException('Login is required', 401);
+			throw new \Exception\AppException('Login is required', 401);
 		}
 	}
 
@@ -70,7 +70,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		if (empty($moduleModel)) {
-			throw new \App\Exceptions\AppException(\App\Language::translate($moduleName) . ' ' . \App\Language::translate('LBL_HANDLER_NOT_FOUND'));
+			throw new \Exception\AppException(\App\Language::translate($moduleName) . ' ' . \App\Language::translate('LBL_HANDLER_NOT_FOUND'));
 		}
 
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
@@ -80,7 +80,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint
 			$handler->checkPermission($request);
 			return;
 		}
-		throw new \App\Exceptions\NoPermitted('LBL_NOT_ACCESSIBLE');
+		throw new \Exception\NoPermitted('LBL_NOT_ACCESSIBLE');
 	}
 
 	protected function triggerPreProcess($handler, \App\Request $request)
@@ -207,12 +207,12 @@ class Vtiger_WebUI extends Vtiger_EntryPoint
 				$response = $handler->process($request);
 				$this->triggerPostProcess($handler, $request);
 			} else {
-				throw new \App\Exceptions\AppException('LBL_HANDLER_NOT_FOUND');
+				throw new \Exception\AppException('LBL_HANDLER_NOT_FOUND');
 			}
 		} catch (Exception $e) {
 			\App\Log::error($e->getMessage() . ' => ' . $e->getFile() . ':' . $e->getLine());
 			$tpl = 'OperationNotPermitted.tpl';
-			if ($e instanceof \App\Exceptions\NoPermittedToRecord || $e instanceof WebServiceException) {
+			if ($e instanceof \Exception\NoPermittedToRecord || $e instanceof WebServiceException) {
 				$tpl = 'NoPermissionsForRecord.tpl';
 			}
 			\vtlib\Functions::throwNewException($e, false, $tpl);

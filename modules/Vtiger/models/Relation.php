@@ -236,7 +236,7 @@ class Vtiger_Relation_Model extends \App\Base
 	/**
 	 * Get query form relation
 	 * @return \App\QueryGenerator
-	 * @throws \App\Exceptions\NotAllowedMethod
+	 * @throws \Exception\NotAllowedMethod
 	 */
 	public function getQuery()
 	{
@@ -247,7 +247,7 @@ class Vtiger_Relation_Model extends \App\Base
 			$this->$functionName();
 		} else {
 			App\Log::error("Not exist relation: $functionName in " . __METHOD__);
-			throw new \App\Exceptions\NotAllowedMethod('LBL_NOT_EXIST_RELATION: ' . $functionName);
+			throw new \Exception\NotAllowedMethod('LBL_NOT_EXIST_RELATION: ' . $functionName);
 		}
 		if ($this->showCreatorDetail()) {
 			$queryGenerator->setCustomColumn('rel_created_user');
@@ -393,7 +393,7 @@ class Vtiger_Relation_Model extends \App\Base
 
 	/**
 	 * Get Activities for related module
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public function getActivities()
 	{
@@ -415,7 +415,7 @@ class Vtiger_Relation_Model extends \App\Base
 				if (in_array($moduleName, $referenceSubProcessInstance->getReferenceList())) {
 					$queryGenerator->addNativeCondition(['vtiger_activity.subprocess' => $this->get('parentRecord')->getId()]);
 				} else {
-					throw new \App\Exceptions\AppException('LBL_HANDLER_NOT_FOUND');
+					throw new \Exception\AppException('LBL_HANDLER_NOT_FOUND');
 				}
 			}
 		}
@@ -699,6 +699,31 @@ class Vtiger_Relation_Model extends \App\Base
 		return $fields;
 	}
 
+	public static function updateRelationSequenceAndPresence($relatedInfoList, $sourceModuleTabId)
+	{
+		$db = PearDatabase::getInstance();
+		$query = 'UPDATE vtiger_relatedlists SET sequence=CASE ';
+		$relation_ids = [];
+		foreach ($relatedInfoList as $relatedInfo) {
+			$relation_id = $relatedInfo['relation_id'];
+			$relation_ids[] = $relation_id;
+			$sequence = $relatedInfo['sequence'];
+			$presence = $relatedInfo['presence'];
+			$query .= ' WHEN relation_id=' . $relation_id . ' THEN ' . $sequence;
+		}
+		$query .= ' END , ';
+		$query .= ' presence = CASE ';
+		foreach ($relatedInfoList as $relatedInfo) {
+			$relation_id = $relatedInfo['relation_id'];
+			$relation_ids[] = $relation_id;
+			$sequence = $relatedInfo['sequence'];
+			$presence = $relatedInfo['presence'];
+			$query .= ' WHEN relation_id=' . $relation_id . ' THEN ' . $presence;
+		}
+		$query .= ' END WHERE tabid=? && relation_id IN (' . generateQuestionMarks($relation_ids) . ')';
+		$db->pquery($query, array($sourceModuleTabId, $relation_ids));
+	}
+
 	/**
 	 * Function to set presence relation
 	 * @param int $relationId
@@ -706,7 +731,7 @@ class Vtiger_Relation_Model extends \App\Base
 	 */
 	public static function updateRelationPresence($relationId, $status)
 	{
-		\App\Db::getInstance()->createCommand()->update('vtiger_relatedlists', ['presence' => $status === 0 ? 1 : 0], ['relation_id' => $relationId])->execute();
+		\App\Db::getInstance()->createCommand()->update('vtiger_relatedlists', ['presence' => $status === '0' ? 1 : 0], ['relation_id' => $relationId])->execute();
 	}
 
 	public static function removeRelationById($relationId)

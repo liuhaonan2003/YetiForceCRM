@@ -325,7 +325,7 @@ class Oss_Tool
 		if ($tabId) {
 			vtlib\Link::addLink($tabId, $type, $widgetName, $link);
 		} else {
-			vtlib\Utils::log('tabid module not found - check if module name is correct');
+			vtlib\Utils::Log('tabid module not found - check if module name is correct');
 		}
 	}
 
@@ -342,7 +342,7 @@ class Oss_Tool
 		for ($i = 0; $i < $numMandatoryArg; $i++) {
 			if (empty($parameterList[$i])) {
 				$i++;
-				vtlib\Utils::log($i . ' function parameter is empty');
+				vtlib\Utils::Log($i . ' function parameter is empty');
 				return false;
 			}
 		}

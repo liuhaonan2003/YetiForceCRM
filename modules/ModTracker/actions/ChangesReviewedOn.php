@@ -10,27 +10,22 @@
 class ModTracker_ChangesReviewedOn_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
 		$sourceModule = $request->get('sourceModule');
-		if ($record) {
+		if (!empty($record)) {
 			$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record);
-			if (!$recordModel->isViewable() || !$recordModel->getModule()->isTrackingEnabled()) {
-				throw new \App\Exceptions\NoPermittedToRecord('LBL_PERMISSION_DENIED');
+			if (!$recordModel->getModule()->isTrackingEnabled()) {
+				throw new \Exception\NoPermittedToRecord('LBL_PERMISSION_DENIED');
 			}
-		} elseif ($sourceModule) {
+		} elseif (!empty($sourceModule)) {
 			$moduleModel = Vtiger_Module_Model::getInstance($sourceModule);
 			if (!$moduleModel || $moduleModel->isTrackingEnabled()) {
-				throw new \App\Exceptions\NoPermittedToRecord('LBL_PERMISSION_DENIED');
+				throw new \Exception\NoPermittedToRecord('LBL_PERMISSION_DENIED');
 			}
 		} else {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermittedToRecord('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -48,7 +43,7 @@ class ModTracker_ChangesReviewedOn_Action extends Vtiger_Action_Controller
 			$this->invokeExposedMethod($mode, $request);
 			return;
 		}
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
 		$result = ModTracker_Record_Model::setLastReviewed($record);
 		ModTracker_Record_Model::unsetReviewed($record, false, $result);
 		$response = new Vtiger_Response();
@@ -58,12 +53,7 @@ class ModTracker_ChangesReviewedOn_Action extends Vtiger_Action_Controller
 
 	public function getUnreviewed(\App\Request $request)
 	{
-		$records = $request->getArray('recordsId');
-		foreach ($records as $key => $record) {
-			if (!\App\Privilege::isPermitted($request->get('sourceModule'), 'DetailView', $record)) {
-				unset($records[$key]);
-			}
-		}
+		$records = $request->get('recordsId');
 		$result = ModTracker_Record_Model::getUnreviewed($records, false, true);
 		$response = new Vtiger_Response();
 		$response->setResult($result);

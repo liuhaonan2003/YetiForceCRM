@@ -12,35 +12,27 @@
 Class Vtiger_Edit_View extends Vtiger_Index_View
 {
 
-	/**
-	 * Record model instance
-	 * @var Vtiger_Record_Model 
-	 */
-	protected $record;
+	protected $record = false;
 
 	public function __construct()
 	{
 		parent::__construct();
 	}
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
+
 		if (!empty($record)) {
 			$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
-			$isPermited = $recordModel->isEditable() || ($request->getBoolean('isDuplicate') === true && $recordModel->getModule()->isPermitted('DuplicateRecord') && $recordModel->isCreateable() && $recordModel->isViewable());
+			$isPermited = $recordModel->isEditable() || ($request->getBoolean('isDuplicate') === true && $recordModel->isCreateable() && $recordModel->isViewable());
 		} else {
 			$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 			$isPermited = $recordModel->isCreateable();
 		}
 		if (!$isPermited) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
 	}
 
@@ -66,7 +58,7 @@ Class Vtiger_Edit_View extends Vtiger_Index_View
 	{
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
-		$record = $request->getInteger('record');
+		$record = $request->get('record');
 		if (!empty($record) && $request->getBoolean('isDuplicate') === true) {
 			$viewer->assign('MODE', '');
 			$viewer->assign('RECORD_ID', '');

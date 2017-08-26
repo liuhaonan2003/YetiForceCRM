@@ -71,11 +71,11 @@ class Vendors extends CRMEntity
 	 * @param reference variable - where condition is passed when the query is executed
 	 * Returns Export Vendors Query.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 
 		$current_user = vglobal('current_user');
-		\App\Log::trace('Entering createExportQuery(' . $where . ') method ...');
+		\App\Log::trace('Entering create_export_query(' . $where . ') method ...');
 
 		include('include/utils/ExportUtils.php');
 
@@ -102,7 +102,7 @@ class Vendors extends CRMEntity
 		else
 			$query .= sprintf('  WHERE %s', $where_auto);
 
-		\App\Log::trace('Exiting createExportQuery method ...');
+		\App\Log::trace('Exiting create_export_query method ...');
 		return $query;
 	}
 
@@ -239,12 +239,12 @@ class Vendors extends CRMEntity
 		parent::deletePerminently($moduleName, $recordId);
 	}
 
-	public function saveRelatedModule($module, $crmid, $with_module, $with_crmids, $relatedName = false)
+	public function save_related_module($module, $crmid, $with_module, $with_crmids, $relatedName = false)
 	{
 		if (!is_array($with_crmids))
 			$with_crmids = [$with_crmids];
 		if (!in_array($with_module, ['Contacts', 'Products', 'Campaigns'])) {
-			parent::saveRelatedModule($module, $crmid, $with_module, $with_crmids, $relatedName);
+			parent::save_related_module($module, $crmid, $with_module, $with_crmids, $relatedName);
 		} else {
 			foreach ($with_crmids as $with_crmid) {
 				if ($with_module === 'Contacts') {

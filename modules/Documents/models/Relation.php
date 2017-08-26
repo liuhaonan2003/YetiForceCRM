@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Relation Model Class
  * @package YetiForce.Model
@@ -6,16 +7,9 @@
  * @license YetiForce Public License 2.0 (licenses/License.html or yetiforce.com)
  * @author Radosław Skrzypczak <r.skrzypczak@yetiforce.com>
  */
-
-/**
- * Class Documents_Relation_Model
- */
 class Documents_Relation_Model extends Vtiger_Relation_Model
 {
 
-	/**
-	 * Set exceptional data
-	 */
 	public function setExceptionData()
 	{
 		$data = [
@@ -28,12 +22,6 @@ class Documents_Relation_Model extends Vtiger_Relation_Model
 		$this->setData($data);
 	}
 
-	/**
-	 * Delete relation
-	 * @param int $relatedRecordId
-	 * @param int $sourceRecordId
-	 * @return boolean
-	 */
 	public function deleteRelation($relatedRecordId, $sourceRecordId)
 	{
 		include_once('modules/ModTracker/ModTracker.php');
@@ -44,13 +32,13 @@ class Documents_Relation_Model extends Vtiger_Relation_Model
 		if ($destinationModuleName == 'OSSMailView' || $sourceModuleName == 'OSSMailView') {
 			if ($destinationModuleName == 'OSSMailView') {
 				$mailId = $relatedRecordId;
-				$crmId = $sourceRecordId;
+				$crmid = $sourceRecordId;
 			} else {
 				$mailId = $sourceRecordId;
-				$crmId = $relatedRecordId;
+				$crmid = $relatedRecordId;
 			}
-
-			if (\App\Db::getInstance()->createCommand()->delete('vtiger_ossmailview_relation', ['crmid' => $crmId, 'ossmailviewid' => $mailId])->execute()) {
+			$db = PearDatabase::getInstance();
+			if ($db->delete('vtiger_ossmailview_relation', 'crmid = ? && ossmailviewid = ?', [$crmid, $mailId]) > 0) {
 				return true;
 			} else {
 				return false;

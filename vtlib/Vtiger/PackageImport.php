@@ -91,6 +91,20 @@ class PackageImport extends PackageExport
 	}
 
 	/**
+	 * Get the value of matching path (instead of complete xpath result)
+	 * @param String Path expression for which value is required
+	 */
+	public function xpath_value($path)
+	{
+		$xpathres = $this->xpath($path);
+		foreach ($xpathres as $pathkey => $pathvalue) {
+			if ($pathkey == $path)
+				return $pathvalue;
+		}
+		return false;
+	}
+
+	/**
 	 * Are we trying to import language package?
 	 */
 	public function isLanguageType($zipfile = null)
@@ -539,7 +553,7 @@ class PackageImport extends PackageExport
 			} else {
 				$this->initImport($zipfile, $overwrite);
 				// Call module import function
-				$this->importModule();
+				$this->import_Module();
 			}
 		}
 	}
@@ -548,7 +562,7 @@ class PackageImport extends PackageExport
 	 * Import Module
 	 * @access private
 	 */
-	public function importModule()
+	public function import_Module()
 	{
 		$tabname = $this->_modulexml->name;
 		$tabLabel = $this->_modulexml->label;
@@ -583,19 +597,19 @@ class PackageImport extends PackageExport
 			$moduleInstance->initWebservice();
 			$this->moduleInstance = $moduleInstance;
 
-			$this->importTables($this->_modulexml);
-			$this->importBlocks($this->_modulexml, $moduleInstance);
+			$this->import_Tables($this->_modulexml);
+			$this->import_Blocks($this->_modulexml, $moduleInstance);
 			$this->importInventory();
-			$this->importCustomViews($this->_modulexml, $moduleInstance);
-			$this->importSharingAccess($this->_modulexml, $moduleInstance);
-			$this->importEvents($this->_modulexml, $moduleInstance);
-			$this->importActions($this->_modulexml, $moduleInstance);
-			$this->importRelatedLists($this->_modulexml, $moduleInstance);
-			$this->importCustomLinks($this->_modulexml, $moduleInstance);
-			$this->importCronTasks($this->_modulexml);
+			$this->import_CustomViews($this->_modulexml, $moduleInstance);
+			$this->import_SharingAccess($this->_modulexml, $moduleInstance);
+			$this->import_Events($this->_modulexml, $moduleInstance);
+			$this->import_Actions($this->_modulexml, $moduleInstance);
+			$this->import_RelatedLists($this->_modulexml, $moduleInstance);
+			$this->import_CustomLinks($this->_modulexml, $moduleInstance);
+			$this->import_CronTasks($this->_modulexml);
 			Module::fireEvent($moduleInstance->name, Module::EVENT_MODULE_POSTINSTALL);
 		} else {
-			$this->importUpdate($this->_modulexml);
+			$this->import_update($this->_modulexml);
 		}
 	}
 
@@ -603,7 +617,7 @@ class PackageImport extends PackageExport
 	 * Import Tables of the module
 	 * @access private
 	 */
-	public function importTables($modulenode)
+	public function import_Tables($modulenode)
 	{
 		if (empty($modulenode->tables) || empty($modulenode->tables->table))
 			return;
@@ -615,19 +629,19 @@ class PackageImport extends PackageExport
 			$tableName = $tablenode->name;
 			$sql = (string) $tablenode->sql; // Convert to string format
 			// Avoid executing SQL that will DELETE or DROP table data
-			if (Utils::isCreateSql($sql)) {
+			if (Utils::IsCreateSql($sql)) {
 				if (!Utils::checkTable($tableName)) {
 					self::log("SQL: $sql ... ", false);
-					Utils::executeQuery($sql);
-					self::log('DONE');
+					Utils::ExecuteQuery($sql);
+					self::log("DONE");
 				}
 			} else {
-				if (Utils::isDestructiveSql($sql)) {
+				if (Utils::IsDestructiveSql($sql)) {
 					self::log("SQL: $sql ... SKIPPED");
 				} else {
 					self::log("SQL: $sql ... ", false);
-					Utils::executeQuery($sql);
-					self::log('DONE');
+					Utils::ExecuteQuery($sql);
+					self::log("DONE");
 				}
 			}
 		}
@@ -638,13 +652,13 @@ class PackageImport extends PackageExport
 	 * Import Blocks of the module
 	 * @access private
 	 */
-	public function importBlocks($modulenode, $moduleInstance)
+	public function import_Blocks($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->blocks) || empty($modulenode->blocks->block))
 			return;
 		foreach ($modulenode->blocks->block as $blocknode) {
-			$blockInstance = $this->importBlock($modulenode, $moduleInstance, $blocknode);
-			$this->importFields($blocknode, $blockInstance, $moduleInstance);
+			$blockInstance = $this->import_Block($modulenode, $moduleInstance, $blocknode);
+			$this->import_Fields($blocknode, $blockInstance, $moduleInstance);
 		}
 	}
 
@@ -652,7 +666,7 @@ class PackageImport extends PackageExport
 	 * Import Block of the module
 	 * @access private
 	 */
-	public function importBlock($modulenode, $moduleInstance, $blocknode)
+	public function import_Block($modulenode, $moduleInstance, $blocknode)
 	{
 		$blocklabel = $blocknode->label;
 
@@ -681,13 +695,13 @@ class PackageImport extends PackageExport
 	 * Import Fields of the module
 	 * @access private
 	 */
-	public function importFields($blocknode, $blockInstance, $moduleInstance)
+	public function import_Fields($blocknode, $blockInstance, $moduleInstance)
 	{
 		if (empty($blocknode->fields) || empty($blocknode->fields->field))
 			return;
 
 		foreach ($blocknode->fields->field as $fieldnode) {
-			$this->importField($blocknode, $blockInstance, $moduleInstance, $fieldnode);
+			$this->import_Field($blocknode, $blockInstance, $moduleInstance, $fieldnode);
 		}
 	}
 
@@ -695,7 +709,7 @@ class PackageImport extends PackageExport
 	 * Import Field of the module
 	 * @access private
 	 */
-	public function importField($blocknode, $blockInstance, $moduleInstance, $fieldnode)
+	public function import_Field($blocknode, $blockInstance, $moduleInstance, $fieldnode)
 	{
 		$fieldInstance = new Field();
 		$fieldInstance->name = (string) $fieldnode->fieldname;
@@ -771,12 +785,12 @@ class PackageImport extends PackageExport
 	 * Import Custom views of the module
 	 * @access private
 	 */
-	public function importCustomViews($modulenode, $moduleInstance)
+	public function import_CustomViews($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->customviews) || empty($modulenode->customviews->customview))
 			return;
 		foreach ($modulenode->customviews->customview as $customviewnode) {
-			$this->importCustomView($modulenode, $moduleInstance, $customviewnode);
+			$this->import_CustomView($modulenode, $moduleInstance, $customviewnode);
 		}
 	}
 
@@ -784,7 +798,7 @@ class PackageImport extends PackageExport
 	 * Import Custom View of the module
 	 * @access private
 	 */
-	public function importCustomView($modulenode, $moduleInstance, $customviewnode)
+	public function import_CustomView($modulenode, $moduleInstance, $customviewnode)
 	{
 		$filterInstance = new Filter();
 		$filterInstance->name = $customviewnode->viewname;
@@ -815,7 +829,7 @@ class PackageImport extends PackageExport
 	 * Import Sharing Access of the module
 	 * @access private
 	 */
-	public function importSharingAccess($modulenode, $moduleInstance)
+	public function import_SharingAccess($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->sharingaccess))
 			return;
@@ -831,7 +845,7 @@ class PackageImport extends PackageExport
 	 * Import Events of the module
 	 * @access private
 	 */
-	public function importEvents($modulenode, $moduleInstance)
+	public function import_Events($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->eventHandlers) || empty($modulenode->eventHandlers->event)) {
 			return;
@@ -846,12 +860,12 @@ class PackageImport extends PackageExport
 	 * Import actions of the module
 	 * @access private
 	 */
-	public function importActions($modulenode, $moduleInstance)
+	public function import_Actions($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->actions) || empty($modulenode->actions->action))
 			return;
 		foreach ($modulenode->actions->action as $actionnode) {
-			$this->importAction($modulenode, $moduleInstance, $actionnode);
+			$this->import_Action($modulenode, $moduleInstance, $actionnode);
 		}
 	}
 
@@ -859,7 +873,7 @@ class PackageImport extends PackageExport
 	 * Import action of the module
 	 * @access private
 	 */
-	public function importAction($modulenode, $moduleInstance, $actionnode)
+	public function import_Action($modulenode, $moduleInstance, $actionnode)
 	{
 		$actionstatus = (string) $actionnode->status;
 		if ($actionstatus === 'enabled') {
@@ -873,16 +887,16 @@ class PackageImport extends PackageExport
 	 * Import related lists of the module
 	 * @access private
 	 */
-	public function importRelatedLists($modulenode, $moduleInstance)
+	public function import_RelatedLists($modulenode, $moduleInstance)
 	{
 		if (!empty($modulenode->relatedlists) && !empty($modulenode->relatedlists->relatedlist)) {
 			foreach ($modulenode->relatedlists->relatedlist as $relatedlistnode) {
-				$this->importRelatedlist($modulenode, $moduleInstance, $relatedlistnode);
+				$this->import_Relatedlist($modulenode, $moduleInstance, $relatedlistnode);
 			}
 		}
 		if (!empty($modulenode->inrelatedlists) && !empty($modulenode->inrelatedlists->inrelatedlist)) {
 			foreach ($modulenode->inrelatedlists->inrelatedlist as $inRelatedListNode) {
-				$this->importInRelatedlist($modulenode, $moduleInstance, $inRelatedListNode);
+				$this->import_InRelatedlist($modulenode, $moduleInstance, $inRelatedListNode);
 			}
 		}
 	}
@@ -891,7 +905,7 @@ class PackageImport extends PackageExport
 	 * Import related list of the module.
 	 * @access private
 	 */
-	public function importRelatedlist($modulenode, $moduleInstance, $relatedlistnode)
+	public function import_Relatedlist($modulenode, $moduleInstance, $relatedlistnode)
 	{
 		$relModuleInstance = Module::getInstance($relatedlistnode->relatedmodule);
 		$label = $relatedlistnode->label;
@@ -908,7 +922,7 @@ class PackageImport extends PackageExport
 		return $relModuleInstance;
 	}
 
-	public function importInRelatedlist($modulenode, $moduleInstance, $inRelatedListNode)
+	public function import_InRelatedlist($modulenode, $moduleInstance, $inRelatedListNode)
 	{
 		$inRelModuleInstance = Module::getInstance($inRelatedListNode->inrelatedmodule);
 		$label = $inRelatedListNode->label;
@@ -929,7 +943,7 @@ class PackageImport extends PackageExport
 	 * Import custom links of the module.
 	 * @access private
 	 */
-	public function importCustomLinks($modulenode, $moduleInstance)
+	public function import_CustomLinks($modulenode, $moduleInstance)
 	{
 		if (empty($modulenode->customlinks) || empty($modulenode->customlinks->customlink))
 			return;
@@ -952,7 +966,7 @@ class PackageImport extends PackageExport
 	 * Import cron jobs of the module.
 	 * @access private
 	 */
-	public function importCronTasks($modulenode)
+	public function import_CronTasks($modulenode)
 	{
 		if (empty($modulenode->crons) || empty($modulenode->crons->cron))
 			return;
@@ -969,7 +983,7 @@ class PackageImport extends PackageExport
 		}
 	}
 
-	public function importUpdate($modulenode)
+	public function import_update($modulenode)
 	{
 		$dirName = 'cache/updates';
 		$result = false;
@@ -1049,9 +1063,9 @@ class PackageImport extends PackageExport
 		$table = $inventoryFieldInstance->getTableName();
 
 		if ($instance->isColumnType()) {
-			Utils::addColumn($table, $fieldNode->columnname, $instance->getDBType());
+			Utils::AddColumn($table, $fieldNode->columnname, $instance->getDBType());
 			foreach ($instance->getCustomColumn() as $column => $criteria) {
-				Utils::addColumn($table, $column, $criteria);
+				Utils::AddColumn($table, $column, $criteria);
 			}
 		}
 		$db = \PearDatabase::getInstance();

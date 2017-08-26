@@ -122,13 +122,13 @@ class Contacts extends CRMEntity
 	 * @param reference variable - where condition is passed when the query is executed
 	 * Returns Export Contacts Query.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 
 		$current_user = vglobal('current_user');
-		\App\Log::trace('Entering createExportQuery(' . $where . ') method ...');
+		\App\Log::trace("Entering create_export_query(" . $where . ") method ...");
 
-		include('include/utils/ExportUtils.php');
+		include("include/utils/ExportUtils.php");
 
 		//To get the Permitted fields query and the permitted fields list
 		$sql = getPermittedFieldsQuery("Contacts", "detail_view");
@@ -155,8 +155,8 @@ class Contacts extends CRMEntity
 		else
 			$query .= sprintf(' where %s', $where_auto);
 
-		\App\Log::trace('Export Query Constructed Successfully');
-		\App\Log::trace('Exiting createExportQuery method ...');
+		\App\Log::trace("Export Query Constructed Successfully");
+		\App\Log::trace("Exiting create_export_query method ...");
 		return $query;
 	}
 
@@ -284,7 +284,7 @@ class Contacts extends CRMEntity
 	 * @param - $recordId 
 	 */
 
-	public function markDeleted($recordId)
+	public function mark_deleted($recordId)
 	{
 
 		$db = \App\Db::getInstance();
@@ -293,7 +293,7 @@ class Contacts extends CRMEntity
 			'support_start_date' => null,
 			'support_end_date' => null
 			], ['customerid' => $recordId])->execute();
-		parent::markDeleted($recordId);
+		parent::mark_deleted($recordId);
 	}
 
 	// Function to unlink an entity with given Id from another entity
@@ -314,12 +314,12 @@ class Contacts extends CRMEntity
 		}
 	}
 
-	public function saveRelatedModule($module, $crmid, $withModule, $withCrmid, $relatedName = false)
+	public function save_related_module($module, $crmid, $withModule, $withCrmid, $relatedName = false)
 	{
 		if (!is_array($withCrmid))
 			$withCrmid = [$withCrmid];
 		if (!in_array($withModule, ['Products', 'Campaigns', 'Vendors'])) {
-			parent::saveRelatedModule($module, $crmid, $withModule, $withCrmid, $relatedName);
+			parent::save_related_module($module, $crmid, $withModule, $withCrmid, $relatedName);
 		} else {
 			foreach ($withCrmid as $id) {
 				if ($withModule === 'Campaigns') {

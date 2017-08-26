@@ -56,11 +56,11 @@ class ModComments_Record_Model extends Vtiger_Record_Model
 				} else
 					return '';
 			} else if ($isMailConverterType == 1) {
-				return \App\Layout::getImagePath('MailConverterComment.png');
+				return vimage_path('MailConverterComment.png');
 			} else {
 				$imagePath = $commentor->getImageDetails();
 				if (!empty($imagePath[0]['name'])) {
-					return $imagePath[0]['path'];
+					return $imagePath[0]['path'] . '_' . $imagePath[0]['name'];
 				}
 			}
 		}

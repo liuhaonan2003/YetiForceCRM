@@ -10,16 +10,11 @@
 class OSSMailView_MassDelete_Action extends Vtiger_Mass_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($request->getModule(), 'MassDelete')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if (!$currentUserPriviligesModel->hasModulePermission($request->getModule())) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -45,8 +40,8 @@ class OSSMailView_MassDelete_Action extends Vtiger_Mass_Action
 		$permission = true;
 		foreach ($recordIds as $recordId) {
 			if (Users_Privileges_Model::isPermitted($moduleName, 'Delete', $recordId)) {
-				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
-				$recordModel->deleteRel($recordId);
+				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName); // YTfixme: not 100% sure thats whats expected
+				$recordModel->delete_rel($recordId);
 				$recordModel->delete();
 			} else {
 				$permission = false;
@@ -54,7 +49,7 @@ class OSSMailView_MassDelete_Action extends Vtiger_Mass_Action
 		}
 
 		if (!$permission) {
-			throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
 		}
 
 		$cvId = $request->get('viewname');

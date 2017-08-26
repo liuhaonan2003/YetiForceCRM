@@ -73,13 +73,13 @@ class Leads extends CRMEntity
 	 * @param reference variable - where condition is passed when the query is executed
 	 * Returns Export Leads Query.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 
 		$current_user = vglobal('current_user');
-		\App\Log::trace('Entering createExportQuery(' . $where . ') method ...');
+		\App\Log::trace("Entering create_export_query(" . $where . ") method ...");
 
-		include('include/utils/ExportUtils.php');
+		include("include/utils/ExportUtils.php");
 
 		//To get the Permitted fields query and the permitted fields list
 		$sql = getPermittedFieldsQuery("Leads", "detail_view");
@@ -234,7 +234,7 @@ class Leads extends CRMEntity
 		}
 	}
 
-	public function saveRelatedModule($module, $crmid, $withModule, $withCrmids, $relatedName = false)
+	public function save_related_module($module, $crmid, $withModule, $withCrmids, $relatedName = false)
 	{
 		if (!is_array($withCrmids))
 			$withCrmids = [$withCrmids];
@@ -254,7 +254,7 @@ class Leads extends CRMEntity
 					'campaignrelstatusid' => 0
 				])->execute();
 			} else {
-				parent::saveRelatedModule($module, $crmid, $withModule, $withCrmid, $relatedName);
+				parent::save_related_module($module, $crmid, $withModule, $withCrmid, $relatedName);
 			}
 		}
 	}

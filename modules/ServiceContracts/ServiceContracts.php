@@ -249,7 +249,7 @@ class ServiceContracts extends CRMEntity
 	/**
 	 * Create query to export the records.
 	 */
-	public function createExportQuery($where)
+	public function create_export_query($where)
 	{
 		$current_user = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 
@@ -351,7 +351,7 @@ class ServiceContracts extends CRMEntity
 	 * @param String Module name
 	 * @param String Event Type
 	 */
-	public function moduleHandler($moduleName, $eventType)
+	public function vtlib_handler($moduleName, $eventType)
 	{
 
 		require_once('include/utils/utils.php');
@@ -394,17 +394,17 @@ class ServiceContracts extends CRMEntity
 	 * NOTE: This function has been added to CRMEntity (base class).
 	 * You can override the behavior by re-defining it here.
 	 */
-	public function saveRelatedModule($module, $crmid, $with_module, $with_crmids, $relatedName = false)
+	public function save_related_module($module, $crmid, $with_module, $with_crmids, $relatedName = false)
 	{
 		if (!is_array($with_crmids))
 			$with_crmids = Array($with_crmids);
 		foreach ($with_crmids as $with_crmid) {
 			if ($with_module == 'HelpDesk') {
-				parent::saveRelatedModule($module, $crmid, $with_module, $with_crmid);
+				parent::save_related_module($module, $crmid, $with_module, $with_crmid);
 				$this->updateHelpDeskRelatedTo($crmid, $with_crmid);
 				$this->updateServiceContractState($crmid);
 			} else {
-				parent::saveRelatedModule($module, $crmid, $with_module, $with_crmid, $relatedName);
+				parent::save_related_module($module, $crmid, $with_module, $with_crmid, $relatedName);
 			}
 		}
 	}
@@ -443,7 +443,7 @@ class ServiceContracts extends CRMEntity
 	public function updateServiceContractState($focusId)
 	{
 		$this->id = $focusId;
-		$this->retrieveEntityInfo($focusId, 'ServiceContracts');
+		$this->retrieve_entity_info($focusId, 'ServiceContracts');
 
 		$contractTicketsResult = $this->db->pquery("SELECT relcrmid FROM vtiger_crmentityrel
 														WHERE module = 'ServiceContracts'
@@ -460,7 +460,7 @@ class ServiceContracts extends CRMEntity
 			$ticketId = $this->db->query_result($contractTicketsResult, $i, 'relcrmid');
 			$ticketFocus->id = $ticketId;
 			if (isRecordExists($ticketId)) {
-				$ticketFocus->retrieveEntityInfo($ticketId, 'HelpDesk');
+				$ticketFocus->retrieve_entity_info($ticketId, 'HelpDesk');
 				if (strtolower($ticketFocus->column_fields['ticketstatus']) == 'closed') {
 					$totalUsedUnits += $this->computeUsedUnits($ticketFocus->column_fields);
 				}
@@ -568,9 +568,9 @@ class ServiceContracts extends CRMEntity
 	 * NOTE: This function has been added to CRMEntity (base class).
 	 * You can override the behavior by re-defining it here.
 	 */
-	public function deleteRelatedModule($module, $crmid, $with_module, $with_crmid)
+	public function delete_related_module($module, $crmid, $with_module, $with_crmid)
 	{
-		parent::deleteRelatedModule($module, $crmid, $with_module, $with_crmid);
+		parent::delete_related_module($module, $crmid, $with_module, $with_crmid);
 		if ($with_module == 'HelpDesk') {
 			$this->updateServiceContractState($crmid);
 		}

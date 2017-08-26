@@ -33,7 +33,7 @@ class Settings_LayoutEditor_Field_Model extends Vtiger_Field_Model
 		$columnCvstdfilter = $tablename . ":" . $columnName . ":" . $fieldname . ":" . $fldModule . "_" . str_replace(" ", "_", $oldfieldlabel);
 		$selectColumnname = $tablename . ":" . $columnName . ":" . $fldModule . "_" . str_replace(" ", "_", $oldfieldlabel) . ":" . $fieldname . ":" . $fieldtype[0];
 		$reportsummaryColumn = $tablename . ":" . $columnName . ":" . str_replace(" ", "_", $oldfieldlabel);
-		if ($tablename !== 'vtiger_crmentity') {
+		if ($tablename != 'vtiger_crmentity') {
 			$db->createCommand()->dropColumn($tablename, $columnName)->execute();
 		}
 		//we have to remove the entries in customview and report related tables which have this field ($colName)
@@ -46,7 +46,7 @@ class Settings_LayoutEditor_Field_Model extends Vtiger_Field_Model
 		$db->createCommand()->delete('vtiger_reportdatefilter', ['datecolumnname' => $columnCvstdfilter])->execute();
 		$db->createCommand()->delete('vtiger_reportsummary', ['like', 'columnname', $reportsummaryColumn])->execute();
 		//Deleting from convert lead mapping vtiger_table- Jaguar
-		if ($fldModule === 'Leads') {
+		if ($fldModule == 'Leads') {
 			$db->createCommand()->delete('vtiger_convertleadmapping', ['leadfid' => $id])->execute();
 		} elseif ($fldModule == 'Accounts') {
 			$mapDelId = ['Accounts' => 'accountfid'];
@@ -54,7 +54,7 @@ class Settings_LayoutEditor_Field_Model extends Vtiger_Field_Model
 		}
 
 		//HANDLE HERE - we have to remove the table for other picklist type values which are text area and multiselect combo box
-		if ($this->getFieldDataType() === 'picklist' || $this->getFieldDataType() === 'multipicklist') {
+		if ($this->getFieldDataType() == 'picklist' || $this->getFieldDataType() == 'multipicklist') {
 			$query = (new \App\Db\Query())->from('vtiger_field')
 				->where(['fieldname' => $fieldname])
 				->andWhere(['in', 'uitype', [15, 16, 33]]);
@@ -100,21 +100,16 @@ class Settings_LayoutEditor_Field_Model extends Vtiger_Field_Model
 		}
 	}
 
-	/**
-	 * Function to activate field
-	 * @param integer[] $fieldIdsList
-	 * @param integer $blockId
-	 */
 	public static function makeFieldActive($fieldIdsList = [], $blockId)
 	{
 		$maxSequence = (new \App\Db\Query())->from('vtiger_field')->where(['block' => $blockId, 'presence' => [0, 2]])->max('sequence');
-		$db = \App\Db::getInstance();
+
 		$caseExpression = 'CASE';
 		foreach ($fieldIdsList as $fieldId) {
-			$caseExpression .= " WHEN fieldid = {$db->quoteValue($fieldId)} THEN {$db->quoteValue($maxSequence + 1)}";
+			$caseExpression .= " WHEN fieldid = $fieldId THEN " . ($maxSequence + 1);
 		}
 		$caseExpression .= ' ELSE sequence END';
-		$db->createCommand()
+		\App\Db::getInstance()->createCommand()
 			->update('vtiger_field', [
 				'presence' => 2,
 				'sequence' => new \yii\db\Expression($caseExpression),
@@ -239,7 +234,7 @@ class Settings_LayoutEditor_Field_Model extends Vtiger_Field_Model
 		if (!is_array($blockId)) {
 			$blockId = [$blockId];
 		}
-		$query = (new \App\Db\Query())->from('vtiger_field')->where(['block' => $blockId])->orderBy('sequence');
+		$query = (new \App\Db\Query())->from('vtiger_field')->where(['block' => $blockId, 'displaytype' => [1, 2, 4, 5, 9, 10]])->orderBy('sequence');
 		$dataReader = $query->createCommand()->query();
 		$fieldModelsList = [];
 		while ($row = $dataReader->read()) {

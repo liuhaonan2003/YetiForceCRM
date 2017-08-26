@@ -9,16 +9,11 @@
 class OSSMailScanner_GetLog_Action extends Vtiger_Action_Controller
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermittedForAdmin
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		if (!$currentUserModel->isAdminUser()) {
-			throw new \App\Exceptions\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermittedForAdmin('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -29,7 +24,7 @@ class OSSMailScanner_GetLog_Action extends Vtiger_Action_Controller
 		$moduleName = $request->getModule();
 
 		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
-		$log = $recordModel->getScanHistory($startNumber);
+		$log = $recordModel->get_scan_history($startNumber);
 
 		$response = new Vtiger_Response();
 		$response->setResult($log);

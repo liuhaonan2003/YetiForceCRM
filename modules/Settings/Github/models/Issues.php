@@ -18,7 +18,7 @@ class Settings_Github_Issues_Model
 		return $this->valueMap->$key;
 	}
 
-	public static function getInstanceFromArray($issueArray)
+	static function getInstanceFromArray($issueArray)
 	{
 		$issueModel = new self();
 		$issueModel->valueMap = $issueArray;

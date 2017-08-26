@@ -366,7 +366,7 @@ jQuery.Class("Calendar_CalendarView_Js", {
 			if (timeFormat == 24) {
 				var defaultTimeFormat = 'HH:mm';
 			} else {
-				defaultTimeFormat = 'hh:mm A';
+				defaultTimeFormat = 'hh:mm tt';
 			}
 			var startDateString = moment(startDate).format(dateFormat);
 			var startTimeString = moment(startDate).format(defaultTimeFormat);

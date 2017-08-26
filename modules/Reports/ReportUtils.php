@@ -21,11 +21,11 @@ function getFieldByReportLabel($module, $label)
 	// this is required so the internal cache is populated or reused.
 	getColumnFields($module);
 	//lookup all the accessible fields
-	$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module);
+	$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 	$label = \App\Purifier::decodeHtml($label);
 
 	if ($module === 'Calendar') {
-		$cachedEventsFields = VTCacheUtils::lookupFieldInfoModule('Events');
+		$cachedEventsFields = VTCacheUtils::lookupFieldInfo_Module('Events');
 		if ($cachedEventsFields) {
 			if (empty($cachedModuleFields))
 				$cachedModuleFields = $cachedEventsFields;
@@ -43,7 +43,7 @@ function getFieldByReportLabel($module, $label)
 
 	foreach ($cachedModuleFields as $fieldInfo) {
 		$fieldLabel = str_replace(' ', '_', $fieldInfo['fieldlabel']);
-		$fieldLabel = App\Purifier::decodeHtml($fieldLabel);
+		$fieldLabel = decode_html($fieldLabel);
 		if ($label === $fieldLabel) {
 			VTCacheUtils::setReportFieldByLabel($module, $label, $fieldInfo);
 			return $fieldInfo;
@@ -209,15 +209,15 @@ function getReportFieldValue(ReportRun $report, $picklistArray, $dbField, $value
 	if ($fieldvalue == "") {
 		return "-";
 	}
-	$fieldvalue = str_replace('<', '&lt;', $fieldvalue);
-	$fieldvalue = str_replace('>', '&gt;', $fieldvalue);
-	$fieldvalue = App\Purifier::decodeHtml($fieldvalue);
+	$fieldvalue = str_replace("<", "&lt;", $fieldvalue);
+	$fieldvalue = str_replace(">", "&gt;", $fieldvalue);
+	$fieldvalue = decode_html($fieldvalue);
 
-	if (stristr($fieldvalue, '|##|') && empty($fieldType)) {
+	if (stristr($fieldvalue, "|##|") && empty($fieldType)) {
 		$fieldvalue = str_ireplace(' |##| ', ', ', $fieldvalue);
-	} elseif ($fld_type == 'date' && empty($fieldType)) {
+	} elseif ($fld_type == "date" && empty($fieldType)) {
 		$fieldvalue = DateTimeField::convertToUserFormat($fieldvalue);
-	} elseif ($fld_type == 'datetime' && empty($fieldType)) {
+	} elseif ($fld_type == "datetime" && empty($fieldType)) {
 		$date = new DateTimeField($fieldvalue);
 		$fieldvalue = $date->getDisplayDateTimeValue();
 	}

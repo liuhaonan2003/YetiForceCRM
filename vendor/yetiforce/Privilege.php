@@ -18,7 +18,7 @@ class Privilege
 	 * Function to check permission for a Module/Action/Record
 	 * @param string $moduleName
 	 * @param string $actionName
-	 * @param int|bool $record
+	 * @param <Number> $record
 	 * @return Boolean
 	 */
 	public static function isPermitted($moduleName, $actionName = null, $record = false, $userId = false)
@@ -29,19 +29,14 @@ class Privilege
 		}
 		$userPrivileges = \App\User::getPrivilegesFile($userId);
 		$permission = false;
-		if ($moduleName === 'Home' && Request::_get('parent') !== 'Settings') {
+		if (($moduleName == 'Users' || $moduleName == 'Home' || $moduleName == 'uploads') && Request::_get('parenttab') != 'Settings') {
 			//These modules dont have security right now
 			static::$isPermittedLevel = 'SEC_MODULE_DONT_HAVE_SECURITY_RIGHT';
 			\App\Log::trace('Exiting isPermitted method ... - yes');
 			return true;
 		}
-		if ($moduleName === 'Users' && Request::_get('parent') !== 'Settings' && $record == \App\User::getCurrentUserId()) {
-			static::$isPermittedLevel = 'SEC_IS_CURRENT_USER';
-			\App\Log::trace('Exiting isPermitted method ... - yes');
-			return true;
-		}
 		//Checking the Access for the Settings Module
-		if ($moduleName == 'Settings' || $moduleName === 'Administration' || $moduleName === 'System' || Request::_get('parent') === 'Settings') {
+		if ($moduleName == 'Settings' || $moduleName == 'Administration' || $moduleName == 'System' || Request::_get('parenttab') == 'Settings') {
 			if (!$userPrivileges['is_admin']) {
 				$permission = false;
 			} else {
@@ -56,7 +51,7 @@ class Privilege
 		$actionid = Module::getActionId($actionName);
 		$checkModule = $moduleName;
 
-		if ($checkModule === 'Events') {
+		if ($checkModule == 'Events') {
 			$checkModule = 'Calendar';
 		}
 

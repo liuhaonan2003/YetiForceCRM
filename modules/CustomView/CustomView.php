@@ -211,7 +211,7 @@ class CustomView extends CRMEntity
 
 		if ($adb->num_rows($result) == 0 && is_numeric($cvid) && $this->customviewmodule != 'Users') {
 			\App\Log::trace("Error !!!: " . \App\Language::translate('LBL_NO_FOUND_VIEW') . " ID: $cvid");
-			throw new \App\Exceptions\AppException('LBL_NO_FOUND_VIEW');
+			throw new \Exception\AppException('LBL_NO_FOUND_VIEW');
 		} else if (!is_numeric($cvid) && $this->customviewmodule != 'Users') {
 			$filterDir = 'modules' . DIRECTORY_SEPARATOR . $this->customviewmodule . DIRECTORY_SEPARATOR . 'filters' . DIRECTORY_SEPARATOR . $cvid . '.php';
 			if (file_exists($filterDir)) {
@@ -222,7 +222,7 @@ class CustomView extends CRMEntity
 				}
 			} else {
 				\App\Log::trace("Error !!!: " . \App\Language::translate('LBL_NO_FOUND_VIEW') . " Filter: $cvid");
-				throw new \App\Exceptions\AppException('LBL_NO_FOUND_VIEW');
+				throw new \Exception\AppException('LBL_NO_FOUND_VIEW');
 			}
 		} else {
 			while ($columnrow = $adb->fetch_array($result)) {
@@ -378,22 +378,31 @@ class CustomView extends CRMEntity
 	/**
 	 * Function to check if field is present based on
 	 *
-	 * @param string $columnName
-	 * @param string $tableName
+	 * @param String $columnname
+	 * @param String $tablename
 	 */
-	public function isFieldPresentByColumnTable($columnName, $tableName)
+	public function isFieldPresent_ByColumnTable($columnname, $tablename)
 	{
-		if (!isset($this->_fieldby_tblcol_cache[$tableName])) {
-			$rows = (new App\Db\Query())->select(['columnname'])->from('vtiger_field')->where(['tablename' => $tableName, 'presence' => [0, 2]])->column();
-			if ($rows) {
-				$this->_fieldby_tblcol_cache[$tableName] = $rows;
+		$adb = PearDatabase::getInstance();
+
+		if (!isset($this->_fieldby_tblcol_cache[$tablename])) {
+			$query = 'SELECT columnname FROM vtiger_field WHERE tablename = ? and presence in (0,2)';
+
+			$result = $adb->pquery($query, array($tablename));
+			$numrows = $adb->num_rows($result);
+
+			if ($numrows) {
+				$this->_fieldby_tblcol_cache[$tablename] = [];
+				for ($index = 0; $index < $numrows; ++$index) {
+					$this->_fieldby_tblcol_cache[$tablename][] = $adb->query_result($result, $index, 'columnname');
+				}
 			}
 		}
 		// If still the field was not found (might be disabled or deleted?)
-		if (!isset($this->_fieldby_tblcol_cache[$tableName])) {
+		if (!isset($this->_fieldby_tblcol_cache[$tablename])) {
 			return false;
 		}
-		return in_array($columnName, $this->_fieldby_tblcol_cache[$tableName]);
+		return in_array($columnname, $this->_fieldby_tblcol_cache[$tablename]);
 	}
 
 	/** to get the customview Columnlist Query for the given customview Id
@@ -405,46 +414,46 @@ class CustomView extends CRMEntity
 	 */
 	public function getCvColumnListSQL($cvid)
 	{
-		$columnsList = $this->getColumnsListByCvid($cvid);
-		if (isset($columnsList)) {
-			foreach ($columnsList as $columnName => $value) {
-				$tableField = '';
-				if ($value !== '') {
-					$list = explode(':', $value);
+		$columnslist = $this->getColumnsListByCvid($cvid);
+		if (isset($columnslist)) {
+			foreach ($columnslist as $columnname => $value) {
+				$tablefield = "";
+				if ($value != "") {
+					$list = explode(":", $value);
 
 					//Added For getting status for Activities -Jaguar
-					$sqlListColumn = $list[0] . '.' . $list[1];
-					if ($this->customviewmodule === 'Calendar') {
-						if ($list[1] === 'status' || $list[1] === 'activitystatus') {
-							$sqlListColumn = 'vtiger_activity.status as activitystatus';
+					$sqllist_column = $list[0] . "." . $list[1];
+					if ($this->customviewmodule == "Calendar") {
+						if ($list[1] == "status" || $list[1] == "activitystatus") {
+							$sqllist_column = "vtiger_activity.status as activitystatus";
 						}
 					}
 					//Added for assigned to sorting
-					if ($list[1] === 'smownerid') {
+					if ($list[1] == "smownerid") {
 						$userNameSql = \vtlib\Deprecated::getSqlForNameInDisplayFormat(array('first_name' =>
 								'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-						$sqlListColumn = "case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name";
+						$sqllist_column = "case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name";
 					}
-					if ($list[0] === 'vtiger_contactdetails' && $list[1] === 'lastname')
-						$sqlListColumn = 'vtiger_contactdetails.lastname,vtiger_contactdetails.firstname';
-					$sqlList[] = $sqlListColumn;
+					if ($list[0] == "vtiger_contactdetails" && $list[1] == "lastname")
+						$sqllist_column = "vtiger_contactdetails.lastname,vtiger_contactdetails.firstname";
+					$sqllist[] = $sqllist_column;
 					//Ends
 
-					$tableField[$list[0]] = $list[1];
+					$tablefield[$list[0]] = $list[1];
 
 					//Changed as the replace of module name may replace the string if the fieldname has module name in it -- Jeri
-					$fieldInfo = explode('_', $list[3], 2);
-					$fieldLabel = $fieldInfo[1];
-					$fieldLabel = str_replace('_', ' ', $fieldLabel);
+					$fieldinfo = explode('_', $list[3], 2);
+					$fieldlabel = $fieldinfo[1];
+					$fieldlabel = str_replace("_", " ", $fieldlabel);
 
-					if ($this->isFieldPresentByColumnTable($list[1], $list[0])) {
+					if ($this->isFieldPresent_ByColumnTable($list[1], $list[0])) {
 
-						$this->list_fields[$fieldLabel] = $tableField;
-						$this->list_fields_name[$fieldLabel] = $list[2];
+						$this->list_fields[$fieldlabel] = $tablefield;
+						$this->list_fields_name[$fieldlabel] = $list[2];
 					}
 				}
 			}
-			$returnsql = implode(',', $sqlList);
+			$returnsql = implode(",", $sqllist);
 		}
 		return $returnsql;
 	}
@@ -902,7 +911,19 @@ class CustomView extends CRMEntity
 	 */
 	public function getCustomActionDetails($cvid)
 	{
-		return (new App\Db\Query())->select(['subject' => 'vtiger_customaction.subject', 'module' => 'vtiger_customaction.module', 'content' => 'vtiger_customaction.content', 'cvid' => 'vtiger_customaction.cvid'])->from('vtiger_customaction')->innerJoin('vtiger_customview', 'vtiger_customaction.cvid = vtiger_customview.cvid')->where(['vtiger_customaction.cvid' => $cvid])->one();
+		$adb = PearDatabase::getInstance();
+
+		$sSQL = "select vtiger_customaction.* from vtiger_customaction inner join vtiger_customview on vtiger_customaction.cvid = vtiger_customview.cvid";
+		$sSQL .= " where vtiger_customaction.cvid=?";
+		$result = $adb->pquery($sSQL, array($cvid));
+
+		while ($carow = $adb->fetch_array($result)) {
+			$calist["subject"] = $carow["subject"];
+			$calist["module"] = $carow["module"];
+			$calist["content"] = $carow["content"];
+			$calist["cvid"] = $carow["cvid"];
+		}
+		return $calist;
 	}
 
 	public function isPermittedChangeStatus($status)

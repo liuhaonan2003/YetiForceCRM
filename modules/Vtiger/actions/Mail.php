@@ -11,21 +11,20 @@ class Vtiger_Mail_Action extends Vtiger_Action_Controller
 {
 
 	/**
-	 * Function to check permission
+	 * Checking permissions
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 * @throws \App\Exceptions\NoPermittedToRecord
+	 * @return boolean
 	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModulePermission($moduleName)) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if (!\App\Privilege::isPermitted($moduleName)) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
-		if (!$request->isEmpty('sourceRecord') && !\App\Privilege::isPermitted($request->get('sourceModule'), 'DetailView', $request->getInteger('sourceRecord'))) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+		if (!$request->isEmpty('sourceRecord') && !\App\Privilege::isPermitted($request->get('sourceModule'), 'DetailView', $request->get('sourceRecord'))) {
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
+		return true;
 	}
 
 	/**
@@ -119,7 +118,7 @@ class Vtiger_Mail_Action extends Vtiger_Action_Controller
 		$moduleName = $request->getModule();
 		$sourceModule = $request->get('sourceModule');
 		if ($sourceModule) {
-			$parentRecordModel = Vtiger_Record_Model::getInstanceById($request->getInteger('sourceRecord'), $sourceModule);
+			$parentRecordModel = Vtiger_Record_Model::getInstanceById($request->get('sourceRecord'), $sourceModule);
 			$listView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $moduleName);
 		} else {
 			$listView = Vtiger_ListView_Model::getInstance($moduleName, $request->get('viewname'));

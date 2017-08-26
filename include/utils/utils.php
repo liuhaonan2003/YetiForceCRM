@@ -58,7 +58,7 @@ function getColumnFields($module)
 	\App\Log::trace('Entering getColumnFields(' . $module . ') method ...');
 
 	// Lookup in cache for information
-	$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module);
+	$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 
 	if ($cachedModuleFields === false) {
 		$fieldsInfo = vtlib\Functions::getModuleFieldInfos($module);
@@ -71,14 +71,14 @@ function getColumnFields($module)
 			}
 		}
 		// For consistency get information from cache
-		$cachedModuleFields = VTCacheUtils::lookupFieldInfoModule($module);
+		$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 	}
 
 	if ($module == 'Calendar') {
-		$cachedEventsFields = VTCacheUtils::lookupFieldInfoModule('Events');
+		$cachedEventsFields = VTCacheUtils::lookupFieldInfo_Module('Events');
 		if (!$cachedEventsFields) {
 			getColumnFields('Events');
-			$cachedEventsFields = VTCacheUtils::lookupFieldInfoModule('Events');
+			$cachedEventsFields = VTCacheUtils::lookupFieldInfo_Module('Events');
 		}
 
 		if (!$cachedModuleFields) {
@@ -126,6 +126,34 @@ function getUserId_Ol($username)
 		$cache->setUserId($username, $user_id);
 		return $user_id;
 	}
+}
+
+/** Function to get a action for a given action id
+ * @param $action id -- action id :: Type integer
+ * @returns $actionname-- action name :: Type string
+ */
+function getActionname($actionid)
+{
+
+	\App\Log::trace('Entering getActionname(' . $actionid . ') method ...');
+	$adb = PearDatabase::getInstance();
+
+	$actionName = Vtiger_Cache::get('getActionName', $actionid);
+	if ($actionName) {
+		\App\Log::trace('Exiting getActionname method ...');
+		return $actionName;
+	}
+	if (file_exists('user_privileges/tabdata.php') && (filesize('user_privileges/tabdata.php') != 0)) {
+		include('user_privileges/tabdata.php');
+		$actionName = $action_name_array[$actionid];
+	} else {
+		$query = 'select actionname from vtiger_actionmapping where actionid=? and securitycheck=0';
+		$result = $adb->pquery($query, array($actionid));
+		$actionName = $adb->getSingleValue($result);
+	}
+	Vtiger_Cache::set('getActionName', $actionid, $actionName);
+	\App\Log::trace('Exiting getActionname method ...');
+	return $actionName;
 }
 
 /** Function to get a user id or group id for a given entity
@@ -317,7 +345,7 @@ function DeleteEntity($destinationModule, $sourceModule, CRMEntity $focus, $dest
 	} else {
 		$currentUserPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPrivilegesModel->isPermitted($destinationModule, 'Delete', $destinationRecordId)) {
-			throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
 		}
 		$focus->trash($destinationModule, $destinationRecordId);
 	}
@@ -345,7 +373,7 @@ function relateEntities(CRMEntity $focus, $sourceModule, $sourceRecordId, $desti
 		$data['destinationRecordId'] = $destinationRecordId;
 		$eventHandler->setParams($data);
 		$eventHandler->trigger('EntityBeforeLink');
-		$focus->saveRelatedModule($sourceModule, $sourceRecordId, $destinationModule, $destinationRecordId, $relatedName);
+		$focus->save_related_module($sourceModule, $sourceRecordId, $destinationModule, $destinationRecordId, $relatedName);
 		CRMEntity::trackLinkedInfo($sourceRecordId);
 		$eventHandler->trigger('EntityAfterLink');
 	}

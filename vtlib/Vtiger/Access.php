@@ -25,7 +25,7 @@ class Access
 	 */
 	public static function log($message, $delim = true)
 	{
-		Utils::log($message, $delim);
+		Utils::Log($message, $delim);
 	}
 
 	/**

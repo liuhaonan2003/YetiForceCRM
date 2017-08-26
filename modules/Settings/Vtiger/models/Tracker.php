@@ -19,7 +19,7 @@ class Settings_Vtiger_Tracker_Model
 		'delete' => 3,
 	];
 
-	public static function addBasic($type)
+	static function addBasic($type)
 	{
 		$db = App\Db::getInstance('log');
 		if ($type == 'view' && App\Request::_isAjax()) {
@@ -41,14 +41,14 @@ class Settings_Vtiger_Tracker_Model
 		}
 	}
 
-	public static function changeType($type)
+	static function changeType($type)
 	{
 		App\Db::getInstance('log')->createCommand()
 			->update('l_#__settings_tracker_basic', ['type' => self::$types[$type]], ['id' => [self::$id]])
 			->execute();
 	}
 
-	public static function addDetail($prev, $post)
+	static function addDetail($prev, $post)
 	{
 		if (self::$lockTrack) {
 			return true;
@@ -70,12 +70,12 @@ class Settings_Vtiger_Tracker_Model
 		}
 	}
 
-	public static function lockTracking($lock = true)
+	static function lockTracking($lock = true)
 	{
 		self::$lockTrack = $lock;
 	}
 
-	public static function setRecordId($record)
+	static function setRecordId($record)
 	{
 		if (empty(self::$recordId)) {
 			self::$recordId = $record;

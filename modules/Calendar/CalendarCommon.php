@@ -16,13 +16,16 @@
  */
 function getSharedCalendarId($sharedid)
 {
-	$userid = [];
-	$query = (new \App\Db\Query())->select(['userid'])->from('vtiger_sharedcalendar')->where(['sharedid' => $sharedid]);
-	$dataReader = $query->createCommand()->query();
-	while ($column = $dataReader->readColumn(0)) {
-		$userid[] = $column;
+	$adb = PearDatabase::getInstance();
+	$query = "SELECT * from vtiger_sharedcalendar where sharedid=?";
+	$result = $adb->pquery($query, array($sharedid));
+	if ($adb->num_rows($result) != 0) {
+		$countResult = $adb->num_rows($result);
+		for ($j = 0; $j < $countResult; $j++)
+			$userid[] = $adb->query_result($result, $j, 'userid');
+		$shared_ids = implode(",", $userid);
 	}
-	return implode(',', $userid);
+	return $shared_ids;
 }
 
 /**
@@ -67,13 +70,14 @@ function getaddEventPopupTime($starttime, $endtime, $format)
 /**
  * Function to get the vtiger_activity details for mail body
  * @param   string   $description       - activity description
- * @param   integer  $user_id              - to differenciate from notification to invitation.
+ * @param   string   $from              - to differenciate from notification to invitation.
  * return   string   $list              - HTML in string format
  */
 function getActivityDetails($description, $user_id, $from = '')
 {
 
 	$currentUser = vglobal('current_user');
+	$adb = PearDatabase::getInstance();
 	require_once 'include/utils/utils.php';
 	$current_language = vglobal('current_language');
 	$mod_strings = \vtlib\Deprecated::getModuleTranslationStrings($current_language, 'Calendar');

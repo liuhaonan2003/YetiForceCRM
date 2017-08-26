@@ -18,7 +18,7 @@ class Reports_Chart_Model extends \App\Base
 		$result = $db->pquery('SELECT * FROM vtiger_reporttype WHERE reportid = ?', array($reportModel->getId()));
 		$data = $db->query_result($result, 0, 'data');
 		if (!empty($data)) {
-			$decodeData = \App\Json::decode(App\Purifier::decodeHtml($data));
+			$decodeData = \App\Json::decode(decode_html($data));
 			$self->setData($decodeData);
 			$self->setParent($reportModel);
 			$self->setId($reportModel->getId());
@@ -323,7 +323,7 @@ abstract class Base_Chart extends \App\Base
 		return $listURL;
 	}
 
-	abstract public function generateData();
+	abstract function generateData();
 
 	public function getQuery()
 	{
@@ -638,7 +638,8 @@ class VerticalbarChart extends Base_Chart
 
 				$aggregateFunction = $reportColumnInfo[5];
 				$aggregateFunctionLabel = $this->getAggregateFunctionLabel($aggregateFunction);
-				$dataLabels[] = \App\Language::translateArgs($aggregateFunctionLabel, 'Reports', $fieldTranslatedLabel);
+
+				$dataLabels[] = \App\Language::translate($aggregateFunctionLabel, 'Reports', $fieldTranslatedLabel);
 			}
 		}
 		return $dataLabels;

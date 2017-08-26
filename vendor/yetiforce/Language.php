@@ -351,24 +351,28 @@ class Language
 
 	/**
 	 * Function return languange
-	 * @param boolean $active
-	 * @param boolean $allData
+	 * @param boolean|array $condition
 	 * @return array
 	 */
-	public static function getAll($active = true, $allData = false)
+	public static function getAll($condition = false)
 	{
-		$cacheKey = intval($active) . ':' . intval($allData);
+		if (is_array($condition)) {
+			$cacheKey = implode(',', $condition);
+		} else {
+			$cacheKey = $condition;
+		}
 		if (Cache::has('getAll', $cacheKey)) {
 			return Cache::get('getAll', $cacheKey);
 		}
+
 		$query = (new Db\Query())->from('vtiger_language');
-		if ($active) {
-			$query->where(['active' => 1]);
+		if ($condition) {
+			$query->where($condition);
 		}
-		if ($allData) {
-			$output = $query->indexBy('prefix')->all();
-		} else {
-			$output = $query->select(['prefix', 'label'])->createCommand()->queryAllByGroup();
+		$output = [];
+		$dataReader = $query->createCommand()->query();
+		while ($row = $dataReader->read()) {
+			$output[$row['prefix']] = $row;
 		}
 		Cache::save('getAll', $cacheKey, $output);
 		return $output;

@@ -9,8 +9,19 @@
  * Contributor(s): YetiForce.com
  * *********************************************************************************** */
 
-class Campaigns_DetailAjax_Action extends Vtiger_RelatedList_View
+class Campaigns_DetailAjax_Action extends Vtiger_BasicAjax_Action
 {
+
+	public function checkPermission(\App\Request $request)
+	{
+		$moduleName = $request->getModule();
+		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		$permission = $userPrivilegesModel->hasModulePermission($moduleName);
+
+		if (!$permission) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
+		}
+	}
 
 	public function __construct()
 	{

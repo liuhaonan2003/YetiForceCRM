@@ -10,6 +10,7 @@
  * ****************************************************************************** */
 require_once 'include/database/PearDatabase.php';
 require_once 'include/utils/utils.php';
+require_once 'include/utils/GetUserGroups.php';
 require_once 'include/runtime/Globals.php';
 require_once 'include/runtime/Cache.php';
 

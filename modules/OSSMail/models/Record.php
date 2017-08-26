@@ -43,7 +43,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	 * Returns Roundcube configuration
 	 * @return array
 	 */
-	public static function loadRoundcubeConfig()
+	public static function load_roundcube_config()
 	{
 		include 'public_html/modules/OSSMail/roundcube/config/defaults.inc.php';
 		include 'config/modules/OSSMail.php';
@@ -76,7 +76,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	{
 		\App\Log::trace("Entering OSSMail_Record_Model::imapConnect($user , $password , $folder) method ...");
 		if (!$config) {
-			$config = self::loadRoundcubeConfig();
+			$config = self::load_roundcube_config();
 		}
 		$cacheName = $user . $host . $folder;
 		if (isset(self::$imapConnectCache[$cacheName])) {
@@ -128,7 +128,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 		if (!$mbox) {
 			\App\Log::error('Error OSSMail_Record_Model::imapConnect(): ' . imap_last_error());
 			if ($dieOnError) {
-				throw new \App\Exceptions\AppException(\App\Language::translate('IMAP_ERROR', 'OSSMailScanner') . ': ' . imap_last_error());
+				throw new \Exception\AppException(\App\Language::translate('IMAP_ERROR', 'OSSMailScanner') . ': ' . imap_last_error());
 			}
 		}
 		self::$imapConnectCache[$cacheName] = $mbox;
@@ -205,7 +205,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 			return false;
 		}
 		$header = imap_header($mbox, $msgno);
-		$structure = self::getBodyAttach($mbox, $id, $msgno);
+		$structure = self::_get_body_attach($mbox, $id, $msgno);
 
 		$msgid = '';
 		if (property_exists($header, 'message_id')) {
@@ -222,7 +222,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 		$mail->set('ccaddress', $mail->getEmail('cc'));
 		$mail->set('bccaddress', $mail->getEmail('bcc'));
 		$mail->set('senderaddress', $mail->getEmail('sender'));
-		$mail->set('subject', self::decodeText($header->subject));
+		$mail->set('subject', self::_decode_text($header->subject));
 		$mail->set('MailDate', $header->MailDate);
 		$mail->set('date', $header->date);
 		$mail->set('udate', $header->udate);
@@ -273,7 +273,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	 * @param string $text
 	 * @return string
 	 */
-	public static function decodeText($text)
+	public static function _decode_text($text)
 	{
 		$data = imap_mime_header_decode($text);
 		$text = '';
@@ -293,7 +293,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	 * @param string $text
 	 * @return string
 	 */
-	public static function getFullName($text)
+	public static function get_full_name($text)
 	{
 		$return = '';
 		foreach ($text as $row) {
@@ -303,7 +303,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 			if ($row->personal == '') {
 				$return .= $row->mailbox . '@' . $row->host;
 			} else {
-				$return .= self::decodeText($row->personal) . ' - ' . $row->mailbox . '@' . $row->host;
+				$return .= self::_decode_text($row->personal) . ' - ' . $row->mailbox . '@' . $row->host;
 			}
 		}
 		return $return;
@@ -316,7 +316,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	 * @param int $msgno
 	 * @return array
 	 */
-	public static function getBodyAttach($mbox, $id, $msgno)
+	public static function _get_body_attach($mbox, $id, $msgno)
 	{
 		$struct = imap_fetchstructure($mbox, $id, FT_UID);
 		$mail = ['id' => $id];
@@ -389,7 +389,7 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 				$fileName = $attachmentId . '.' . strtolower($partStructure->subtype);
 			} else {
 				$fileName = !empty($params['filename']) ? $params['filename'] : $params['name'];
-				$fileName = self::decodeText($fileName);
+				$fileName = self::_decode_text($fileName);
 				$fileName = self::decodeRFC2231($fileName);
 			}
 			$mail['attachments'][$attachmentId]['filename'] = $fileName;
@@ -566,30 +566,30 @@ class OSSMail_Record_Model extends Vtiger_Record_Model
 	{
 		$fileName = 'config/modules/OSSMail.php';
 		$fileContent = file_get_contents($fileName);
-		$fields = self::getEditableFields();
+		$Fields = self::getEditableFields();
 		foreach ($param as $fieldName => $fieldValue) {
-			if (!isset($fields[$fieldName])) {
-				continue;
-			}
-			$type = $fields[$fieldName]['fieldType'];
-			if ($type == 'checkbox') {
-				$fieldValue = strcasecmp('true', $fieldValue) === 0;
-			} elseif ($type === 'int') {
-				$fieldValue = (int) $fieldValue;
+			$type = $Fields[$fieldName]['fieldType'];
+			$pattern = '/(\$config\[\'' . $fieldName . '\'\])[\s]+=([^;]+);/';
+			if ($type == 'checkbox' || $type == 'int') {
+				$patternString = "\$config['%s'] = %s;";
 			} elseif ($type == 'multipicklist') {
 				if (!is_array($fieldValue)) {
 					$fieldValue = [$fieldValue];
 				}
-				$saveValue = [];
+				$saveValue = '[';
 				foreach ($fieldValue as $value) {
-					$saveValue[$value] = $value;
+					$saveValue .= "'$value' => '$value',";
 				}
+				$saveValue .= ']';
 				$fieldValue = $saveValue;
+				$patternString = "\$config['%s'] = %s;";
 			} elseif ($fieldName == 'skin_logo') {
-				$fieldValue = ['*' => $fieldValue];
+				$patternString = "\$config['%s'] = array(\"*\" => \"%s\");";
+			} else {
+				$patternString = "\$config['%s'] = '%s';";
 			}
-			$replacement = sprintf("\$config['%s'] = %s;", $fieldName, vtlib\Functions::varExportMin($fieldValue));
-			$fileContent = preg_replace('/(\$config\[\'' . $fieldName . '\'\])[\s]+=([^\n]+);/', $replacement, $fileContent);
+			$replacement = sprintf($patternString, $fieldName, $fieldValue);
+			$fileContent = preg_replace($pattern, $replacement, $fileContent);
 		}
 		$filePointer = fopen($fileName, 'w');
 		fwrite($filePointer, $fileContent);

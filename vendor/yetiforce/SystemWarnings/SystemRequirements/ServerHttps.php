@@ -19,11 +19,7 @@ class ServerHttps extends \App\SystemWarnings\Template
 	 */
 	public function process()
 	{
-		if (\App\Config::$requestMode !== 'WebUI') {
-			$this->status = 1;
-			return;
-		}
-		if (\App\RequestUtil::getBrowserInfo()->https) {
+		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
 			$this->status = 1;
 		} else {
 			$this->status = 0;

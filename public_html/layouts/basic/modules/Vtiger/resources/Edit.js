@@ -204,13 +204,13 @@ jQuery.Class("Vtiger_Edit_Js", {
 						}
 						var mapFieldDisplayElement = formElement.find('input[name="' + key + '_display"]');
 						if (mapFieldDisplayElement.length > 0) {
-							mapFieldDisplayElement.val(data['displayData'][value[0]]).attr('readonly', true);
+							mapFieldDisplayElement.val(response[value[0] + '_label']).attr('readonly', true);
 							var referenceModulesList = formElement.find('#' + thisInstance.moduleName + '_editView_fieldName_' + key + '_dropDown');
 							if (referenceModulesList.length > 0 && value[1]) {
 								referenceModulesList.val(value[1]).change().trigger("chosen:updated");
 							}
 							thisInstance.setReferenceFieldValue(mapFieldDisplayElement.closest('.fieldValue'), {
-								name: data['displayData'][value[0]],
+								name: response[value[0] + '_label'],
 								id: response[value[0]]
 							});
 						}
@@ -275,7 +275,7 @@ jQuery.Class("Vtiger_Edit_Js", {
 		if (sourceRecordElement.length > 0) {
 			sourceRecordId = sourceRecordElement.val();
 		}
-		urlOrParams = 'module=' + moduleName + '&view=TreePopup&template=' + sourceFieldElement.data('treetemplate') + '&src_field=' + sourceFieldElement.attr('name') + '&src_record=' + sourceRecordId + '&multiple=' + sourceFieldElement.data('multiple') + '&value=' + sourceFieldElement.val();
+		urlOrParams = 'module=' + moduleName + '&view=TreePopup&template=' + sourceFieldElement.data('treetemplate') + '&src_field=' + sourceFieldElement.attr('name') + '&src_record=' + sourceRecordId + '&multiple=' + sourceFieldElement.data('multiple')+'&value='+sourceFieldElement.val();
 		var popupInstance = Vtiger_Popup_Js.getInstance();
 		popupInstance.show(urlOrParams, function (data) {
 			var responseData = JSON.parse(data);
@@ -786,11 +786,16 @@ jQuery.Class("Vtiger_Edit_Js", {
 		var sourceModule = data['source_module'];
 		var noAddress = true;
 		var errorMsg;
-		thisInstance.getRecordDetails(data).then(function (data) {
-			var response = data['result'];
-			thisInstance.addressFieldsData = response;
-			thisInstance.copyAddress(from, to, true, sourceModule);
-		});
+		thisInstance.getRecordDetails(data).then(
+				function (data) {
+					var response = data['result'];
+					thisInstance.addressFieldsData = response['data'];
+					thisInstance.copyAddress(from, to, true, sourceModule);
+				},
+				function (error, err) {
+
+				}
+		);
 	},
 	/**
 	 * Function to copy address between fields
@@ -811,8 +816,8 @@ jQuery.Class("Vtiger_Edit_Js", {
 			var nameElementFrom = addressMapping[key] + from;
 			var nameElementTo = addressMapping[key] + to;
 			if (relatedRecord) {
-				var fromElement = thisInstance.addressFieldsData['data'][nameElementFrom];
-				var fromElementLable = thisInstance.addressFieldsData['displayData'][nameElementFrom];
+				var fromElement = thisInstance.addressFieldsData[nameElementFrom];
+				var fromElementLable = thisInstance.addressFieldsData[nameElementFrom + '_label'];
 			} else {
 				var fromElement = formElement.find('[name="' + nameElementFrom + '"]').val();
 				var fromElementLable = formElement.find('[name="' + nameElementFrom + '_display"]').val();
@@ -853,7 +858,7 @@ jQuery.Class("Vtiger_Edit_Js", {
 		thisInstance.getRecordDetails(data).then(
 				function (data) {
 					var response = data['result'];
-					thisInstance.mapAddressDetails(response, container);
+					thisInstance.mapAddressDetails(response['data'], container);
 				},
 				function (error, err) {
 
@@ -862,28 +867,29 @@ jQuery.Class("Vtiger_Edit_Js", {
 	mapAddressDetails: function (result, container) {
 		for (var key in result) {
 			if (key.indexOf("addresslevel") != -1) {
+
 				if (container.find('[name="' + key + '"]').length != 0) {
-					container.find('[name="' + key + '"]').val(result['data'][key]);
+					container.find('[name="' + key + '"]').val(result[key]);
 					container.find('[name="' + key + '"]').attr('readonly', true);
-					container.find('[name="' + key + '_display"]').val(result['displayData'][key]);
+					container.find('[name="' + key + '_display"]').val(result[key + '_label']);
 					container.find('[name="' + key + '_display"]').attr('readonly', true);
 				}
-				if (container.find('[name="' + key + 'a"]').length != 0 && container.find('[name="' + key + 'a"]').val() == 0 && result['data'][key] != 0) {
-					container.find('[name="' + key + 'a"]').val(result['data'][key]);
+				if (container.find('[name="' + key + 'a"]').length != 0 && container.find('[name="' + key + 'a"]').val() == 0 && result[key] != 0) {
+					container.find('[name="' + key + 'a"]').val(result[key]);
 					container.find('[name="' + key + 'a"]').attr('readonly', true);
-					container.find('[name="' + key + 'a_display"]').val(result['displayData'][key]);
+					container.find('[name="' + key + 'a_display"]').val(result[key + '_label']);
 					container.find('[name="' + key + 'a_display"]').attr('readonly', true);
 				}
-				if (container.find('[name="' + key + 'b"]').length != 0 && container.find('[name="' + key + 'b"]').val() == 0 && result['data'][key] != 0) {
-					container.find('[name="' + key + 'b"]').val(result['data'][key]);
+				if (container.find('[name="' + key + 'b"]').length != 0 && container.find('[name="' + key + 'b"]').val() == 0 && result[key] != 0) {
+					container.find('[name="' + key + 'b"]').val(result[key]);
 					container.find('[name="' + key + 'b"]').attr('readonly', true);
-					container.find('[name="' + key + 'b_display"]').val(result['displayData'][key]);
+					container.find('[name="' + key + 'b_display"]').val(result[key + '_label']);
 					container.find('[name="' + key + 'b_display"]').attr('readonly', true);
 				}
-				if (container.find('[name="' + key + 'c"]').length != 0 && container.find('[name="' + key + 'c"]').val() == 0 && result['data'][key] != 0) {
-					container.find('[name="' + key + 'c"]').val(result['data'][key]);
+				if (container.find('[name="' + key + 'c"]').length != 0 && container.find('[name="' + key + 'c"]').val() == 0 && result[key] != 0) {
+					container.find('[name="' + key + 'c"]').val(result[key]);
 					container.find('[name="' + key + 'c"]').attr('readonly', true);
-					container.find('[name="' + key + 'c_display"]').val(result['displayData'][key]);
+					container.find('[name="' + key + 'c_display"]').val(result[key + '_label']);
 					container.find('[name="' + key + 'c_display"]').attr('readonly', true);
 				}
 			}

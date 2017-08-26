@@ -14,6 +14,7 @@ class HelpDesk_OpenTickets_Dashboard extends Vtiger_IndexAjax_View
 
 	/**
 	 * Function returns Tickets grouped by Status
+	 * @param type $data
 	 * @return array
 	 */
 	public function getOpenTickets()
@@ -54,31 +55,24 @@ class HelpDesk_OpenTickets_Dashboard extends Vtiger_IndexAjax_View
 		return $chartData;
 	}
 
-	/**
-	 * Return params to search
-	 * @param integer $value
-	 * @return string
-	 */
 	public function getSearchParams($value)
 	{
 		$openTicketsStatus = Settings_SupportProcesses_Module_Model::getOpenTicketStatus();
-		if ($openTicketsStatus) {
-			$openTicketsStatus = implode('##', $openTicketsStatus);
-		} else {
+		if ($openTicketsStatus)
+			$openTicketsStatus = implode(',', $openTicketsStatus);
+		else {
 			$allTicketStatus = Settings_SupportProcesses_Module_Model::getAllTicketStatus();
-			$openTicketsStatus = implode('##', $allTicketStatus);
+			$openTicketsStatus = implode(',', $allTicketStatus);
 		}
+
 		$listSearchParams = [];
-		$conditions = [['assigned_user_id', 'e', $value]];
-		array_push($conditions, ['ticketstatus', 'e', $openTicketsStatus]);
+
+		$conditions = array(array('assigned_user_id', 'e', $value));
+		array_push($conditions, array('ticketstatus', 'e', "$openTicketsStatus"));
 		$listSearchParams[] = $conditions;
-		return '&viewname=All&search_params=' . urlencode(App\Json::encode($listSearchParams));
+		return '&viewname=All&search_params=' . json_encode($listSearchParams);
 	}
 
-	/**
-	 * Main process
-	 * @param \App\Request $request
-	 */
 	public function process(\App\Request $request)
 	{
 		$currentUser = Users_Record_Model::getCurrentUserModel();

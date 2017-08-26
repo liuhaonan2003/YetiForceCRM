@@ -31,12 +31,12 @@
 			</div>	
 		</div>
 		<div class="col-sm-6">
-			{include file=\App\Layout::getTemplatePath('dashboards/SelectAccessibleTemplate.tpl', $MODULE_NAME)}
+			{include file="dashboards/SelectAccessibleTemplate.tpl"|@vtemplate_path:$MODULE_NAME}
 		</div>
 	</div>
 </div>
 
 <div class="dashboardWidgetContent noSpaces">
-	{include file=\App\Layout::getTemplatePath('dashboards/NewAccountsContents.tpl', $MODULE_NAME)}
+	{include file="dashboards/NewAccountsContents.tpl"|@vtemplate_path:$MODULE_NAME}
 </div>
 

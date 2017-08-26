@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Model of tree
  * @package YetiForce.Model
@@ -6,38 +7,23 @@
  * @license YetiForce Public License 2.0 (licenses/License.html or yetiforce.com)
  * @author Tomasz Kur <t.kur@yetiforce.com>
  */
-
-/**
- * Class tree model for module knowledge base
- */
 class KnowledgeBase_Tree_Model extends \App\Base
 {
 
-	/**
-	 * Last id in tree
-	 * @var int
-	 */
 	private $lastIdinTree;
 
-	/**
-	 * Get module name
-	 * @return string
-	 */
 	public function getModuleName()
 	{
 		return $this->get('moduleName');
 	}
 
-	/**
-	 * Get folders
-	 * @return array
-	 */
 	public function getFolders()
 	{
 		$folders = [];
+		$db = PearDatabase::getInstance();
 		$lastId = 0;
-		$dataReader = (new \App\Db\Query())->from('vtiger_trees_templates_data')->where(['templateid' => $this->getTemplate()])->createCommand()->query();
-		while ($row = $dataReader->read()) {
+		$result = $db->pquery('SELECT * FROM vtiger_trees_templates_data WHERE templateid = ?', [$this->getTemplate()]);
+		while ($row = $db->getRow($result)) {
 			$treeID = (int) ltrim($row['tree'], 'T');
 			$pieces = explode('::', $row['parenttrre']);
 			end($pieces);
@@ -61,33 +47,23 @@ class KnowledgeBase_Tree_Model extends \App\Base
 		return $folders;
 	}
 
-	/**
-	 * Get template
-	 * @return array
-	 */
 	public function getTemplate()
 	{
 		return $this->getTreeField()['fieldparams'];
 	}
 
-	/**
-	 * Get tree field
-	 * @return array
-	 */
 	public function getTreeField()
 	{
 		if ($this->has('fieldTemp')) {
 			return $this->get('fieldTemp');
 		}
-		$fieldTemp = (new \App\Db\Query())->select(['tablename', 'columnname', 'fieldname', 'fieldlabel', 'fieldparams'])->from('vtiger_field')->where(['uitype' => 302, 'tabid' => \App\Module::getModuleId($this->getModuleName())])->one();
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery('SELECT tablename,columnname,fieldname,fieldlabel,fieldparams FROM vtiger_field WHERE uitype = ? && tabid = ?', [302, vtlib\Functions::getModuleId($this->getModuleName())]);
+		$fieldTemp = $db->getRow($result);
 		$this->set('fieldTemp', $fieldTemp);
 		return $fieldTemp;
 	}
 
-	/**
-	 * Get all records
-	 * @return array
-	 */
 	public function getAllRecords()
 	{
 		$queryGenerator = new App\QueryGenerator($this->getModuleName());
@@ -95,10 +71,6 @@ class KnowledgeBase_Tree_Model extends \App\Base
 		return $queryGenerator->createQuery()->all();
 	}
 
-	/**
-	 * Get documents
-	 * @return array
-	 */
 	public function getDocuments()
 	{
 		$records = $this->getAllRecords();
@@ -118,11 +90,6 @@ class KnowledgeBase_Tree_Model extends \App\Base
 		return $tree;
 	}
 
-	/**
-	 * Get instance
-	 * @param KnowledgeBase_Module_Model $moduleModel
-	 * @return \self
-	 */
 	static public function getInstance($moduleModel)
 	{
 		$model = new self();

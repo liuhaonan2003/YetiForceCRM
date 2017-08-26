@@ -14,7 +14,7 @@ class Rss_DeleteAjax_Action extends Vtiger_Delete_Action
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 
 		$recordModel = Rss_Record_Model::getInstanceById($recordId, $moduleName);
 		$recordModel->delete();

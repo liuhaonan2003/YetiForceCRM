@@ -21,10 +21,11 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action
 	 * @param <array> $request
 	 */
 
-	public function addRelation(\App\Request $request)
+	public function addRelation($request)
 	{
 		$sourceModule = $request->getModule();
-		$sourceRecordId = $request->getInteger('src_record');
+		$sourceRecordId = $request->get('src_record');
+
 		$relatedModule = $request->get('related_module');
 		if (is_numeric($relatedModule)) {
 			$relatedModule = vtlib\Functions::getModuleName($relatedModule);
@@ -35,7 +36,7 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action
 		$relationModel = Vtiger_Relation_Model::getInstance($sourceModuleModel, $relatedModuleModel);
 		foreach ($relatedRecordIdList as $relatedRecordId) {
 			$relationModel->addRelation($sourceRecordId, $relatedRecordId, $listPrice);
-			if ($relatedModule === 'PriceBooks') {
+			if ($relatedModule == 'PriceBooks') {
 				$recordModel = Vtiger_Record_Model::getInstanceById($relatedRecordId);
 				if ($sourceRecordId && ($sourceModule === 'Products' || $sourceModule === 'Services')) {
 					$parentRecordModel = Vtiger_Record_Model::getInstanceById($sourceRecordId, $sourceModule);
@@ -52,10 +53,10 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action
 	 * Function adds Products/Services-PriceBooks Relation
 	 * @param type $request
 	 */
-	public function addListPrice(\App\Request $request)
+	public function addListPrice($request)
 	{
 		$sourceModule = $request->getModule();
-		$sourceRecordId = $request->getInteger('src_record');
+		$sourceRecordId = $request->get('src_record');
 		$relatedModule = $request->get('related_module');
 		$relInfos = $request->get('relinfo');
 
@@ -68,3 +69,5 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action
 		}
 	}
 }
+
+?>

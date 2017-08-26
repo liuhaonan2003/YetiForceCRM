@@ -12,6 +12,8 @@ require_once('config/config.php');
 require_once('modules/Users/Users.php');
 require_once('include/utils/UserInfoUtil.php');
 require_once('include/utils/utils.php');
+require_once('include/utils/GetUserGroups.php');
+require_once('include/utils/GetGroupUsers.php');
 
 /** Creates a file with all the user, user-role,user-profile, user-groups informations 
  * @param $userid -- user id:: Type integer
@@ -25,7 +27,7 @@ function createUserPrivilegesfile($userid)
 		$newbuf = '';
 		$newbuf .= "<?php\n";
 		$user_focus = CRMEntity::getInstance('Users');
-		$user_focus->retrieveEntityInfo($userid, 'Users');
+		$user_focus->retrieve_entity_info($userid, 'Users');
 		$userInfo = [];
 		$user_focus->column_fields["id"] = '';
 		$user_focus->id = $userid;
@@ -55,7 +57,7 @@ function createUserPrivilegesfile($userid)
 			$newbuf .= "\$profileGlobalPermission=" . constructArray($globalPermissionArr) . ";\n";
 			$newbuf .= "\$profileTabsPermission=" . constructArray($tabsPermissionArr) . ";\n";
 			$newbuf .= "\$profileActionPermission=" . constructTwoDimensionalArray($actionPermissionArr) . ";\n";
-			$newbuf .= "\$current_user_groups=" . constructSingleArray(\App\PrivilegeUtil::getAllGroupsByUser($userid)) . ";\n";
+			$newbuf .= "\$current_user_groups=" . constructSingleArray(\Vtiger_Util_Helper::getGroupsIdsForUsers($userid)) . ";\n";
 			$newbuf .= "\$subordinate_roles=" . constructSingleCharArray($subRoles) . ";\n";
 			$newbuf .= "\$parent_roles=" . constructSingleCharArray($parentRoles) . ";\n";
 			$newbuf .= "\$subordinate_roles_users=" . constructTwoDimensionalCharIntSingleArray($subRoleAndUsers) . ";\n";
@@ -82,7 +84,7 @@ function createUserSharingPrivilegesfile($userid)
 	if ($handle) {
 		$newbuf = "<?php\n";
 		$user_focus = CRMEntity::getInstance('Users');
-		$user_focus->retrieveEntityInfo($userid, 'Users');
+		$user_focus->retrieve_entity_info($userid, 'Users');
 		if ($user_focus->is_admin == 'on') {
 			fputs($handle, $newbuf);
 			fclose($handle);
@@ -236,9 +238,11 @@ function getRelatedModuleSharingArray($par_mod, $share_mod, $mod_sharingrule_mem
 									} elseif (array_key_exists($shareEntId, $mod_share_write_per['GROUP'])) {
 										$share_grp_users = $mod_share_write_per['GROUP'][$shareEntId];
 									} else {
-										$usersByGroup = App\PrivilegeUtil::getUsersByGroup($shareEntId, true);
-										$share_grp_users = $usersByGroup['users'];
-										foreach ($usersByGroup['subGroups'] as $subgrpid => $subgrpusers) {
+										$focusGrpUsers = new GetGroupUsers();
+										$focusGrpUsers->getAllUsersInGroup($shareEntId);
+										$share_grp_users = $focusGrpUsers->group_users;
+
+										foreach ($focusGrpUsers->group_subgroups as $subgrpid => $subgrpusers) {
 											if (!array_key_exists($subgrpid, $grp_read_per)) {
 												$grp_read_per[$subgrpid] = $subgrpusers;
 											}
@@ -255,9 +259,10 @@ function getRelatedModuleSharingArray($par_mod, $share_mod, $mod_sharingrule_mem
 									} elseif (array_key_exists($shareEntId, $mod_share_write_per['GROUP'])) {
 										$share_grp_users = $mod_share_write_per['GROUP'][$shareEntId];
 									} else {
-										$usersByGroup = App\PrivilegeUtil::getUsersByGroup($shareEntId, true);
-										$share_grp_users = $usersByGroup['users'];
-										foreach ($usersByGroup['subGroups'] as $subgrpid => $subgrpusers) {
+										$focusGrpUsers = new GetGroupUsers();
+										$focusGrpUsers->getAllUsersInGroup($shareEntId);
+										$share_grp_users = $focusGrpUsers->group_users;
+										foreach ($focusGrpUsers->group_subgroups as $subgrpid => $subgrpusers) {
 											if (!array_key_exists($subgrpid, $grp_write_per)) {
 												$grp_write_per[$subgrpid] = $subgrpusers;
 											}
@@ -274,9 +279,10 @@ function getRelatedModuleSharingArray($par_mod, $share_mod, $mod_sharingrule_mem
 								} elseif (array_key_exists($shareEntId, $mod_share_write_per['GROUP'])) {
 									$share_grp_users = $mod_share_write_per['GROUP'][$shareEntId];
 								} else {
-									$usersByGroup = App\PrivilegeUtil::getUsersByGroup($shareEntId, true);
-									$share_grp_users = $usersByGroup['users'];
-									foreach ($usersByGroup['subGroups'] as $subgrpid => $subgrpusers) {
+									$focusGrpUsers = new GetGroupUsers();
+									$focusGrpUsers->getAllUsersInGroup($shareEntId);
+									$share_grp_users = $focusGrpUsers->group_users;
+									foreach ($focusGrpUsers->group_subgroups as $subgrpid => $subgrpusers) {
 										if (!array_key_exists($subgrpid, $grp_read_per)) {
 											$grp_read_per[$subgrpid] = $subgrpusers;
 										}

@@ -33,4 +33,13 @@ class Calendar_Feed_Action extends Vtiger_BasicAjax_Action
 			echo $ex->getMessage();
 		}
 	}
+
+	public function getGroupsIdsForUsers($userId)
+	{
+		Vtiger_Loader::includeOnce('~include/utils/GetUserGroups.php');
+
+		$userGroupInstance = new GetUserGroups();
+		$userGroupInstance->getAllUserGroups($userId);
+		return $userGroupInstance->user_groups;
+	}
 }

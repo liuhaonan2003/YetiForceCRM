@@ -12,4 +12,3 @@
 {include file="Header.tpl"|vtemplate_path:$MODULE}
 <div class="bodyContents">
 	<div class="mainContainer">
-		<div class="contentsDiv">

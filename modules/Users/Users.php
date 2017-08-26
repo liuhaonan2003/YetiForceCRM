@@ -208,7 +208,7 @@ class Users extends CRMEntity
 	 * All Rights Reserved..
 	 * Contributor(s): ______________________________________..
 	 */
-	public function encryptPassword($user_password, $crypt_type = 'PHP5.3MD5')
+	public function encrypt_password($user_password, $crypt_type = 'PHP5.3MD5')
 	{
 		// encrypt the password.
 		$salt = substr($this->column_fields["user_name"], 0, 2);
@@ -273,7 +273,7 @@ class Users extends CRMEntity
 	{
 		$userName = $this->column_fields['user_name'];
 		$userInfo = (new App\Db\Query())->select(['id', 'deleted', 'user_password', 'crypt_type', 'status'])->from($this->table_name)->where(['user_name' => $userName])->one();
-		$encryptedPassword = $this->encryptPassword($userPassword, empty($userInfo['crypt_type']) ? 'PHP5.3MD5' : $userInfo['crypt_type']);
+		$encryptedPassword = $this->encrypt_password($userPassword, empty($userInfo['crypt_type']) ? 'PHP5.3MD5' : $userInfo['crypt_type']);
 		if (!$userInfo || (int) $userInfo['deleted'] !== 0) {
 			\App\Log::error('User not found: ' . $userName);
 			return false;
@@ -364,7 +364,7 @@ class Users extends CRMEntity
 	 * All Rights Reserved..
 	 * Contributor(s): Contributor(s): YetiForce.com
 	 */
-	public function changePassword($userPassword, $newPassword, $dieOnError = true)
+	public function change_password($userPassword, $newPassword, $dieOnError = true)
 	{
 		$userName = $this->column_fields['user_name'];
 		$currentUser = \App\User::getCurrentUserModel();
@@ -383,7 +383,7 @@ class Users extends CRMEntity
 		}
 		//set new password
 		$crypt_type = AppConfig::module('Users', 'PASSWORD_CRYPT_TYPE');
-		$encryptedNewPassword = $this->encryptPassword($newPassword, $crypt_type);
+		$encryptedNewPassword = $this->encrypt_password($newPassword, $crypt_type);
 
 		\App\Db::getInstance()->createCommand()->update($this->table_name, [
 			'user_password' => $encryptedNewPassword,
@@ -406,7 +406,7 @@ class Users extends CRMEntity
 	public function verifyPassword($password)
 	{
 		$row = (new \App\Db\Query())->select(['user_name', 'user_password', 'crypt_type'])->from($this->table_name)->where(['id' => $this->id])->one();
-		$encryptedPassword = $this->encryptPassword($password, $row['crypt_type']);
+		$encryptedPassword = $this->encrypt_password($password, $row['crypt_type']);
 		if ($encryptedPassword !== $row['user_password']) {
 			return false;
 		}
@@ -462,10 +462,10 @@ class Users extends CRMEntity
 	 * @param $record -- record id:: Type integer
 	 * @param $module -- module:: Type varchar
 	 */
-	public function retrieveEntityInfo($record, $module)
+	public function retrieve_entity_info($record, $module)
 	{
 
-		\App\Log::trace("Entering into retrieveEntityInfo($record, $module) method.");
+		\App\Log::trace("Entering into retrieve_entity_info($record, $module) method.");
 
 		if ($record == '') {
 			\App\Log::error('record is empty. returning null');
@@ -514,7 +514,7 @@ class Users extends CRMEntity
 			$this->column_fields['currency_symbol_placement'] = $this->currency_symbol_placement = '1.0$';
 		}
 		$this->id = $record;
-		\App\Log::trace('Exit from retrieveEntityInfo() method.');
+		\App\Log::trace('Exit from retrieve_entity_info() method.');
 		return $this;
 	}
 
@@ -605,7 +605,7 @@ class Users extends CRMEntity
 	/** Function to delete an entity with given Id */
 	public function trash($module, $id)
 	{
-		$this->markDeleted($id);
+		$this->mark_deleted($id);
 	}
 
 	/**
@@ -637,7 +637,7 @@ class Users extends CRMEntity
 	 * This function should be overridden in each module.  It marks an item as deleted.
 	 * @param <type> $id
 	 */
-	public function markDeleted($id)
+	public function mark_deleted($id)
 	{
 		$adb = PearDatabase::getInstance();
 		$current_user = vglobal('current_user');

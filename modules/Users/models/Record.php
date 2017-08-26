@@ -294,10 +294,10 @@ class Users_Record_Model extends Vtiger_Record_Model
 		$entityInstance = $this->getModule()->getEntityInstance();
 		$cryptType = AppConfig::module('Users', 'PASSWORD_CRYPT_TYPE');
 		if ($this->isNew() || $this->getPreviousValue('confirm_password') !== false) {
-			$this->set('confirm_password', $entityInstance->encryptPassword($this->get('confirm_password'), $cryptType));
+			$this->set('confirm_password', $entityInstance->encrypt_password($this->get('confirm_password'), $cryptType));
 		}
 		if ($this->isNew() || $this->getPreviousValue('user_password') !== false) {
-			$this->set('user_password', $entityInstance->encryptPassword($this->get('user_password'), $cryptType));
+			$this->set('user_password', $entityInstance->encrypt_password($this->get('user_password'), $cryptType));
 			$values['vtiger_users']['crypt_type'] = $cryptType;
 		}
 		return $values;
@@ -363,7 +363,7 @@ class Users_Record_Model extends Vtiger_Record_Model
 		$dataReader = $query->createCommand()->query();
 		while ($userId = $dataReader->readColumn(0)) {
 			$focus->id = $userId;
-			$focus->retrieveEntityInfo($userId, 'Users');
+			$focus->retrieve_entity_info($userId, 'Users');
 			$userModel = self::getInstanceFromUserObject($focus);
 			$users[$userModel->getId()] = $userModel;
 		}
@@ -468,9 +468,12 @@ class Users_Record_Model extends Vtiger_Record_Model
 	{
 		if (empty($this->get('groups'))) {
 			if ($this->isAdminUser()) {
-				$userGroups = App\PrivilegeUtil::getAllGroupsByUser($this->getId());
+				$userGroupFocus = new GetUserGroups();
+				$userGroupFocus->getAllUserGroups($this->getId());
+				$userGroups = $userGroupFocus->user_groups;
 			} else {
-				$userGroups = $this->getPrivileges()->get('groups');
+				$privilegesModel = $this->getPrivileges();
+				$userGroups = $privilegesModel->get('groups');
 			}
 			$this->set('groups', $userGroups);
 		}
@@ -528,7 +531,7 @@ class Users_Record_Model extends Vtiger_Record_Model
 		$image = $this->getImageDetails();
 		$image = reset($image);
 		if (empty($image) || empty($image['path'])) {
-			$imagePath = 'public_html/' . \App\Layout::getImagePath('DefaultUserIcon.png');
+			$imagePath = vimage_path('DefaultUserIcon.png');
 		} else {
 			$imagePath = $image['path'];
 		}
@@ -721,7 +724,7 @@ class Users_Record_Model extends Vtiger_Record_Model
 			for ($i = 0; $i < $noOfUsers; ++$i) {
 				$userId = $db->query_result($result, $i, 'id');
 				$focus->id = $userId;
-				$focus->retrieveEntityInfo($userId, 'Users');
+				$focus->retrieve_entity_info($userId, 'Users');
 
 				$userModel = self::getInstanceFromUserObject($focus);
 				$users[$userModel->getId()] = $userModel;

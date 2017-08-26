@@ -13,33 +13,24 @@ Vtiger_Loader::includeOnce('~include/Webservices/ConvertLead.php');
 class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 {
 
-	/**
-	 * Record model instance
-	 * @var Vtiger_Record_Model 
-	 */
-	protected $record = false;
-
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 * @throws \App\Exceptions\NoPermittedToRecord
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'ConvertLead')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
-		$this->record = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
-		if (!$this->record->isEditable()) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
+
+		$recordPermission = \App\Privilege::isPermitted($moduleName, 'EditView', $recordId);
+		if (!$recordPermission) {
+			throw new \Exception\NoPermittedToRecord('LBL_NO_PERMISSIONS_FOR_THE_RECORD');
 		}
-		if (!Leads_Module_Model::checkIfAllowedToConvert($this->record->get('leadstatus'))) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+
+		$recordModel = Vtiger_Record_Model::getInstanceById($recordId);
+		if (!Leads_Module_Model::checkIfAllowedToConvert($recordModel->get('leadstatus'))) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -50,7 +41,7 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 
 	public function process(\App\Request $request)
 	{
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$modules = $request->get('modules');
 		$assignId = $request->get('assigned_user_id');
 		$currentUser = Users_Record_Model::getCurrentUserModel();
@@ -61,7 +52,8 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 		$entityValues['leadId'] = $recordId;
 		$createAlways = Vtiger_Processes_Model::getConfig('marketing', 'conversion', 'create_always');
 
-		$convertLeadFields = $this->record->getConvertLeadFields();
+		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $request->getModule());
+		$convertLeadFields = $recordModel->getConvertLeadFields();
 		$availableModules = ['Accounts'];
 		foreach ($availableModules as $module) {
 			if (\App\Module::isModuleActive($module) && in_array($module, $modules)) {
@@ -78,7 +70,7 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 			$results = true;
 			if ($createAlways === true || $createAlways === 'true') {
 				$leadModel = Vtiger_Module_Model::getCleanInstance($request->getModule());
-				$results = $leadModel->searchAccountsToConvert($this->record);
+				$results = $leadModel->searchAccountsToConvert($recordModel);
 				$entityValues['entities']['Accounts']['convert_to_id'] = $results;
 			}
 			if (!$results) {
@@ -87,17 +79,17 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 					$message = \App\Language::translate('LBL_TOO_MANY_ACCOUNTS_TO_CONVERT', $request->getModule(), '<a href="index.php?module=MarketingProcesses&view=Index&parent=Settings"><span class="glyphicon glyphicon-folder-open"></span></a>');
 				}
 				$this->showError($request, '', $message);
-				throw new \App\Exceptions\AppException('LBL_TOO_MANY_ACCOUNTS_TO_CONVERT');
+				throw new \Exception\AppException('LBL_TOO_MANY_ACCOUNTS_TO_CONVERT');
 			}
 		} catch (Exception $e) {
 			$this->showError($request, $e);
-			throw new \App\Exceptions\AppException($e->getMessage());
+			throw new \Exception\AppException($e->getMessage());
 		}
 		try {
 			$result = vtws_convertlead($entityValues, $currentUser);
 		} catch (Exception $e) {
 			$this->showError($request, $e);
-			throw new \App\Exceptions\AppException($e->getMessage());
+			throw new \Exception\AppException($e->getMessage());
 		}
 
 		if (!empty($result['Accounts'])) {
@@ -109,7 +101,7 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller
 			header("Location: index.php?view=Detail&module=Accounts&record=$accountId");
 		} else {
 			$this->showError($request);
-			throw new \App\Exceptions\AppException('Error');
+			throw new \Exception\AppException('Error');
 		}
 	}
 

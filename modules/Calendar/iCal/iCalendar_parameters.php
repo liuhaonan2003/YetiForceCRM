@@ -5,7 +5,7 @@
 class iCalendar_parameter
 {
 
-	public function multipleValuesAllowed($parameter)
+	public function multiple_values_allowed($parameter)
 	{
 		switch ($parameter) {
 			case 'DELEGATED-FROM':
@@ -17,7 +17,7 @@ class iCalendar_parameter
 		}
 	}
 
-	public function defaultValueICal($parameter)
+	public function default_value($parameter)
 	{
 		switch ($parameter) {
 			case 'CUTYPE': return 'INDIVIDUAL';
@@ -31,7 +31,7 @@ class iCalendar_parameter
 		}
 	}
 
-	public function isValidValue(&$parent_property, $parameter, $value)
+	public function is_valid_value(&$parent_property, $parameter, $value)
 	{
 		switch ($parameter) {
 			// These must all be a URI
@@ -183,7 +183,7 @@ class iCalendar_parameter
 		}
 	}
 
-	public function doValueFormatting($parameter, $value)
+	public function do_value_formatting($parameter, $value)
 	{
 		switch ($parameter) {
 			// Parameters of type CAL-ADDRESS or URI MUST be double-quoted
@@ -223,6 +223,11 @@ class iCalendar_parameter
 				return $value;
 				break;
 		}
+	}
+
+	public function undo_value_formatting($parameter, $value)
+	{
+		
 	}
 }
 

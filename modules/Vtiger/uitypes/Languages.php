@@ -31,6 +31,6 @@ class Vtiger_Languages_UIType extends Vtiger_Picklist_UIType
 	 */
 	public function getPicklistValues()
 	{
-		return \App\Language::getAll();
+		return Vtiger_Language_Handler::getAllLanguages();
 	}
 }

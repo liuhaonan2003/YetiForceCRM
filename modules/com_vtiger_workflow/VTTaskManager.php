@@ -79,7 +79,8 @@ class VTTaskManager
 	public function retrieveTask($taskId)
 	{
 		$task = (new \App\Db\Query())->select(['task'])->from('com_vtiger_workflowtasks')->where(['task_id' => $taskId])->scalar();
-		return $this->unserializeTask($task);
+		$task = $this->unserializeTask($task);
+		return $task;
 	}
 
 	/**
@@ -116,7 +117,7 @@ class VTTaskManager
 	 * Return all tasks
 	 * @return array
 	 */
-	public function getTasks()
+	function getTasks()
 	{
 		$result = (new \App\Db\Query())->select(['task'])->from('com_vtiger_workflowtasks')->all();
 		return $this->getTasksForResult($result);
@@ -194,7 +195,7 @@ abstract class VTTask
 	 * Task contents
 	 * @var Vtiger_Record_Model
 	 */
-	public $contents;
+	var $contents;
 
 	/**
 	 * Do task
@@ -272,7 +273,7 @@ class VTTaskType
 	 * Data array
 	 * @var array
 	 */
-	public $data;
+	var $data;
 
 	/**
 	 * Return value for $data key

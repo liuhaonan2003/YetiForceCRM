@@ -34,7 +34,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 	/**
 	 * Function returns the mass edit form
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
 	 */
 	public function showMassEditForm(\App\Request $request)
 	{
@@ -42,13 +41,10 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 		$cvId = $request->get('viewname');
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
+
 		$viewer = $this->getViewer($request);
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-		if (!$moduleModel->isPermitted('MassEdit')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
-
 		$recordStructureInstance = Vtiger_RecordStructure_Model::getInstanceForModule($moduleModel, Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_MASSEDIT);
 		$fieldInfo = [];
 		$fieldList = $moduleModel->getFields();
@@ -90,7 +86,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 	/**
 	 * Function returns the Add Comment form
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
 	 */
 	public function showAddCommentForm(\App\Request $request)
 	{
@@ -100,11 +95,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
 
-		$moduleModel = Vtiger_Module_Model::getInstance($sourceModule);
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModulePermission($sourceModule) || !($moduleModel->isCommentEnabled() && $currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'EditView') && $moduleModel->isPermitted('MassAddComment'))) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
 		$viewer = $this->getViewer($request);
 		$viewer->assign('SOURCE_MODULE', $sourceModule);
 		$viewer->assign('MODULE', $moduleName);
@@ -126,13 +116,13 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 		if (!empty($searchParams)) {
 			$viewer->assign('SEARCH_PARAMS', $searchParams);
 		}
+
 		echo $viewer->view('AddCommentForm.tpl', $moduleName, true);
 	}
 
 	/**
 	 * Function shows form that will lets you send SMS
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
 	 */
 	public function showSendSMSForm(\App\Request $request)
 	{
@@ -141,11 +131,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
 		$cvId = $request->get('viewname');
-
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'CreateView') || !$currentUserPriviligesModel->hasModuleActionPermission($sourceModule, 'MassSendSMS') || !SMSNotifier_Module_Model::checkServer()) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
 
 		$moduleModel = Vtiger_Module_Model::getInstance($sourceModule);
 		$phoneFields = $moduleModel->getFieldsByType('phone');
@@ -181,43 +166,95 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View
 	}
 
 	/**
-	 * Function shows the duplicate search form
+	 * Function returns the record Ids selected in the current filter
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
+	 * @return integer
 	 */
-	public function showDuplicatesSearchForm(\App\Request $request)
+	public function getRecordsListFromRequest(\App\Request $request, $module = false)
 	{
-		$moduleName = $request->getModule();
-		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-		if ($moduleModel->isPermitted('DuplicatesHandling')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		$cvId = $request->get('viewname');
+		$selectedIds = $request->get('selected_ids');
+		$excludedIds = $request->get('excluded_ids');
+		if (empty($module)) {
+			$module = $request->getModule();
 		}
-		$fields = $moduleModel->getFields();
-		$viewer = $this->getViewer($request);
-		$viewer->assign('MODULE', $moduleName);
-		$viewer->assign('FIELDS', $fields);
-		$viewer->view('showDuplicateSearch.tpl', $moduleName);
+		if (!empty($selectedIds) && $selectedIds != 'all') {
+			if (!empty($selectedIds) && count($selectedIds) > 0) {
+				return $selectedIds;
+			}
+		}
+
+		$sourceRecord = $request->get('sourceRecord');
+		$sourceModule = $request->get('sourceModule');
+		if ($sourceRecord && $sourceModule) {
+			$sourceRecordModel = Vtiger_Record_Model::getInstanceById($sourceRecord, $sourceModule);
+			return $sourceRecordModel->getSelectedIdsList($module, $excludedIds);
+		}
+
+		$customViewModel = CustomView_Record_Model::getInstanceById($cvId);
+		if ($customViewModel) {
+			$searchKey = $request->get('search_key');
+			$searchValue = $request->get('search_value');
+			$operator = $request->get('operator');
+			if (!empty($operator)) {
+				$customViewModel->set('operator', $operator);
+				$customViewModel->set('search_key', $searchKey);
+				$customViewModel->set('search_value', $searchValue);
+			}
+			$customViewModel->set('search_params', $request->get('search_params'));
+			return $customViewModel->getRecordIds($excludedIds, $module);
+		}
 	}
 
 	/**
-	 * Rransfer record ownership
+	 * Function shows the List of Mail Merge Templates
 	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
 	 */
+	public function showMailMergeTemplates(\App\Request $request)
+	{
+		$selectedIds = $request->get('selected_ids');
+		$excludedIds = $request->get('excluded_ids');
+		$cvId = $request->get('viewname');
+		$module = $request->getModule();
+		$templates = Settings_MailMerge_Record_Model::getByModule($module);
+
+		$viewer = $this->getViewer($request);
+		$viewer->assign('TEMPLATES', $templates);
+		$viewer->assign('SELECTED_IDS', $selectedIds);
+		$viewer->assign('EXCLUDED_IDS', $excludedIds);
+		$viewer->assign('VIEWNAME', $cvId);
+		$viewer->assign('MODULE', $module);
+
+		return $viewer->view('showMergeTemplates.tpl', $module);
+	}
+
+	/**
+	 * Function shows the duplicate search form
+	 * @param \App\Request $request
+	 */
+	public function showDuplicatesSearchForm(\App\Request $request)
+	{
+		$module = $request->getModule();
+		$moduleModel = Vtiger_Module_Model::getInstance($module);
+		$fields = $moduleModel->getFields();
+
+		$viewer = $this->getViewer($request);
+		$viewer->assign('MODULE', $module);
+		$viewer->assign('FIELDS', $fields);
+		$viewer->view('showDuplicateSearch.tpl', $module);
+	}
+
 	public function transferOwnership(\App\Request $request)
 	{
-		$moduleName = $request->getModule();
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'MassTransferOwnership')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
-		$transferModel = Vtiger_TransferOwnership_Model::getInstance($moduleName);
+		$module = $request->getModule();
+		$transferModel = Vtiger_TransferOwnership_Model::getInstance($module);
+
 		$viewer = $this->getViewer($request);
-		$viewer->assign('MODULE', $moduleName);
+		$viewer->assign('MODULE', $module);
 		$viewer->assign('REL_BY_FIELDS', $transferModel->getRelationsByFields());
 		$viewer->assign('REL_BY_RELATEDLIST', $transferModel->getRelationsByRelatedList());
 		$viewer->assign('SKIP_MODULES', $transferModel->getSkipModules());
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
-		$viewer->view('TransferRecordOwnership.tpl', $moduleName);
+		$viewer->view('TransferRecordOwnership.tpl', $module);
 	}
 }

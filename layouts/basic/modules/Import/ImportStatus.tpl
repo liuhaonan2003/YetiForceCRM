@@ -12,7 +12,7 @@
 {strip}
 <div class='widget_header row '>
 	<div class="col-xs-12">
-		{include file=\App\Layout::getTemplatePath('BreadCrumbs.tpl', $MODULE)}
+		{include file='BreadCrumbs.tpl'|@vtemplate_path:$MODULE}
 	</div>
 </div>
 {literal}

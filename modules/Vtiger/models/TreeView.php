@@ -10,7 +10,7 @@
 class Vtiger_TreeView_Model extends \App\Base
 {
 
-	public static $_cached_instance;
+	static $_cached_instance;
 
 	/**
 	 * Function to get the Module Name
@@ -62,7 +62,7 @@ class Vtiger_TreeView_Model extends \App\Base
 			->where(['uitype' => 302, 'tabid' => \App\Module::getModuleId($this->getModuleName())])
 			->one();
 		if (!$fieldTemp) {
-			throw new \App\Exceptions\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $this->getModuleName()));
+			throw new \Exception\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $this->getModuleName()));
 		}
 		$this->set('fieldTemp', $fieldTemp);
 		return $fieldTemp;

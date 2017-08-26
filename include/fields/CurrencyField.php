@@ -181,7 +181,7 @@ class CurrencyField
 		}
 
 		if ($skipFormatting === false) {
-			$value = $this->formatCurrencyValue($value);
+			$value = $this->_formatCurrencyValue($value);
 		}
 		return $this->currencyDecimalFormat($value, $user);
 	}
@@ -226,7 +226,7 @@ class CurrencyField
 	 * @param Number $value
 	 * @return Formatted Currency
 	 */
-	private function formatCurrencyValue($value)
+	private function _formatCurrencyValue($value)
 	{
 
 		$currencyPattern = $this->currencyFormat;
@@ -477,7 +477,7 @@ class CurrencyField
 			else
 				$decimalSeparator = $user->currency_decimal_separator;
 
-			$fieldValue = explode(App\Purifier::decodeHtml($decimalSeparator), $value);
+			$fieldValue = explode(decode_html($decimalSeparator), $value);
 			if (strlen($fieldValue[1]) <= 1) {
 				if (strlen($fieldValue[1]) == 1) {
 					return $value = $fieldValue[0] . $decimalSeparator . $fieldValue[1];

@@ -12,16 +12,11 @@
 class Vtiger_MassDelete_Action extends Vtiger_Mass_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($request->getModule(), 'MassDelete')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		if (!$currentUserPriviligesModel->hasModuleActionPermission($request->getModule(), 'Delete')) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -40,21 +35,29 @@ class Vtiger_MassDelete_Action extends Vtiger_Mass_Action
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
-		if ($request->get('selected_ids') === 'all' && $request->get('mode') === 'FindDuplicates') {
+		if ($request->get('selected_ids') == 'all' && $request->get('mode') == 'FindDuplicates') {
 			$recordIds = Vtiger_FindDuplicate_Model::getMassDeleteRecords($request);
 		} else {
-			$recordIds = static::getRecordsListFromRequest($request);
+			$recordIds = $this->getRecordsListFromRequest($request);
 		}
 		foreach ($recordIds as $recordId) {
-			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel);
-			if ($recordModel->isDeletable()) {
-				$recordModel->delete();
+			if (Users_Privileges_Model::isPermitted($moduleName, 'Delete', $recordId)) {
+				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel);
+				if ($recordModel->isDeletable()) {
+					$recordModel->delete();
+				}
 			} else {
-				throw new \App\Exceptions\AppException('LBL_PERMISSION_DENIED');
+				$permission = 'No';
 			}
 		}
+
+		if ($permission === 'No') {
+			throw new \Exception\AppException('LBL_PERMISSION_DENIED');
+		}
+
+		$cvId = $request->get('viewname');
 		$response = new Vtiger_Response();
-		$response->setResult(array('viewname' => $request->get('viewname'), 'module' => $moduleName));
+		$response->setResult(array('viewname' => $cvId, 'module' => $moduleName));
 		$response->emit();
 	}
 }

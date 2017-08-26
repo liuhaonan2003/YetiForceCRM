@@ -191,7 +191,7 @@ class Settings_LangManagement_Module_Model extends Settings_Vtiger_Module_Model
 	/**
 	 * Function creates directory structure
 	 * @param array $params
-	 * @throws \App\Exceptions\AppException
+	 * @throws \Exception\AppException
 	 */
 	public static function createCustomLangDirectory($params)
 	{
@@ -205,7 +205,7 @@ class Settings_LangManagement_Module_Model extends Settings_Vtiger_Module_Model
 			if (!file_exists(ROOT_DIRECTORY . $loc)) {
 				if (!mkdir(ROOT_DIRECTORY . $loc)) {
 					\App\Log::warning("No permissions to create directories: $loc");
-					throw new \App\Exceptions\AppException('No permissions to create directories');
+					throw new \Exception\AppException('No permissions to create directories');
 				}
 			}
 		}
@@ -327,7 +327,7 @@ class Settings_LangManagement_Module_Model extends Settings_Vtiger_Module_Model
 	 */
 	public static function add($params)
 	{
-		if (isset(App\Language::getAll(false)[$params['prefix']])) {
+		if (App\Language::getAll(['prefix' => $params['prefix']])) {
 			return ['success' => false, 'data' => 'LBL_LangExist'];
 		}
 		$destiny = 'languages/' . $params['prefix'] . '/';

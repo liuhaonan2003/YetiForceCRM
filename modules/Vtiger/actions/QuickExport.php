@@ -9,16 +9,11 @@
 class Vtiger_QuickExport_Action extends Vtiger_Mass_Action
 {
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPriviligesModel->hasModuleActionPermission($request->getModule(), 'QuickExportToExcel')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -58,7 +53,7 @@ class Vtiger_QuickExport_Action extends Vtiger_Mass_Action
 		$customView = CustomView_Record_Model::getInstanceById($filter);
 		//get the column headers, they go in row 0 of the spreadsheet
 		foreach ($headers as &$fieldsModel) {
-			$worksheet->setCellValueExplicitByColumnAndRow($col, $row, App\Purifier::decodeHtml(App\Language::translate($fieldsModel->getFieldLabel(), $module)), PHPExcel_Cell_DataType::TYPE_STRING);
+			$worksheet->setCellValueExplicitByColumnAndRow($col, $row, decode_html(App\Language::translate($fieldsModel->getFieldLabel(), $module)), PHPExcel_Cell_DataType::TYPE_STRING);
 			$col++;
 		}
 		$row++;
@@ -67,10 +62,7 @@ class Vtiger_QuickExport_Action extends Vtiger_Mass_Action
 		foreach ($recordIds as $id) {
 			$col = 0;
 			$record = Vtiger_Record_Model::getInstanceById($id, $module);
-			if (!$record->isViewable()) {
-				continue;
-			}
-			foreach ($headers as $fieldsModel) {
+			foreach ($headers as &$fieldsModel) {
 				//depending on the uitype we might want the raw value, the display value or something else.
 				//we might also want the display value sans-links so we can use strip_tags for that
 				//phone numbers need to be explicit strings
@@ -96,7 +88,7 @@ class Vtiger_QuickExport_Action extends Vtiger_Mass_Action
 						$worksheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()->setFormatCode('DD/MM/YYYY HH:MM:SS'); //format the date to the users preference
 						break;
 					default:
-						$worksheet->setCellValueExplicitByColumnAndRow($col, $row, App\Purifier::decodeHtml(strip_tags($value)), PHPExcel_Cell_DataType::TYPE_STRING);
+						$worksheet->setCellValueExplicitByColumnAndRow($col, $row, decode_html(strip_tags($value)), PHPExcel_Cell_DataType::TYPE_STRING);
 				}
 				$col++;
 			}
@@ -125,7 +117,7 @@ class Vtiger_QuickExport_Action extends Vtiger_Mass_Action
 
 		header('Content-Type: application/x-msexcel');
 		header('Content-Length: ' . filesize($tempFileName));
-		$filename = \App\Language::translate($module, $module) . '-' . \App\Language::translate(App\Purifier::decodeHtml($customView->get('viewname')), $module) . ".xls";
+		$filename = \App\Language::translate($module, $module) . '-' . \App\Language::translate(decode_html($customView->get('viewname')), $module) . ".xls";
 		header("Content-Disposition: attachment; filename=\"$filename\"");
 
 		$fp = fopen($tempFileName, 'rb');

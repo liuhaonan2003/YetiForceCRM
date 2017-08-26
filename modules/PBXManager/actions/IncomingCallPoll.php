@@ -32,16 +32,13 @@ class PBXManager_IncomingCallPoll_Action extends Vtiger_Action_Controller
 		}
 	}
 
-	/**
-	 * Function to check permission
-	 * @param \App\Request $request
-	 * @throws \App\Exceptions\NoPermitted
-	 */
 	public function checkPermission(\App\Request $request)
 	{
-		$currentUserPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPrivilegesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
+		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		$permission = $userPrivilegesModel->hasModulePermission($request->getModule());
+
+		if (!$permission) {
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -109,10 +106,6 @@ class PBXManager_IncomingCallPoll_Action extends Vtiger_Action_Controller
 	{
 		$user = Users_Record_Model::getCurrentUserModel();
 		$moduleName = $request->get('modulename');
-		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if (!$currentUserPriviligesModel->hasModuleActionPermission($moduleName, 'CreateView')) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
 		$name = explode("@", $request->get('email'));
 		$element['lastname'] = $name[0];
 		$element['email'] = $request->get('email');
@@ -124,7 +117,7 @@ class PBXManager_IncomingCallPoll_Action extends Vtiger_Action_Controller
 		foreach ($mandatoryFieldModels as $mandatoryField) {
 			$fieldName = $mandatoryField->get('name');
 			$fieldType = $mandatoryField->getFieldDataType();
-			$defaultValue = App\Purifier::decodeHtml($mandatoryField->get('defaultvalue'));
+			$defaultValue = decode_html($mandatoryField->get('defaultvalue'));
 			if (!empty($element[$fieldName])) {
 				continue;
 			} else {

@@ -90,8 +90,8 @@ class LanguageExport extends Package
 		$db = \PearDatabase::getInstance();
 		$sqlresult = $db->pquery('SELECT * FROM vtiger_language WHERE prefix = ?', array($prefix));
 		$languageresultrow = $db->fetch_array($sqlresult);
-		$langname = \App\Purifier::decodeHtml($languageresultrow['name']);
-		$langlabel = \App\Purifier::decodeHtml($languageresultrow['label']);
+		$langname = decode_html($languageresultrow['name']);
+		$langlabel = decode_html($languageresultrow['label']);
 		$this->openNode('module');
 		$this->outputNode('language', 'type');
 		$this->outputNode($langname, 'name');
@@ -117,9 +117,9 @@ class LanguageExport extends Package
 	 */
 	public static function __initSchema()
 	{
-		$hastable = Utils::checkTable(self::TABLENAME);
+		$hastable = Utils::CheckTable(self::TABLENAME);
 		if (!$hastable) {
-			Utils::createTable(
+			Utils::CreateTable(
 				self::TABLENAME, '(id INT NOT NULL PRIMARY KEY,
 				name VARCHAR(50), prefix VARCHAR(10), label VARCHAR(30), lastupdated DATETIME, sequence INT, isdefault INT(1), active INT(1))', true
 			);

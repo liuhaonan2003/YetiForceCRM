@@ -10,16 +10,16 @@
 class OSSMailView_Relation_Model extends Vtiger_Relation_Model
 {
 
-	public function addRelation($mailId, $crmId, $date = false)
+	public function addRelation($mailId, $crmid, $date = false)
 	{
 		$return = false;
-		$dbCommand = \App\Db::getInstance()->createCommand();
-		CRMEntity::trackLinkedInfo($crmId);
-		$destinationModuleName = \App\Record::getType($crmId);
+		$db = PearDatabase::getInstance();
+		CRMEntity::trackLinkedInfo($crmid);
+		$destinationModuleName = \App\Record::getType($crmid);
 		$data = [
 			'CRMEntity' => CRMEntity::getInstance($destinationModuleName),
 			'sourceModule' => $destinationModuleName,
-			'sourceRecordId' => $crmId,
+			'sourceRecordId' => $crmid,
 			'destinationModule' => 'OSSMailView',
 			'destinationRecordId' => $mailId
 		];
@@ -28,34 +28,37 @@ class OSSMailView_Relation_Model extends Vtiger_Relation_Model
 		$eventHandler->setParams($data);
 		$eventHandler->trigger('EntityBeforeLink');
 
-		$relationExists = (new App\Db\Query())->from('vtiger_ossmailview_relation')->where(['ossmailviewid' => $mailId, 'crmid' => $crmId])->exists();
-		if (!$relationExists) {
+		$query = 'SELECT * FROM vtiger_ossmailview_relation WHERE ossmailviewid = ? && crmid = ?';
+		$result = $db->pquery($query, [$mailId, $crmid]);
+		if ($db->getRowCount($result) == 0) {
 			if (!$date) {
 				$recordModel = Vtiger_Record_Model::getInstanceById($mailId, 'OSSMailView');
 				$date = $recordModel->get('date');
 			}
-			$dbCommand->insert('vtiger_ossmailview_relation', [
+			$db->insert('vtiger_ossmailview_relation', [
 				'ossmailviewid' => $mailId,
-				'crmid' => $crmId,
+				'crmid' => $crmid,
 				'date' => $date
-			])->execute();
+			]);
 
-			if ($parentId = Users_Privileges_Model::getParentRecord($crmId)) {
-				$relationExists = (new App\Db\Query())->from('vtiger_ossmailview_relation')->where(['ossmailviewid' => $mailId, 'crmid' => $parentId])->exists();
-				if (!$relationExists) {
-					$dbCommand->insert('vtiger_ossmailview_relation', [
+			if ($parentId = Users_Privileges_Model::getParentRecord($crmid)) {
+				$query = 'SELECT * FROM vtiger_ossmailview_relation WHERE ossmailviewid = ? && crmid = ?';
+				$result = $db->pquery($query, [$mailId, $parentId]);
+				if ($db->getRowCount($result) == 0) {
+					$db->insert('vtiger_ossmailview_relation', [
 						'ossmailviewid' => $mailId,
 						'crmid' => $parentId,
 						'date' => $date
-					])->execute();
+					]);
 					if ($parentId = Users_Privileges_Model::getParentRecord($parentId)) {
-						$relationExists = (new App\Db\Query())->from('vtiger_ossmailview_relation')->where(['ossmailviewid' => $mailId, 'crmid' => $parentId])->exists();
-						if (!$relationExists) {
-							$dbCommand->insert('vtiger_ossmailview_relation', [
+						$query = 'SELECT * FROM vtiger_ossmailview_relation WHERE ossmailviewid = ? && crmid = ?';
+						$result = $db->pquery($query, [$mailId, $parentId]);
+						if ($db->getRowCount($result) == 0) {
+							$db->insert('vtiger_ossmailview_relation', [
 								'ossmailviewid' => $mailId,
 								'crmid' => $parentId,
 								'date' => $date
-							])->execute();
+							]);
 						}
 					}
 				}

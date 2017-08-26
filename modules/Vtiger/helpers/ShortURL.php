@@ -25,7 +25,7 @@ class Vtiger_ShortURL_Helper
 	 * 	));
 	 */
 
-	public static function generateURL(array $options)
+	static function generateURL(array $options)
 	{
 		$site_URL = AppConfig::main('site_URL');
 		if (!isset($options['onetime']))
@@ -34,7 +34,7 @@ class Vtiger_ShortURL_Helper
 		return rtrim($site_URL, '/') . "/shorturl.php?id=" . $uid;
 	}
 
-	public static function generate(array $options)
+	static function generate(array $options)
 	{
 		$db = PearDatabase::getInstance();
 
@@ -56,17 +56,17 @@ class Vtiger_ShortURL_Helper
 		return $uid;
 	}
 
-	public static function handle($uid)
+	static function handle($uid)
 	{
 		$db = PearDatabase::getInstance();
 
 		$rs = $db->pquery('SELECT * FROM vtiger_shorturls WHERE uid=?', array($uid));
 		if ($rs && $db->num_rows($rs)) {
 			$record = $db->fetch_array($rs);
-			$handlerPath = App\Purifier::decodeHtml($record['handler_path']);
-			$handlerClass = App\Purifier::decodeHtml($record['handler_class']);
-			$handlerFn = App\Purifier::decodeHtml($record['handler_function']);
-			$handlerData = json_decode(App\Purifier::decodeHtml($record['handler_data']), true);
+			$handlerPath = decode_html($record['handler_path']);
+			$handlerClass = decode_html($record['handler_class']);
+			$handlerFn = decode_html($record['handler_function']);
+			$handlerData = json_decode(decode_html($record['handler_data']), true);
 
 			\vtlib\Deprecated::checkFileAccessForInclusion($handlerPath);
 			require_once $handlerPath;
@@ -85,7 +85,7 @@ class Vtiger_ShortURL_Helper
 	/**
 	 * Function will send tracker image of 1X1 pixel transparent Image 
 	 */
-	public static function sendTrackerImage()
+	static function sendTrackerImage()
 	{
 		header('Content-Type: image/png');
 		echo base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=');

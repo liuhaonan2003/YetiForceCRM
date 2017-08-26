@@ -14,7 +14,7 @@ class Contacts_Edit_View extends Vtiger_Edit_View
 	public function process(\App\Request $request)
 	{
 		$moduleName = $request->getModule();
-		$recordId = $request->getInteger('record');
+		$recordId = $request->get('record');
 		$recordModel = $this->record;
 		if (!$recordModel) {
 			if (!empty($recordId)) {

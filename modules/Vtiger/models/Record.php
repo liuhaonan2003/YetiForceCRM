@@ -93,7 +93,7 @@ class Vtiger_Record_Model extends \App\Base
 		if (empty($displayName)) {
 			$displayName = $this->getDisplayName();
 		}
-		return Vtiger_Util_Helper::toSafeHTML(App\Purifier::decodeHtml($displayName));
+		return Vtiger_Util_Helper::toSafeHTML(decode_html($displayName));
 	}
 
 	/**
@@ -121,7 +121,7 @@ class Vtiger_Record_Model extends \App\Base
 	public function getSearchName()
 	{
 		$displayName = $this->get('searchlabel');
-		return Vtiger_Util_Helper::toSafeHTML(App\Purifier::decodeHtml($displayName));
+		return Vtiger_Util_Helper::toSafeHTML(decode_html($displayName));
 	}
 
 	public function isWatchingRecord()
@@ -512,7 +512,7 @@ class Vtiger_Record_Model extends \App\Base
 
 		$focus = CRMEntity::getInstance($moduleName);
 		$focus->id = $recordId;
-		$focus->retrieveEntityInfo($recordId, $moduleName);
+		$focus->retrieve_entity_info($recordId, $moduleName);
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', $moduleName);
 		$instance = new $modelClassName();
 		$instance->setEntity($focus)->setData($focus->column_fields)->setModuleFromInstance($module);
@@ -644,7 +644,7 @@ class Vtiger_Record_Model extends \App\Base
 				}
 				if ($loadData && $recordId) {
 					$focus->id = $recordId;
-					$focus->retrieveEntityInfo($recordId, $moduleName);
+					$focus->retrieve_entity_info($recordId, $moduleName);
 					$this->setEntity($focus);
 				}
 				foreach ($lockFields as $fieldName => $values) {

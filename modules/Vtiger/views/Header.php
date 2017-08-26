@@ -35,7 +35,8 @@ abstract class Vtiger_Header_View extends Vtiger_View_Controller
 		if (strpos($filename, 'modules') === 0) {
 			$filename = $filename;
 		}
-		return file_exists(ROOT_DIRECTORY . DIRECTORY_SEPARATOR . 'public_html' . DIRECTORY_SEPARATOR . $filename);
+
+		return file_exists($filename);
 	}
 
 	/**
@@ -120,9 +121,6 @@ abstract class Vtiger_Header_View extends Vtiger_View_Controller
 		foreach ($headerScripts as $headerType => $headerScripts) {
 			foreach ($headerScripts as $headerScript) {
 				if ($this->checkFileUriInRelocatedMouldesFolder($headerScript->linkurl)) {
-					if (!IS_PUBLIC_DIR) {
-						$headerScript->linkurl = 'public_html/' . $headerScript->linkurl;
-					}
 					$headerScriptInstances[] = Vtiger_JsScript_Model::getInstanceFromLinkObject($headerScript);
 				}
 			}

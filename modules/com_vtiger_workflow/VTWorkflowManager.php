@@ -9,6 +9,7 @@
  * Contributor(s): YetiForce.com
  * ********************************************************************************** */
 require_once('VTJsonCondition.php');
+require_once 'include/utils/ConfigReader.php';
 require_once 'include/runtime/Cache.php';
 
 class VTWorkflowManager
@@ -18,61 +19,61 @@ class VTWorkflowManager
 	 * On first save
 	 * @var int
 	 */
-	public static $ON_FIRST_SAVE = 1;
+	static $ON_FIRST_SAVE = 1;
 
 	/**
 	 * Once
 	 * @var int
 	 */
-	public static $ONCE = 2;
+	static $ONCE = 2;
 
 	/**
 	 * On every save
 	 * @var int
 	 */
-	public static $ON_EVERY_SAVE = 3;
+	static $ON_EVERY_SAVE = 3;
 
 	/**
 	 * On modify
 	 * @var int
 	 */
-	public static $ON_MODIFY = 4;
+	static $ON_MODIFY = 4;
 
 	/**
 	 * On delete
 	 * @var int
 	 */
-	public static $ON_DELETE = 5;
+	static $ON_DELETE = 5;
 
 	/**
 	 * On schedule
 	 * @var int
 	 */
-	public static $ON_SCHEDULE = 6;
+	static $ON_SCHEDULE = 6;
 
 	/**
 	 * Manual
 	 * @var int
 	 */
-	public static $MANUAL = 7;
+	static $MANUAL = 7;
 
 	/**
 	 * Trigger
 	 * @var int
 	 */
-	public static $TRIGGER = 8;
+	static $TRIGGER = 8;
 
 	/**
 	 * Block edit
 	 * @var int
 	 */
-	public static $BLOCK_EDIT = 9;
+	static $BLOCK_EDIT = 9;
 
 	/**
 	 * On related
 	 * @var int
 	 */
-	public static $ON_RELATED = 10;
+	static $ON_RELATED = 10;
 
 	/**
 	 * Save workflow data
@@ -219,8 +220,13 @@ class VTWorkflowManager
 	 */
 	protected function getWorkflowInstance($type = 'basic')
 	{
-		require_once 'modules/com_vtiger_workflow/VTWorkflowManager.php';
-		$workflow = new Workflow();
+		$configReader = new ConfigReader('modules/com_vtiger_workflow/config.inc', 'workflowConfig');
+		$workflowTypeConfig = $configReader->getConfig($type);
+		$workflowClassPath = $workflowTypeConfig['classpath'];
+		$workflowClass = $workflowTypeConfig['class'];
+
+		require_once $workflowClassPath;
+		$workflow = new $workflowClass();
 		return $workflow;
 	}
 
@@ -380,43 +386,43 @@ class Workflow
 	 * Scheduled hourly
 	 * @var int
 	 */
-	public static $SCHEDULED_HOURLY = 1;
+	static $SCHEDULED_HOURLY = 1;
 
 	/**
 	 * Scheduled daily
 	 * @var int
 	 */
-	public static $SCHEDULED_DAILY = 2;
+	static $SCHEDULED_DAILY = 2;
 
 	/**
 	 * Scheduled weekly
 	 * @var int
 	 */
-	public static $SCHEDULED_WEEKLY = 3;
+	static $SCHEDULED_WEEKLY = 3;
 
 	/**
 	 * Scheduled on specific date
 	 * @var int
 	 */
-	public static $SCHEDULED_ON_SPECIFIC_DATE = 4;
+	static $SCHEDULED_ON_SPECIFIC_DATE = 4;
 
 	/**
 	 * Scheduled monthly by date
 	 * @var int
 	 */
-	public static $SCHEDULED_MONTHLY_BY_DATE = 5;
+	static $SCHEDULED_MONTHLY_BY_DATE = 5;
 
 	/**
 	 * Scheduled monthly by weekday
 	 * @var int
 	 */
-	public static $SCHEDULED_MONTHLY_BY_WEEKDAY = 6;
+	static $SCHEDULED_MONTHLY_BY_WEEKDAY = 6;
 
 	/**
 	 * Scheduled annually
 	 * @var int
 	 */
-	public static $SCHEDULED_ANNUALLY = 7;
+	static $SCHEDULED_ANNUALLY = 7;
 
 	/**
 	 * Constructor

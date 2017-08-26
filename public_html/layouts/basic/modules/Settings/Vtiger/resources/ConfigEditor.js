@@ -18,9 +18,6 @@ jQuery.Class("Settings_Vtiger_ConfigEditor_Js",{},{
 		var data = form.serializeFormData();
 		var updatedFields = {};
 		jQuery.each(data, function(key, value) {
-			if (key === '__vtrftk') {
-				return;
-			}
 			updatedFields[key] = value;
 		})
 		

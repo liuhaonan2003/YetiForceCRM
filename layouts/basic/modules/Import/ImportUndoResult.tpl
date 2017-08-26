@@ -12,7 +12,7 @@
 {strip}
 	<div class='widget_header row '>
 		<div class="col-xs-12">
-			{include file=\App\Layout::getTemplatePath('BreadCrumbs.tpl', $MODULE)}
+			{include file='BreadCrumbs.tpl'|@vtemplate_path:$MODULE}
 		</div>
 	</div>
 	<div class="col-md-3 col-sm-2"></div>
@@ -42,7 +42,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				{include file=\App\Layout::getTemplatePath('Import_Done_Buttons.tpl', 'Import')}
+				{include file='Import_Done_Buttons.tpl'|@vtemplate_path:'Import'}
 			</div>
 		</div>
 	</div>

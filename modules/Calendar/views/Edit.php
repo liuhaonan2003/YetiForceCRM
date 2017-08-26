@@ -25,7 +25,7 @@ Class Calendar_Edit_View extends Vtiger_Edit_View
 
 		$recordId = $request->get('record');
 		if (!empty($recordId)) {
-			$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record);
+			$recordModel = Vtiger_Record_Model::getInstanceById($recordId);
 			$mode = $recordModel->getType();
 		}
 

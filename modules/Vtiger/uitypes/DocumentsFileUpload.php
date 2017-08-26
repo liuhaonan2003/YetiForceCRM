@@ -73,11 +73,11 @@ class Vtiger_DocumentsFileUpload_UIType extends Vtiger_Base_UIType
 		if ($value === null) {
 			$fileName = (new App\Db\Query())->select(['filename'])->from('vtiger_notes')->where(['notesid' => $this->id])->one();
 			if ($fileName) {
-				return App\Purifier::decodeHtml($fileName);
+				return decode_html($fileName);
 			}
 			return $value;
 		} else {
-			return App\Purifier::decodeHtml($value);
+			return decode_html($value);
 		}
 	}
 }

@@ -16,10 +16,16 @@ class TaskDue
 	public function process($instance)
 	{
 
-		\App\Log::trace('Entering TaskDue::process() method ...');
+		\App\Log::trace("Entering TaskDue::process() method ...");
+		$adb = PearDatabase::getInstance();
 		$currentDate = date('Y-m-d');
-		$count = (new App\Db\Query())->from('vtiger_projecttask')->innerJoin('vtiger_crmentity', 'vtiger_projecttask.projecttaskid = vtiger_crmentity.crmid')->where(['vtiger_projecttask.projectid' => $instance->getId(), 'vtiger_crmentity.deleted' => 0, 'vtiger_projecttask.projecttaskstatus' => ['Open', 'In Progress']])->andWhere(['and', ['not', ['vtiger_projecttask.enddate' => null]], ['<', 'vtiger_projecttask.enddate', $currentDate]])->count();
-		\App\Log::trace('Exiting TaskDue::process() method ...');
+		$query = 'SELECT COUNT(projecttaskid) as count 
+				FROM vtiger_projecttask
+						INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_projecttask.projecttaskid
+						WHERE vtiger_crmentity.deleted=0 && vtiger_projecttask.projectid = ? && vtiger_projecttask.projecttaskstatus IN (?,?) && vtiger_projecttask.enddate IS NOT NULL && vtiger_projecttask.enddate < ? ';
+		$result = $adb->pquery($query, array($instance->getId(), 'Open', 'In Progress', $currentDate));
+		$count = $adb->query_result($result, 0, 'count');
+		\App\Log::trace("Exiting TaskDue::process() method ...");
 		return $count;
 	}
 }

@@ -13,11 +13,7 @@ class Vtiger_TreePopup_View extends Vtiger_Footer_View
 	{
 		$currentUserPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		if (!$currentUserPrivilegesModel->hasModulePermission($request->getModule())) {
-			throw new \App\Exceptions\NoPermitted('LBL_PERMISSION_DENIED');
-		}
-		$recordId = $request->getInteger('src_record');
-		if ($recordId && !\App\Privilege::isPermitted($request->get('src_module'), 'DetailView', $recordId)) {
-			throw new \App\Exceptions\NoPermittedToRecord('LBL_PERMISSION_DENIED');
+			throw new \Exception\NoPermitted('LBL_PERMISSION_DENIED');
 		}
 	}
 
@@ -42,16 +38,16 @@ class Vtiger_TreePopup_View extends Vtiger_Footer_View
 		$moduleName = $this->getModule($request);
 		$template = $request->get('template');
 		$srcField = $request->get('src_field');
-		$srcRecord = $request->getInteger('src_record');
+		$srcRecord = $request->get('src_record');
 		$value = $request->get('value');
 		$type = false;
 		if (!empty($template)) {
 			$recordModel = Settings_TreesManager_Record_Model::getInstanceById($template);
 		} else {
-			throw new \App\App\Exceptions\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $moduleName));
+			throw new \Exception\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $moduleName));
 		}
 		if (!$recordModel) {
-			throw new \App\App\Exceptions\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $moduleName));
+			throw new \Exception\AppException(\App\Language::translate('ERR_TREE_NOT_FOUND', $moduleName));
 		}
 		if ($request->get('multiple')) {
 			$type = 'category';

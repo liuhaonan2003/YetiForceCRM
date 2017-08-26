@@ -33,7 +33,7 @@ class OSSMailView_Graf_Dashboard extends Vtiger_IndexAjax_View
 			$assignedto = $currenUserModel->getId();
 		}
 		if ($assignedto != 'all') {
-			$ownerType = \App\Fields\Owner::getType($assignedto);
+			$ownerType = vtws_getOwnerType($assignedto);
 			if ($ownerType == 'Users')
 				array_push($conditions, array("assigned_user_id", "e", \App\Fields\Owner::getUserLabel($assignedto)));
 			else {

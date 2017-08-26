@@ -115,13 +115,6 @@ class Owner
 		return $accessibleUser;
 	}
 
-	/**
-	 * Get accessible
-	 * @param string $private
-	 * @param boolean $fieldType
-	 * @param boolean $translate
-	 * @return array
-	 */
 	public function getAccessible($private = '', $fieldType = false, $translate = false)
 	{
 		return [
@@ -130,13 +123,6 @@ class Owner
 		];
 	}
 
-	/**
-	 * Get allocation
-	 * @param string $mode
-	 * @param string $private
-	 * @param string $fieldType
-	 * @return array
-	 */
 	public function getAllocation($mode, $private = '', $fieldType)
 	{
 		if (\App\Request::_get('parent') != 'Settings') {
@@ -255,8 +241,7 @@ class Owner
 		return $query;
 	}
 
-	/**
-	 * Function returns the user key in user array
+	/** Function returns the user key in user array
 	 * @param $addBlank -- boolean:: Type boolean
 	 * @param $status -- user status:: Type string
 	 * @param $assignedUser -- user id:: Type string or array
@@ -358,7 +343,7 @@ class Owner
 	}
 
 	/**
-	 * Function returns list of accessible users for a module
+	 * Function returns List of Accessible Users for a Module
 	 * @return <Array of Users_Record_Model>
 	 */
 	public function getAccessibleGroupForModule()
@@ -378,7 +363,7 @@ class Owner
 	}
 
 	/**
-	 * Function returns list of accessible users for a module
+	 * Function returns List of Accessible Users for a Module
 	 * @param string $module
 	 * @return <Array of Users_Record_Model>
 	 */
@@ -398,12 +383,6 @@ class Owner
 		return $users;
 	}
 
-	/**
-	 * Get users and group for module list
-	 * @param boolean  $view
-	 * @param boolean  $conditions
-	 * @return array
-	 */
 	public function getUsersAndGroupForModuleList($view = false, $conditions = false)
 	{
 		$queryGenerator = new \App\QueryGenerator($this->moduleName, $this->currentUser->getId());
@@ -441,11 +420,6 @@ class Owner
 		return ['users' => $users, 'group' => $groups];
 	}
 
-	/**
-	 * The function retrieves all users with active status
-	 * @param string $status
-	 * @return string
-	 */
 	public static function getAllUsers($status = 'Active')
 	{
 		$instance = new self();
@@ -454,11 +428,6 @@ class Owner
 
 	protected static $usersIdsCache = [];
 
-	/**
-	 * The function retrieves user ids with active status
-	 * @param string $status
-	 * @return array
-	 */
 	public static function getUsersIds($status = 'Active')
 	{
 		if (!isset(self::$usersIdsCache[$status])) {
@@ -479,11 +448,6 @@ class Owner
 	protected static $groupLabelCache = [];
 	protected static $groupIdCache = [];
 
-	/**
-	 * Function gets labels
-	 * @param int|array $mixedId
-	 * @return int|array
-	 */
 	public static function getLabel($mixedId)
 	{
 		$multiMode = is_array($mixedId);
@@ -516,11 +480,6 @@ class Owner
 		return $multiMode ? $result : array_shift($result);
 	}
 
-	/**
-	 * The function gets the group names
-	 * @param int $id
-	 * @return string
-	 */
 	public static function getGroupName($id)
 	{
 		if (isset(self::$groupLabelCache[$id])) {
@@ -538,7 +497,7 @@ class Owner
 	}
 
 	/**
-	 * Function to get the group id for a given group groupname
+	 * Function to get the Group Id for a given group groupname
 	 * @param string $name
 	 * @return int
 	 */
@@ -556,12 +515,6 @@ class Owner
 		return $id;
 	}
 
-	/**
-	 * The function gets the user label
-	 * @param int $id
-	 * @param boolean $single
-	 * @return string|boolean
-	 */
 	public static function getUserLabel($id, $single = false)
 	{
 		if (isset(self::$userLabelCache[$id])) {

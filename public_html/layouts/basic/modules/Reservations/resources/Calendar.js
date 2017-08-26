@@ -111,7 +111,7 @@ jQuery.Class("Reservations_Calendar_Js", {
 			},
 			eventRender: function (event, element) {
 				app.showPopoverElementView(element.find('.fc-content'), {
-					title: event.title + '<a href="index.php?module=Reservations&view=Detail&record=' + event.id + '" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-th-list"></span></a>',
+					title: event.title + '<a href="index.php?module=' + event.module + '&view=Detail&record=' + event.id + '" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-th-list"></span></a>',
 					container: 'body',
 					html: true,
 					placement: 'auto right',
@@ -238,7 +238,7 @@ jQuery.Class("Reservations_Calendar_Js", {
 			if (timeFormat == 24) {
 				var defaultTimeFormat = 'HH:mm';
 			} else {
-				defaultTimeFormat = 'hh:mm A';
+				defaultTimeFormat = 'hh:mm tt';
 			}
 			var startDateInstance = Date.parse(date);
 			var startDateString = moment(date).format(dateFormat);

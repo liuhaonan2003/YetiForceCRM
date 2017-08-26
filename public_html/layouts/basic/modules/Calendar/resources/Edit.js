@@ -116,21 +116,21 @@ Vtiger_Edit_Js("Calendar_Edit_Js", {
 			return;
 		}
 		var startDateTime = startDate + ' ' + startTime;
-		var dateFormat = container.find('[name="due_date"]').data('dateFormat').toUpperCase();
+		var dateFormat = container.find('[name="due_date"]').data('dateFormat');
 		var timeFormat = endTimeElement.data('format');
 		var endDateString = '';
 		if (container.find('[name="activitytype"]').val() == 'Call') {
-			endDateString = moment(startDateTime, dateFormat).add(container.find('[name="defaultCallDuration"]').val(), 'minutes').format(dateFormat);
+			endDateString = moment(startDateTime).add(container.find('[name="defaultCallDuration"]').val(), 'minutes').format(dateFormat.toUpperCase());
 		} else {
-			endDateString = moment(startDateTime, dateFormat).add(container.find('[name="defaultOtherEventDuration"]').val(), 'minutes').format(dateFormat);
+			endDateString = moment(startDateTime).add(container.find('[name="defaultOtherEventDuration"]').val(), 'minutes').format(dateFormat.toUpperCase());
 		}
 		if (timeFormat == 24) {
 			var defaultTimeFormat = 'HH:mm';
 		} else {
-			defaultTimeFormat = 'hh:mm A';
+			defaultTimeFormat = 'hh:mm tt';
 		}
 		endDateElement.val(endDateString);
-		endTimeElement.val(moment(startTime, defaultTimeFormat).add(container.find('[name="defaultOtherEventDuration"]').val(), 'minutes').format(defaultTimeFormat));
+		endTimeElement.val(moment(startDateTime).format(defaultTimeFormat));
 	},
 	/**
 	 * Function to change the end time based on default call duration
